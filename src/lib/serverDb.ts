@@ -104,12 +104,12 @@ export async function writeFinanceDb() {
   throw new Error("writeFinanceDb is not used with PostgreSQL. Use typed CRUD helpers instead.");
 }
 
-export async function listLoans() {
+export async function listLoans(): Promise<Loan[]> {
   const loans = await prisma.loan.findMany({ orderBy: { createdAt: "desc" } });
   return loans.map(mapLoan);
 }
 
-export async function createLoan(loan: Loan) {
+export async function createLoan(loan: Loan): Promise<Loan> {
   const createdLoan = await prisma.loan.create({
     data: {
       ...loan,
@@ -119,7 +119,7 @@ export async function createLoan(loan: Loan) {
   return mapLoan(createdLoan);
 }
 
-export async function updateLoan(id: string, patch: Omit<Loan, "id" | "status">) {
+export async function updateLoan(id: string, patch: Omit<Loan, "id" | "status">): Promise<Loan | null> {
   try {
     const loan = await prisma.loan.update({
       data: {
@@ -134,7 +134,7 @@ export async function updateLoan(id: string, patch: Omit<Loan, "id" | "status">)
   }
 }
 
-export async function deleteLoan(id: string) {
+export async function deleteLoan(id: string): Promise<boolean> {
   try {
     await prisma.loan.delete({ where: { id } });
     return true;
@@ -143,12 +143,12 @@ export async function deleteLoan(id: string) {
   }
 }
 
-export async function listInsurances() {
+export async function listInsurances(): Promise<Insurance[]> {
   const insurances = await prisma.insurance.findMany({ orderBy: { createdAt: "desc" } });
   return insurances.map(mapInsurance);
 }
 
-export async function createInsurance(insurance: Insurance) {
+export async function createInsurance(insurance: Insurance): Promise<Insurance> {
   const createdInsurance = await prisma.insurance.create({
     data: {
       ...insurance,
@@ -158,7 +158,7 @@ export async function createInsurance(insurance: Insurance) {
   return mapInsurance(createdInsurance);
 }
 
-export async function updateInsurance(id: string, patch: Omit<Insurance, "id">) {
+export async function updateInsurance(id: string, patch: Omit<Insurance, "id">): Promise<Insurance | null> {
   try {
     const insurance = await prisma.insurance.update({
       data: {
@@ -173,7 +173,7 @@ export async function updateInsurance(id: string, patch: Omit<Insurance, "id">) 
   }
 }
 
-export async function deleteInsurance(id: string) {
+export async function deleteInsurance(id: string): Promise<boolean> {
   try {
     await prisma.insurance.delete({ where: { id } });
     return true;
@@ -182,12 +182,12 @@ export async function deleteInsurance(id: string) {
   }
 }
 
-export async function listIncomes() {
+export async function listIncomes(): Promise<Income[]> {
   const incomes = await prisma.income.findMany({ orderBy: { createdAt: "desc" } });
   return incomes.map(mapIncome);
 }
 
-export async function createIncome(income: Income) {
+export async function createIncome(income: Income): Promise<Income> {
   const createdIncome = await prisma.income.create({
     data: {
       ...income,
@@ -198,7 +198,7 @@ export async function createIncome(income: Income) {
   return mapIncome(createdIncome);
 }
 
-export async function updateIncome(id: string, patch: Omit<Income, "id">) {
+export async function updateIncome(id: string, patch: Omit<Income, "id">): Promise<Income | null> {
   try {
     const income = await prisma.income.update({
       data: {
@@ -214,7 +214,7 @@ export async function updateIncome(id: string, patch: Omit<Income, "id">) {
   }
 }
 
-export async function deleteIncome(id: string) {
+export async function deleteIncome(id: string): Promise<boolean> {
   try {
     await prisma.income.delete({ where: { id } });
     return true;
@@ -223,7 +223,7 @@ export async function deleteIncome(id: string) {
   }
 }
 
-export async function listExpenses() {
+export async function listExpenses(): Promise<Expense[]> {
   const expenses = await prisma.expense.findMany({ orderBy: { date: "desc" } });
   return expenses.map(mapExpense);
 }
