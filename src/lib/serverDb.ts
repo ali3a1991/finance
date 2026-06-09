@@ -228,6 +228,16 @@ export async function listExpenses(): Promise<Expense[]> {
   return expenses.map(mapExpense);
 }
 
+export async function createExpense(expense: Expense): Promise<Expense> {
+  const createdExpense = await prisma.expense.create({
+    data: {
+      ...expense,
+      date: toDate(expense.date)
+    }
+  });
+  return mapExpense(createdExpense);
+}
+
 function getMonthKey(date = new Date()) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 }
