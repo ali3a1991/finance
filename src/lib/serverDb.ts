@@ -1,136 +1,231 @@
-import { readFile, writeFile } from "fs/promises";
-import path from "path";
-import type { FinanceDb, Income, Insurance, Loan, MonthlyPayment } from "@/lib/types";
+import { prisma } from "@/lib/prisma";
+import type { Expense, FinanceDb, Income, Insurance, Loan, MonthlyPayment } from "@/lib/types";
 
-const dbPath = path.join(process.cwd(), "data", "finance-db.json");
-
-export async function readFinanceDb() {
-  const raw = await readFile(dbPath, "utf8");
-  const db = JSON.parse(raw) as FinanceDb;
-  db.incomes ??= [];
-  db.paymentConfirmations ??= [];
-  return db;
+function toDateInput(date: Date) {
+  return date.toISOString().slice(0, 10);
 }
 
-export async function writeFinanceDb(db: FinanceDb) {
-  await writeFile(dbPath, `${JSON.stringify(db, null, 2)}\n`, "utf8");
+function toDate(value: string) {
+  return new Date(`${value.slice(0, 10)}T00:00:00`);
+}
+
+function mapLoan(loan: {
+  id: string;
+  name: string;
+  bank: string;
+  balance: number;
+  totalInterest: number;
+  monthlyRate: number;
+  interestRate: number;
+  nextPayment: Date;
+  status: string;
+}): Loan {
+  return {
+    ...loan,
+    nextPayment: toDateInput(loan.nextPayment)
+  };
+}
+
+function mapInsurance(insurance: {
+  id: string;
+  name: string;
+  provider: string;
+  monthlyPremium: number;
+  debitDay: number;
+  renewalDate: Date;
+  coverage: string;
+}): Insurance {
+  return {
+    ...insurance,
+    renewalDate: toDateInput(insurance.renewalDate)
+  };
+}
+
+function mapIncome(income: {
+  id: string;
+  title: string;
+  source: string;
+  amount: number;
+  date: Date;
+  recurring: boolean;
+  entryDay: number | null;
+}): Income {
+  return {
+    ...income,
+    date: toDateInput(income.date),
+    entryDay: income.entryDay ?? undefined
+  };
+}
+
+function mapExpense(expense: {
+  id: string;
+  title: string;
+  category: string;
+  amount: number;
+  date: Date;
+  recurring: boolean;
+}): Expense {
+  return {
+    ...expense,
+    date: toDateInput(expense.date)
+  };
+}
+
+export async function readFinanceDb(): Promise<FinanceDb> {
+  const [loans, insurances, incomes, expenses, monthlyBudgets, paymentConfirmations] = await Promise.all([
+    prisma.loan.findMany({ orderBy: { createdAt: "desc" } }),
+    prisma.insurance.findMany({ orderBy: { createdAt: "desc" } }),
+    prisma.income.findMany({ orderBy: { createdAt: "desc" } }),
+    prisma.expense.findMany({ orderBy: { createdAt: "desc" } }),
+    prisma.monthlyBudget.findMany({ orderBy: { category: "asc" } }),
+    prisma.paymentConfirmation.findMany()
+  ]);
+
+  return {
+    expenses: expenses.map(mapExpense),
+    incomes: incomes.map(mapIncome),
+    insurances: insurances.map(mapInsurance),
+    loans: loans.map(mapLoan),
+    monthlyBudgets,
+    owner: {
+      currency: "EUR",
+      monthlyNetIncome: 0,
+      name: "Ali"
+    },
+    paymentConfirmations: paymentConfirmations.map((payment) => ({
+      id: payment.id,
+      paidAmount: payment.paidAmount,
+      updatedAt: payment.updatedAt.toISOString()
+    }))
+  };
+}
+
+export async function writeFinanceDb() {
+  throw new Error("writeFinanceDb is not used with PostgreSQL. Use typed CRUD helpers instead.");
 }
 
 export async function listLoans() {
-  const db = await readFinanceDb();
-  return db.loans;
+  const loans = await prisma.loan.findMany({ orderBy: { createdAt: "desc" } });
+  return loans.map(mapLoan);
 }
 
 export async function createLoan(loan: Loan) {
-  const db = await readFinanceDb();
-  db.loans.unshift(loan);
-  await writeFinanceDb(db);
-  return loan;
+  const createdLoan = await prisma.loan.create({
+    data: {
+      ...loan,
+      nextPayment: toDate(loan.nextPayment)
+    }
+  });
+  return mapLoan(createdLoan);
 }
 
 export async function updateLoan(id: string, patch: Omit<Loan, "id" | "status">) {
-  const db = await readFinanceDb();
-  const index = db.loans.findIndex((loan) => loan.id === id);
-
-  if (index === -1) {
+  try {
+    const loan = await prisma.loan.update({
+      data: {
+        ...patch,
+        nextPayment: toDate(patch.nextPayment)
+      },
+      where: { id }
+    });
+    return mapLoan(loan);
+  } catch {
     return null;
   }
-
-  db.loans[index] = { ...db.loans[index], ...patch };
-  await writeFinanceDb(db);
-  return db.loans[index];
 }
 
 export async function deleteLoan(id: string) {
-  const db = await readFinanceDb();
-  const nextLoans = db.loans.filter((loan) => loan.id !== id);
-
-  if (nextLoans.length === db.loans.length) {
+  try {
+    await prisma.loan.delete({ where: { id } });
+    return true;
+  } catch {
     return false;
   }
-
-  db.loans = nextLoans;
-  await writeFinanceDb(db);
-  return true;
 }
 
 export async function listInsurances() {
-  const db = await readFinanceDb();
-  return db.insurances;
+  const insurances = await prisma.insurance.findMany({ orderBy: { createdAt: "desc" } });
+  return insurances.map(mapInsurance);
 }
 
 export async function createInsurance(insurance: Insurance) {
-  const db = await readFinanceDb();
-  db.insurances.unshift(insurance);
-  await writeFinanceDb(db);
-  return insurance;
+  const createdInsurance = await prisma.insurance.create({
+    data: {
+      ...insurance,
+      renewalDate: toDate(insurance.renewalDate)
+    }
+  });
+  return mapInsurance(createdInsurance);
 }
 
 export async function updateInsurance(id: string, patch: Omit<Insurance, "id">) {
-  const db = await readFinanceDb();
-  const index = db.insurances.findIndex((insurance) => insurance.id === id);
-
-  if (index === -1) {
+  try {
+    const insurance = await prisma.insurance.update({
+      data: {
+        ...patch,
+        renewalDate: toDate(patch.renewalDate)
+      },
+      where: { id }
+    });
+    return mapInsurance(insurance);
+  } catch {
     return null;
   }
-
-  db.insurances[index] = { ...db.insurances[index], ...patch };
-  await writeFinanceDb(db);
-  return db.insurances[index];
 }
 
 export async function deleteInsurance(id: string) {
-  const db = await readFinanceDb();
-  const nextInsurances = db.insurances.filter((insurance) => insurance.id !== id);
-
-  if (nextInsurances.length === db.insurances.length) {
+  try {
+    await prisma.insurance.delete({ where: { id } });
+    return true;
+  } catch {
     return false;
   }
-
-  db.insurances = nextInsurances;
-  await writeFinanceDb(db);
-  return true;
 }
 
 export async function listIncomes() {
-  const db = await readFinanceDb();
-  return db.incomes ?? [];
+  const incomes = await prisma.income.findMany({ orderBy: { createdAt: "desc" } });
+  return incomes.map(mapIncome);
 }
 
 export async function createIncome(income: Income) {
-  const db = await readFinanceDb();
-  db.incomes ??= [];
-  db.incomes.unshift(income);
-  await writeFinanceDb(db);
-  return income;
+  const createdIncome = await prisma.income.create({
+    data: {
+      ...income,
+      date: toDate(income.date),
+      entryDay: income.entryDay ?? null
+    }
+  });
+  return mapIncome(createdIncome);
 }
 
 export async function updateIncome(id: string, patch: Omit<Income, "id">) {
-  const db = await readFinanceDb();
-  db.incomes ??= [];
-  const index = db.incomes.findIndex((income) => income.id === id);
-
-  if (index === -1) {
+  try {
+    const income = await prisma.income.update({
+      data: {
+        ...patch,
+        date: toDate(patch.date),
+        entryDay: patch.entryDay ?? null
+      },
+      where: { id }
+    });
+    return mapIncome(income);
+  } catch {
     return null;
   }
-
-  db.incomes[index] = { ...db.incomes[index], ...patch };
-  await writeFinanceDb(db);
-  return db.incomes[index];
 }
 
 export async function deleteIncome(id: string) {
-  const db = await readFinanceDb();
-  db.incomes ??= [];
-  const nextIncomes = db.incomes.filter((income) => income.id !== id);
-
-  if (nextIncomes.length === db.incomes.length) {
+  try {
+    await prisma.income.delete({ where: { id } });
+    return true;
+  } catch {
     return false;
   }
+}
 
-  db.incomes = nextIncomes;
-  await writeFinanceDb(db);
-  return true;
+export async function listExpenses() {
+  const expenses = await prisma.expense.findMany({ orderBy: { date: "desc" } });
+  return expenses.map(mapExpense);
 }
 
 function getMonthKey(date = new Date()) {
@@ -223,8 +318,8 @@ export async function getDashboardData() {
     monthlyPayments,
     summary: {
       freeAmount: incomeTotal - committed,
-      insuranceTotal,
       incomeTotal,
+      insuranceTotal,
       loanCount: db.loans.length,
       loanTotal,
       monthlyExpenseTotal
@@ -242,20 +337,16 @@ export async function updateMonthlyPayment(id: string, paidAmount: number) {
   }
 
   const normalizedPaidAmount = Math.max(0, Math.min(paidAmount, payment.amount));
-  db.paymentConfirmations ??= [];
-  const index = db.paymentConfirmations.findIndex((item) => item.id === id);
-  const confirmation = {
-    id,
-    paidAmount: normalizedPaidAmount,
-    updatedAt: new Date().toISOString()
-  };
+  const confirmation = await prisma.paymentConfirmation.upsert({
+    create: {
+      id,
+      paidAmount: normalizedPaidAmount
+    },
+    update: {
+      paidAmount: normalizedPaidAmount
+    },
+    where: { id }
+  });
 
-  if (index === -1) {
-    db.paymentConfirmations.push(confirmation);
-  } else {
-    db.paymentConfirmations[index] = confirmation;
-  }
-
-  await writeFinanceDb(db);
-  return { ...payment, paidAmount: normalizedPaidAmount };
+  return { ...payment, paidAmount: confirmation.paidAmount };
 }

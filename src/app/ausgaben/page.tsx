@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { PlusCircle, Repeat, ReceiptText } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
-import { formatCurrency, formatDate, getFinanceDb } from "@/lib/database";
+import { formatCurrency, formatDate } from "@/lib/formatting";
+import { listExpenses } from "@/lib/serverDb";
 
 type AusgabenPageProps = {
   searchParams: Promise<{
@@ -11,7 +12,7 @@ type AusgabenPageProps = {
 
 export default async function AusgabenPage({ searchParams }: AusgabenPageProps) {
   const params = await searchParams;
-  const { expenses } = getFinanceDb();
+  const expenses = await listExpenses();
   const activeType = params.typ === "wiederkehrend" ? "wiederkehrend" : "einmalig";
   const visibleExpenses = expenses.filter((expense) =>
     activeType === "wiederkehrend" ? expense.recurring : !expense.recurring
