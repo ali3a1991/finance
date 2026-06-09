@@ -16,7 +16,7 @@ export type Insurance = {
   provider: string;
   monthlyPremium: number;
   debitDay: number;
-  renewalDate: string;
+  renewalDate: string | null;
   coverage: string;
 };
 

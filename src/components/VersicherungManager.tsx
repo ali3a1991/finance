@@ -11,6 +11,7 @@ type InsuranceForm = {
   monthlyPremium: string;
   debitDay: string;
   renewalDate: string;
+  hasNoRenewalDate: boolean;
 };
 
 const emptyForm: InsuranceForm = {
@@ -18,7 +19,8 @@ const emptyForm: InsuranceForm = {
   coverage: "",
   monthlyPremium: "",
   debitDay: "",
-  renewalDate: ""
+  renewalDate: "",
+  hasNoRenewalDate: false
 };
 
 const coverageOptions = [
@@ -85,11 +87,11 @@ export function VersicherungManager() {
     loadInsurances().catch(() => setIsLoading(false));
   }, []);
 
-  function updateForm(field: keyof InsuranceForm, value: string) {
+  function updateForm<Key extends keyof InsuranceForm>(field: Key, value: InsuranceForm[Key]) {
     setForm((current) => ({ ...current, [field]: value }));
   }
 
-  function updateEditForm(field: keyof InsuranceForm, value: string) {
+  function updateEditForm<Key extends keyof InsuranceForm>(field: Key, value: InsuranceForm[Key]) {
     setEditForm((current) => ({ ...current, [field]: value }));
   }
 
@@ -105,7 +107,8 @@ export function VersicherungManager() {
       coverage: insurance.coverage,
       monthlyPremium: String(insurance.monthlyPremium),
       debitDay: String(insurance.debitDay),
-      renewalDate: insurance.renewalDate
+      renewalDate: insurance.renewalDate ?? "",
+      hasNoRenewalDate: !insurance.renewalDate
     });
   }
 
@@ -124,7 +127,7 @@ export function VersicherungManager() {
         coverage: form.coverage.trim(),
         monthlyPremium: Number(form.monthlyPremium),
         debitDay: Number(form.debitDay),
-        renewalDate: form.renewalDate
+        renewalDate: form.hasNoRenewalDate ? null : form.renewalDate
       }),
       method: "POST"
     });
@@ -143,7 +146,7 @@ export function VersicherungManager() {
         coverage: editForm.coverage.trim(),
         monthlyPremium: Number(editForm.monthlyPremium),
         debitDay: Number(editForm.debitDay),
-        renewalDate: editForm.renewalDate
+        renewalDate: editForm.hasNoRenewalDate ? null : editForm.renewalDate
       }),
       method: "PUT"
     });
@@ -202,7 +205,7 @@ export function VersicherungManager() {
                   <td>{insurance.coverage}</td>
                   <td>{formatCurrency(insurance.monthlyPremium)}</td>
                   <td>{insurance.debitDay}. Tag</td>
-                  <td>{formatDate(insurance.renewalDate)}</td>
+                  <td>{insurance.renewalDate ? formatDate(insurance.renewalDate) : "Keine Laufzeit"}</td>
                   <td>
                     <div className="table-actions">
                       <button
@@ -296,11 +299,25 @@ export function VersicherungManager() {
               <label>
                 <span>Verlangerung</span>
                 <input
-                  required
+                  required={!form.hasNoRenewalDate}
+                  disabled={form.hasNoRenewalDate}
                   type="date"
                   value={form.renewalDate}
                   onChange={(event) => updateForm("renewalDate", event.target.value)}
                 />
+              </label>
+              <label className="checkbox-row">
+                <input
+                  checked={form.hasNoRenewalDate}
+                  type="checkbox"
+                  onChange={(event) => {
+                    updateForm("hasNoRenewalDate", event.target.checked);
+                    if (event.target.checked) {
+                      updateForm("renewalDate", "");
+                    }
+                  }}
+                />
+                <span>Keine Verlangerung / kein Ablaufdatum</span>
               </label>
               <div className="modal-actions">
                 <button className="button secondary" type="button" onClick={closeAddModal}>
@@ -413,11 +430,25 @@ export function VersicherungManager() {
               <label>
                 <span>Verlangerung</span>
                 <input
-                  required
+                  required={!editForm.hasNoRenewalDate}
+                  disabled={editForm.hasNoRenewalDate}
                   type="date"
                   value={editForm.renewalDate}
                   onChange={(event) => updateEditForm("renewalDate", event.target.value)}
                 />
+              </label>
+              <label className="checkbox-row">
+                <input
+                  checked={editForm.hasNoRenewalDate}
+                  type="checkbox"
+                  onChange={(event) => {
+                    updateEditForm("hasNoRenewalDate", event.target.checked);
+                    if (event.target.checked) {
+                      updateEditForm("renewalDate", "");
+                    }
+                  }}
+                />
+                <span>Keine Verlangerung / kein Ablaufdatum</span>
               </label>
               <div className="modal-actions">
                 <button className="button secondary" type="button" onClick={closeEditModal}>

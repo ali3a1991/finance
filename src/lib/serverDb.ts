@@ -32,12 +32,12 @@ function mapInsurance(insurance: {
   provider: string;
   monthlyPremium: number;
   debitDay: number;
-  renewalDate: Date;
+  renewalDate: Date | null;
   coverage: string;
 }): Insurance {
   return {
     ...insurance,
-    renewalDate: toDateInput(insurance.renewalDate)
+    renewalDate: insurance.renewalDate ? toDateInput(insurance.renewalDate) : null
   };
 }
 
@@ -152,7 +152,7 @@ export async function createInsurance(insurance: Insurance): Promise<Insurance> 
   const createdInsurance = await prisma.insurance.create({
     data: {
       ...insurance,
-      renewalDate: toDate(insurance.renewalDate)
+      renewalDate: insurance.renewalDate ? toDate(insurance.renewalDate) : null
     }
   });
   return mapInsurance(createdInsurance);
@@ -163,7 +163,7 @@ export async function updateInsurance(id: string, patch: Omit<Insurance, "id">):
     const insurance = await prisma.insurance.update({
       data: {
         ...patch,
-        renewalDate: toDate(patch.renewalDate)
+        renewalDate: patch.renewalDate ? toDate(patch.renewalDate) : null
       },
       where: { id }
     });
