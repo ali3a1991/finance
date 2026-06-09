@@ -1,13 +1,12 @@
 import Link from "next/link";
-import { Banknote, Home, ReceiptText, ShieldCheck, TrendingUp, WalletCards } from "lucide-react";
+import { Banknote, Home, ShieldCheck, TrendingUp, WalletCards } from "lucide-react";
 
 const navItems = [
   { href: "/", label: "Startseite", icon: Home },
   { href: "/kredite", label: "Kredite", icon: Banknote },
   { href: "/versicherungen", label: "Versicherungen", icon: ShieldCheck },
   { href: "/einnahmen", label: "Einnahmen", icon: TrendingUp },
-  { href: "/ausgaben", label: "Ausgaben", icon: WalletCards },
-  { href: "/ausgaben/erfassung", label: "Erfassung", icon: ReceiptText }
+  { href: "/ausgaben", label: "Ausgaben", icon: WalletCards }
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
