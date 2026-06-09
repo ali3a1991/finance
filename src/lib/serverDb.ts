@@ -237,26 +237,34 @@ function getCurrentMonthDate(day: number, date = new Date()) {
   return new Date(date.getFullYear(), date.getMonth(), safeDay).toISOString();
 }
 
+function isSameOrBeforeCurrentMonth(startDate: Date, date = new Date()) {
+  const startMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1).getTime();
+  const currentMonth = new Date(date.getFullYear(), date.getMonth(), 1).getTime();
+  return startMonth <= currentMonth;
+}
+
 function getPaymentStatus(db: FinanceDb, id: string) {
   return db.paymentConfirmations?.find((payment) => payment.id === id)?.paidAmount ?? 0;
 }
 
 export function buildMonthlyPayments(db: FinanceDb, date = new Date()): MonthlyPayment[] {
   const monthKey = getMonthKey(date);
-  const loanPayments: MonthlyPayment[] = db.loans.map((loan) => {
-    const dueDay = new Date(`${loan.nextPayment}T00:00:00`).getDate();
-    const id = `loan:${loan.id}:${monthKey}`;
+  const loanPayments: MonthlyPayment[] = db.loans
+    .filter((loan) => isSameOrBeforeCurrentMonth(new Date(`${loan.nextPayment}T00:00:00`), date))
+    .map((loan) => {
+      const dueDay = new Date(`${loan.nextPayment}T00:00:00`).getDate();
+      const id = `loan:${loan.id}:${monthKey}`;
 
-    return {
-      amount: loan.monthlyRate,
-      category: loan.bank,
-      dueDate: getCurrentMonthDate(dueDay, date),
-      id,
-      paidAmount: getPaymentStatus(db, id),
-      sourceType: "loan",
-      title: loan.name
-    };
-  });
+      return {
+        amount: loan.monthlyRate,
+        category: loan.bank,
+        dueDate: getCurrentMonthDate(dueDay, date),
+        id,
+        paidAmount: getPaymentStatus(db, id),
+        sourceType: "loan",
+        title: loan.name
+      };
+    });
 
   const insurancePayments: MonthlyPayment[] = db.insurances.map((insurance) => {
     const id = `insurance:${insurance.id}:${monthKey}`;
@@ -311,8 +319,7 @@ export async function getDashboardData() {
   const monthlyExpenseTotal = db.expenses.reduce((sum, expense) => sum + expense.amount, 0);
   const loanTotal = db.loans.reduce((sum, loan) => sum + loan.balance, 0);
   const insuranceTotal = db.insurances.reduce((sum, insurance) => sum + insurance.monthlyPremium, 0);
-  const committed =
-    monthlyExpenseTotal + db.loans.reduce((sum, loan) => sum + loan.monthlyRate, 0) + insuranceTotal;
+  const committed = monthlyPayments.reduce((sum, payment) => sum + payment.amount, 0);
 
   return {
     monthlyPayments,
