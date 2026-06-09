@@ -1,0 +1,13 @@
+{
+  "owner": {
+    "name": "Ali",
+    "currency": "EUR",
+    "monthlyNetIncome": 0
+  },
+  "loans": [],
+  "insurances": [],
+  "incomes": [],
+  "expenses": [],
+  "monthlyBudgets": [],
+  "paymentConfirmations": []
+}
