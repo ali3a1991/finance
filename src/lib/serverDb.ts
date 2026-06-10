@@ -682,6 +682,25 @@ export async function getDashboardData(ownerId: string, monthKey?: string | null
   const db = await readFinanceDb(ownerId);
   const selectedDate = getDateFromMonthKey(monthKey);
   const monthlyPayments = buildMonthlyPayments(db, selectedDate);
+  const investmentQuotes = await fetchInvestmentQuotes((db.investments ?? []).map((investment) => investment.symbol));
+  const investmentSummary = (db.investments ?? []).reduce(
+    (summary, investment) => {
+      const investedValue = investment.quantity * investment.purchasePrice;
+      const quote = investmentQuotes[investment.symbol.toUpperCase()];
+      const currentUnitPrice = quote?.currentPrice ?? investment.purchasePrice;
+      const currentValue = investment.quantity * currentUnitPrice;
+
+      return {
+        currentTotal: summary.currentTotal + currentValue,
+        investedTotal: summary.investedTotal + investedValue,
+        itemCount: summary.itemCount + 1
+      };
+    },
+    { currentTotal: 0, investedTotal: 0, itemCount: 0 }
+  );
+  const investmentResult = investmentSummary.currentTotal - investmentSummary.investedTotal;
+  const investmentReturnRate =
+    investmentSummary.investedTotal > 0 ? (investmentResult / investmentSummary.investedTotal) * 100 : 0;
   const incomeTotal = (db.incomes ?? [])
     .filter((income) => {
       if (income.recurring) {
@@ -713,6 +732,11 @@ export async function getDashboardData(ownerId: string, monthKey?: string | null
       freeAmount: incomeTotal - committed,
       incomeTotal,
       insuranceTotal,
+      investmentCurrentTotal: investmentSummary.currentTotal,
+      investmentInvestedTotal: investmentSummary.investedTotal,
+      investmentItemCount: investmentSummary.itemCount,
+      investmentResult,
+      investmentReturnRate,
       loanCount: db.loans.length,
       loanTotal,
       monthlyExpenseTotal

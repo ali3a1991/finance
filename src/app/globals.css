@@ -727,6 +727,79 @@ th {
   color: var(--rose);
 }
 
+.investment-summary-panel {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.6fr);
+  gap: 18px;
+  align-items: stretch;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 18px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--primary) 9%, transparent), transparent 48%),
+    var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.investment-summary-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.summary-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 8px;
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.investment-summary-heading span,
+.investment-summary-grid span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.investment-summary-heading strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 1.15rem;
+}
+
+.investment-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.investment-summary-grid > div {
+  display: grid;
+  gap: 6px;
+  min-height: 92px;
+  align-content: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--surface-soft);
+}
+
+.investment-summary-grid strong {
+  font-size: 1.25rem;
+}
+
+.investment-summary-grid .positive {
+  color: var(--primary);
+}
+
+.investment-summary-grid .negative {
+  color: var(--rose);
+}
+
 .payment-panel {
   display: grid;
   gap: 18px;
@@ -1496,9 +1569,18 @@ th {
   .stats-grid,
   .card-grid,
   .cash-gauge-panel,
+  .investment-summary-panel,
   .two-column,
   .monthly-list,
   .settings-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .investment-summary-heading {
+    align-self: center;
+  }
+
+  .investment-summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -1518,6 +1600,7 @@ th {
   .form-panel,
   .modal-form,
   .detail-summary,
+  .investment-summary-panel,
   .monthly-list,
   .settings-panel {
     grid-template-columns: 1fr;
@@ -1554,6 +1637,24 @@ th {
 
   .stat-card {
     min-height: 150px;
+  }
+
+  .investment-summary-panel {
+    gap: 14px;
+    padding: 14px;
+  }
+
+  .investment-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .investment-summary-grid > div {
+    min-height: 82px;
+    padding: 10px;
+  }
+
+  .investment-summary-grid strong {
+    font-size: 1.05rem;
   }
 
   .data-list {

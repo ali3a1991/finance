@@ -1,7 +1,18 @@
 "use client";
 
 import { ChangeEvent, useEffect, useState } from "react";
-import { Banknote, CalendarDays, Check, ChevronLeft, ChevronRight, PiggyBank, Save, ShieldCheck, WalletCards } from "lucide-react";
+import {
+  Banknote,
+  CalendarDays,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  LineChart,
+  PiggyBank,
+  Save,
+  ShieldCheck,
+  WalletCards
+} from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { StatCard } from "@/components/StatCard";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -13,6 +24,11 @@ type DashboardSummary = {
   freeAmount: number;
   incomeTotal: number;
   insuranceTotal: number;
+  investmentCurrentTotal: number;
+  investmentInvestedTotal: number;
+  investmentItemCount: number;
+  investmentResult: number;
+  investmentReturnRate: number;
   loanCount: number;
   loanTotal: number;
   monthlyExpenseTotal: number;
@@ -28,6 +44,11 @@ const emptySummary: DashboardSummary = {
   freeAmount: 0,
   incomeTotal: 0,
   insuranceTotal: 0,
+  investmentCurrentTotal: 0,
+  investmentInvestedTotal: 0,
+  investmentItemCount: 0,
+  investmentResult: 0,
+  investmentReturnRate: 0,
   loanCount: 0,
   loanTotal: 0,
   monthlyExpenseTotal: 0
@@ -124,6 +145,7 @@ export function HomeDashboard() {
         ? t("dashboard.attentive")
         : t("dashboard.critical");
   const isCurrentMonth = selectedMonth === getMonthKey();
+  const investmentResultClass = summary.investmentResult >= 0 ? "positive" : "negative";
 
   return (
     <>
@@ -212,6 +234,42 @@ export function HomeDashboard() {
           value={formatCurrency(summary.freeAmount)}
           helper={t("dashboard.afterFixedPayments")}
         />
+      </section>
+
+      <section className="investment-summary-panel" aria-label={t("dashboard.investmentOverview")}>
+        <div className="investment-summary-heading">
+          <div className="summary-icon">
+            <LineChart size={20} aria-hidden="true" />
+          </div>
+          <div>
+            <span>{t("dashboard.investmentOverview")}</span>
+            <strong>{summary.investmentItemCount} {t("dashboard.investmentItems")}</strong>
+          </div>
+        </div>
+        <div className="investment-summary-grid">
+          <div>
+            <span>{t("dashboard.investedTotal")}</span>
+            <strong>{formatCurrency(summary.investmentInvestedTotal)}</strong>
+          </div>
+          <div>
+            <span>{t("dashboard.currentInvestmentValue")}</span>
+            <strong>{formatCurrency(summary.investmentCurrentTotal)}</strong>
+          </div>
+          <div>
+            <span>{t("dashboard.returnRate")}</span>
+            <strong className={investmentResultClass}>
+              {summary.investmentReturnRate.toLocaleString(language === "de" ? "de-DE" : "en-US", {
+                maximumFractionDigits: 2,
+                minimumFractionDigits: 2
+              })}
+              %
+            </strong>
+          </div>
+          <div>
+            <span>{t("dashboard.investmentResult")}</span>
+            <strong className={investmentResultClass}>{formatCurrency(summary.investmentResult)}</strong>
+          </div>
+        </div>
       </section>
 
       <section className="payment-panel">
