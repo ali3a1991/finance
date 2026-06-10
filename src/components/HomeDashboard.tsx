@@ -102,10 +102,6 @@ export function HomeDashboard() {
         <div className="gauge-copy">
           <span>Monatskompass</span>
           <h2>Einnahmen gegen Zahlungen</h2>
-          <p>
-            Je weiter die Nadel nach rechts wandert, desto mehr vom Monatseinkommen ist bereits durch feste Zahlungen
-            gebunden.
-          </p>
         </div>
         <div className="gauge-wrap">
           <div className="gauge-arc">
