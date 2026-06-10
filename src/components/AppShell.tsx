@@ -1,18 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { Banknote, Home, Menu, Settings, ShieldCheck, TrendingUp, WalletCards, X } from "lucide-react";
+import { Banknote, FileText, Home, Menu, Settings, ShieldCheck, TrendingUp, WalletCards, X } from "lucide-react";
 import { useState } from "react";
 import { useApiLoading } from "@/components/ApiLoadingProvider";
 import { useLanguage } from "@/components/LanguageProvider";
 
 const navItems = [
   { href: "/", labelKey: "home", icon: Home },
-  { href: "/kredite", labelKey: "loans", icon: Banknote },
-  { href: "/versicherungen", labelKey: "insurances", icon: ShieldCheck },
   { href: "/einnahmen", labelKey: "incomes", icon: TrendingUp },
-  { href: "/ausgaben", labelKey: "expenses", icon: WalletCards },
-  { href: "/einstellungen", labelKey: "settings", icon: Settings }
+  { href: "/ausgaben", labelKey: "expenses", icon: WalletCards }
+];
+
+const contractItems = [
+  { href: "/versicherungen", labelKey: "insurances", icon: ShieldCheck },
+  { href: "/kredite", labelKey: "loans", icon: Banknote },
+  { href: "/vertraege/allgemein", labelKey: "general", icon: FileText }
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -81,6 +84,28 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </Link>
             );
           })}
+          <div className="nav-group">
+            <div className="nav-group-label">
+              <FileText size={18} aria-hidden="true" />
+              <span>{t("nav.contracts")}</span>
+            </div>
+            <div className="nav-sublist">
+              {contractItems.map((item) => {
+                const Icon = item.icon;
+
+                return (
+                  <Link href={item.href} className="nav-subitem" key={item.href} onClick={closeMobileMenu}>
+                    <Icon size={16} aria-hidden="true" />
+                    <span>{t(`nav.${item.labelKey}`)}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+          <Link href="/einstellungen" className="nav-item" onClick={closeMobileMenu}>
+            <Settings size={18} aria-hidden="true" />
+            <span>{t("nav.settings")}</span>
+          </Link>
         </nav>
       </aside>
       <main className="main-content">{children}</main>

@@ -16,10 +16,12 @@ const translations = {
     },
     nav: {
       home: "Startseite",
-      loans: "Kredite",
+      loans: "Kredit",
       insurances: "Versicherungen",
       incomes: "Einnahmen",
       expenses: "Ausgaben",
+      contracts: "Verträge",
+      general: "Allgemein",
       settings: "Einstellungen",
       openMenu: "Menu offnen",
       closeMenu: "Menu schliessen",
@@ -55,6 +57,11 @@ const translations = {
         eyebrow: "Ausgaben / Erfassung",
         title: "Neue Ausgabe eintragen.",
         description: "Ein klares Formular fur schnelle Testbuchungen im Finanzmanager."
+      },
+      contractsGeneral: {
+        eyebrow: "Verträge",
+        title: "Allgemeine Verträge.",
+        description: "Ein zentraler Ort für weitere laufende Verträge außerhalb von Krediten und Versicherungen."
       },
       settings: {
         eyebrow: "Einstellungen",
@@ -107,6 +114,11 @@ const translations = {
       languageGroup: "Sprache auswahlen",
       german: "Deutsch",
       english: "Englisch"
+    },
+    contracts: {
+      generalLabel: "Allgemein",
+      generalTitle: "Weitere Verträge",
+      generalDescription: "Hier kann später eine eigene Tabelle für allgemeine Verträge wie Mobilfunk, Streaming oder Mitgliedschaften entstehen."
     }
   },
   en: {
@@ -116,10 +128,12 @@ const translations = {
     },
     nav: {
       home: "Home",
-      loans: "Loans",
+      loans: "Credit",
       insurances: "Insurance",
       incomes: "Income",
       expenses: "Expenses",
+      contracts: "Contracts",
+      general: "General",
       settings: "Settings",
       openMenu: "Open menu",
       closeMenu: "Close menu",
@@ -155,6 +169,11 @@ const translations = {
         eyebrow: "Expenses / Capture",
         title: "Add a new expense.",
         description: "A clear form for quick test bookings in the finance manager."
+      },
+      contractsGeneral: {
+        eyebrow: "Contracts",
+        title: "General contracts.",
+        description: "A central place for other recurring contracts outside loans and insurance."
       },
       settings: {
         eyebrow: "Settings",
@@ -207,6 +226,11 @@ const translations = {
       languageGroup: "Select language",
       german: "German",
       english: "English"
+    },
+    contracts: {
+      generalLabel: "General",
+      generalTitle: "Other contracts",
+      generalDescription: "A dedicated table for general contracts such as mobile plans, streaming or memberships can be added here later."
     }
   }
 } as const;
