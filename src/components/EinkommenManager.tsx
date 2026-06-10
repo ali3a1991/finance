@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { Pencil, PlusCircle, Save, Trash2, TrendingUp, X } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
 import { formatCurrency, formatDate } from "@/lib/formatting";
 import { requestJson } from "@/lib/requestJson";
@@ -37,6 +38,7 @@ function toPayload(form: IncomeForm): Omit<Income, "id"> {
 }
 
 export function EinkommenManager() {
+  const { canWrite } = useAuth();
   const { t } = useLanguage();
   const [activeType, setActiveType] = useState<"recurring" | "oneTime">("recurring");
   const [editForm, setEditForm] = useState<IncomeForm>(emptyForm);
@@ -145,12 +147,14 @@ export function EinkommenManager() {
 
   return (
     <>
-      <div className="action-row">
-        <button className="button primary" type="button" onClick={() => setIsOpen(true)}>
-          <PlusCircle size={18} aria-hidden="true" />
-          {t("incomes.add")}
-        </button>
-      </div>
+      {canWrite ? (
+        <div className="action-row">
+          <button className="button primary" type="button" onClick={() => setIsOpen(true)}>
+            <PlusCircle size={18} aria-hidden="true" />
+            {t("incomes.add")}
+          </button>
+        </div>
+      ) : null}
 
       <nav className="tab-row" aria-label={t("incomes.ariaTabs")}>
         <button
@@ -181,7 +185,7 @@ export function EinkommenManager() {
                 <th>{t("incomes.amount")}</th>
                 <th>{t("incomes.date")}</th>
                 <th>{t("incomes.type")}</th>
-                <th>{t("common.actions")}</th>
+                {canWrite ? <th>{t("common.actions")}</th> : null}
               </tr>
             </thead>
             <tbody>
@@ -197,26 +201,28 @@ export function EinkommenManager() {
                   <td>{formatCurrency(income.amount)}</td>
                   <td>{income.recurring ? `${income.entryDay}. ${t("common.day")}` : formatDate(income.date)}</td>
                   <td>{income.recurring ? t("incomes.fixed") : t("common.oneTime")}</td>
-                  <td>
-                    <div className="table-actions">
-                      <button
-                        className="icon-button"
-                        type="button"
-                        onClick={() => openEditModal(income)}
-                        aria-label={`${income.title} ${t("common.edit")}`}
-                      >
-                        <Pencil size={16} aria-hidden="true" />
-                      </button>
-                      <button
-                        className="icon-button danger"
-                        type="button"
-                        onClick={() => setIncomeToDelete(income)}
-                        aria-label={`${income.title} ${t("common.delete")}`}
-                      >
-                        <Trash2 size={16} aria-hidden="true" />
-                      </button>
-                    </div>
-                  </td>
+                  {canWrite ? (
+                    <td>
+                      <div className="table-actions">
+                        <button
+                          className="icon-button"
+                          type="button"
+                          onClick={() => openEditModal(income)}
+                          aria-label={`${income.title} ${t("common.edit")}`}
+                        >
+                          <Pencil size={16} aria-hidden="true" />
+                        </button>
+                        <button
+                          className="icon-button danger"
+                          type="button"
+                          onClick={() => setIncomeToDelete(income)}
+                          aria-label={`${income.title} ${t("common.delete")}`}
+                        >
+                          <Trash2 size={16} aria-hidden="true" />
+                        </button>
+                      </div>
+                    </td>
+                  ) : null}
                 </tr>
               ))}
             </tbody>

@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { Pencil, PlusCircle, Save, Trash2, X } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
 import { formatCurrency, formatDate } from "@/lib/formatting";
 import { requestJson } from "@/lib/requestJson";
@@ -34,6 +35,7 @@ function toPayload(form: ExpenseForm): Omit<Expense, "id"> {
 }
 
 export function AusgabenManager() {
+  const { canWrite } = useAuth();
   const { t } = useLanguage();
   const [editForm, setEditForm] = useState<ExpenseForm>(emptyForm);
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
@@ -138,12 +140,14 @@ export function AusgabenManager() {
 
   return (
     <>
-      <div className="action-row">
-        <button className="button primary" type="button" onClick={() => setIsOpen(true)}>
-          <PlusCircle size={18} aria-hidden="true" />
-          {t("expenses.add")}
-        </button>
-      </div>
+      {canWrite ? (
+        <div className="action-row">
+          <button className="button primary" type="button" onClick={() => setIsOpen(true)}>
+            <PlusCircle size={18} aria-hidden="true" />
+            {t("expenses.add")}
+          </button>
+        </div>
+      ) : null}
 
       {isLoading ? <p className="muted-text">{t("expenses.loading")}</p> : null}
 
@@ -156,7 +160,7 @@ export function AusgabenManager() {
                 <th>{t("expenses.category")}</th>
                 <th>{t("expenses.date")}</th>
                 <th>{t("expenses.amount")}</th>
-                <th>{t("common.actions")}</th>
+                {canWrite ? <th>{t("common.actions")}</th> : null}
               </tr>
             </thead>
             <tbody>
@@ -166,26 +170,28 @@ export function AusgabenManager() {
                   <td>{expense.category}</td>
                   <td>{formatDate(expense.date)}</td>
                   <td>{formatCurrency(expense.amount)}</td>
-                  <td>
-                    <div className="table-actions">
-                      <button
-                        className="icon-button"
-                        type="button"
-                        onClick={() => openEditModal(expense)}
-                        aria-label={`${expense.title} ${t("common.edit")}`}
-                      >
-                        <Pencil size={16} aria-hidden="true" />
-                      </button>
-                      <button
-                        className="icon-button danger"
-                        type="button"
-                        onClick={() => setExpenseToDelete(expense)}
-                        aria-label={`${expense.title} ${t("common.delete")}`}
-                      >
-                        <Trash2 size={16} aria-hidden="true" />
-                      </button>
-                    </div>
-                  </td>
+                  {canWrite ? (
+                    <td>
+                      <div className="table-actions">
+                        <button
+                          className="icon-button"
+                          type="button"
+                          onClick={() => openEditModal(expense)}
+                          aria-label={`${expense.title} ${t("common.edit")}`}
+                        >
+                          <Pencil size={16} aria-hidden="true" />
+                        </button>
+                        <button
+                          className="icon-button danger"
+                          type="button"
+                          onClick={() => setExpenseToDelete(expense)}
+                          aria-label={`${expense.title} ${t("common.delete")}`}
+                        >
+                          <Trash2 size={16} aria-hidden="true" />
+                        </button>
+                      </div>
+                    </td>
+                  ) : null}
                 </tr>
               ))}
             </tbody>

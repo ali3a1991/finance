@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { Landmark, ListOrdered, Pencil, PlusCircle, Save, Trash2, X } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
 import { formatCurrency, formatDate } from "@/lib/formatting";
 import { requestJson } from "@/lib/requestJson";
@@ -35,6 +36,7 @@ const emptyForm: KreditForm = {
 };
 
 export function KreditManager() {
+  const { canWrite } = useAuth();
   const { t } = useLanguage();
   const [loans, setLoans] = useState<Loan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -197,12 +199,14 @@ export function KreditManager() {
 
   return (
     <>
-      <div className="action-row">
-        <button className="button primary" type="button" onClick={() => setIsOpen(true)}>
-          <PlusCircle size={18} aria-hidden="true" />
-          {t("loans.add")}
-        </button>
-      </div>
+      {canWrite ? (
+        <div className="action-row">
+          <button className="button primary" type="button" onClick={() => setIsOpen(true)}>
+            <PlusCircle size={18} aria-hidden="true" />
+            {t("loans.add")}
+          </button>
+        </div>
+      ) : null}
 
       {isLoading ? <p className="muted-text">{t("loans.loading")}</p> : null}
 
@@ -248,22 +252,26 @@ export function KreditManager() {
                       >
                         <ListOrdered size={16} aria-hidden="true" />
                       </button>
-                      <button
-                        className="icon-button"
-                        type="button"
-                        onClick={() => openEditModal(loan)}
-                        aria-label={`${loan.name} ${t("common.edit")}`}
-                      >
-                        <Pencil size={16} aria-hidden="true" />
-                      </button>
-                      <button
-                        className="icon-button danger"
-                        type="button"
-                        onClick={() => setLoanToDelete(loan)}
-                        aria-label={`${loan.name} ${t("common.delete")}`}
-                      >
-                        <Trash2 size={16} aria-hidden="true" />
-                      </button>
+                      {canWrite ? (
+                        <>
+                          <button
+                            className="icon-button"
+                            type="button"
+                            onClick={() => openEditModal(loan)}
+                            aria-label={`${loan.name} ${t("common.edit")}`}
+                          >
+                            <Pencil size={16} aria-hidden="true" />
+                          </button>
+                          <button
+                            className="icon-button danger"
+                            type="button"
+                            onClick={() => setLoanToDelete(loan)}
+                            aria-label={`${loan.name} ${t("common.delete")}`}
+                          >
+                            <Trash2 size={16} aria-hidden="true" />
+                          </button>
+                        </>
+                      ) : null}
                     </div>
                   </td>
                 </tr>

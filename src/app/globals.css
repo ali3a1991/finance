@@ -741,6 +741,10 @@ th {
   background: var(--surface-raised);
 }
 
+.payment-row.readonly {
+  grid-template-columns: minmax(220px, 1fr) minmax(130px, auto);
+}
+
 .payment-row.paid {
   border-color: rgba(17, 107, 95, 0.28);
   background: rgba(17, 107, 95, 0.08);
@@ -1561,6 +1565,10 @@ th {
     align-items: start;
     gap: 10px;
     padding: 10px;
+  }
+
+  .payment-row.readonly {
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
   .payment-main {

@@ -2,6 +2,7 @@
 
 import { ChangeEvent, useEffect, useState } from "react";
 import { Banknote, CalendarDays, Check, ChevronLeft, ChevronRight, PiggyBank, Save, ShieldCheck, WalletCards } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
 import { StatCard } from "@/components/StatCard";
 import { useLanguage } from "@/components/LanguageProvider";
 import { formatCurrency, formatDate } from "@/lib/formatting";
@@ -59,6 +60,7 @@ function parsePaymentInputValue(value: string) {
 }
 
 export function HomeDashboard() {
+  const { canWrite } = useAuth();
   const { language, t } = useLanguage();
   const [selectedMonth, setSelectedMonth] = useState(getMonthKey());
   const [isLoading, setIsLoading] = useState(true);
@@ -237,18 +239,20 @@ export function HomeDashboard() {
 
             return (
               <article
-                className={`payment-row ${isPaid ? "paid" : ""} ${isPartial ? "partial" : ""}`}
+                className={`payment-row ${!canWrite ? "readonly" : ""} ${isPaid ? "paid" : ""} ${isPartial ? "partial" : ""}`}
                 key={payment.id}
               >
-                <button
-                  className="payment-check"
-                  type="button"
-                  onClick={() => updatePayment(payment.id, isPaid ? 0 : payment.amount)}
-                  aria-label={`${payment.title} ${t("dashboard.markPaid")}`}
-                  disabled={isUpdating}
-                >
-                  {isPaid ? <Check size={18} aria-hidden="true" /> : null}
-                </button>
+                {canWrite ? (
+                  <button
+                    className="payment-check"
+                    type="button"
+                    onClick={() => updatePayment(payment.id, isPaid ? 0 : payment.amount)}
+                    aria-label={`${payment.title} ${t("dashboard.markPaid")}`}
+                    disabled={isUpdating}
+                  >
+                    {isPaid ? <Check size={18} aria-hidden="true" /> : null}
+                  </button>
+                ) : null}
                 <div className="payment-main">
                   <strong>{payment.title}</strong>
                   <span>
@@ -267,32 +271,34 @@ export function HomeDashboard() {
                           : t("dashboard.open")}
                   </span>
                 </div>
-                <div className="partial-input">
-                  <label>
-                    <span>{t("dashboard.paidAmount")}</span>
-                    <input
-                      inputMode="decimal"
-                      min="0"
-                      max={payment.amount}
-                      step="0.01"
-                      type="text"
-                      value={draftValue}
-                      onChange={(event) => handlePartialChange(payment, event)}
-                      disabled={isUpdating}
-                    />
-                  </label>
-                  {hasDraftChange ? (
-                    <button
-                      className="icon-button partial-submit"
-                      type="button"
-                      onClick={() => submitPartialPayment(payment)}
-                      disabled={isUpdating}
-                      aria-label={`${payment.title} ${t("dashboard.savePaidAmount")}`}
-                    >
-                      <Save size={18} aria-hidden="true" />
-                    </button>
-                  ) : null}
-                </div>
+                {canWrite ? (
+                  <div className="partial-input">
+                    <label>
+                      <span>{t("dashboard.paidAmount")}</span>
+                      <input
+                        inputMode="decimal"
+                        min="0"
+                        max={payment.amount}
+                        step="0.01"
+                        type="text"
+                        value={draftValue}
+                        onChange={(event) => handlePartialChange(payment, event)}
+                        disabled={isUpdating}
+                      />
+                    </label>
+                    {hasDraftChange ? (
+                      <button
+                        className="icon-button partial-submit"
+                        type="button"
+                        onClick={() => submitPartialPayment(payment)}
+                        disabled={isUpdating}
+                        aria-label={`${payment.title} ${t("dashboard.savePaidAmount")}`}
+                      >
+                        <Save size={18} aria-hidden="true" />
+                      </button>
+                    ) : null}
+                  </div>
+                ) : null}
               </article>
             );
           })}

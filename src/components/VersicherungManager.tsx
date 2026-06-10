@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { Pencil, PlusCircle, Save, ShieldCheck, Trash2, X } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
 import { formatCurrency, formatDate } from "@/lib/formatting";
 import { requestJson } from "@/lib/requestJson";
@@ -41,6 +42,7 @@ const coverageOptions = [
 ];
 
 export function VersicherungManager() {
+  const { canWrite } = useAuth();
   const { t } = useLanguage();
   const [insurances, setInsurances] = useState<Insurance[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -165,12 +167,14 @@ export function VersicherungManager() {
 
   return (
     <>
-      <div className="action-row">
-        <button className="button primary" type="button" onClick={() => setIsOpen(true)}>
-          <PlusCircle size={18} aria-hidden="true" />
-          {t("insurances.add")}
-        </button>
-      </div>
+      {canWrite ? (
+        <div className="action-row">
+          <button className="button primary" type="button" onClick={() => setIsOpen(true)}>
+            <PlusCircle size={18} aria-hidden="true" />
+            {t("insurances.add")}
+          </button>
+        </div>
+      ) : null}
 
       {isLoading ? <p className="muted-text">{t("insurances.loading")}</p> : null}
 
@@ -185,7 +189,7 @@ export function VersicherungManager() {
                 <th>{t("insurances.debitDay")}</th>
                 <th>{t("insurances.startDate")}</th>
                 <th>{t("insurances.endDate")}</th>
-                <th>{t("common.actions")}</th>
+                {canWrite ? <th>{t("common.actions")}</th> : null}
               </tr>
             </thead>
             <tbody>
@@ -202,26 +206,28 @@ export function VersicherungManager() {
                   <td>{insurance.debitDay}. {t("common.day")}</td>
                   <td>{insurance.startDate ? formatDate(insurance.startDate) : "-"}</td>
                   <td>{insurance.endDate ? formatDate(insurance.endDate) : "-"}</td>
-                  <td>
-                    <div className="table-actions">
-                      <button
-                        className="icon-button"
-                        type="button"
-                        onClick={() => openEditModal(insurance)}
-                        aria-label={`${insurance.provider} ${t("common.edit")}`}
-                      >
-                        <Pencil size={16} aria-hidden="true" />
-                      </button>
-                      <button
-                        className="icon-button danger"
-                        type="button"
-                        onClick={() => setInsuranceToDelete(insurance)}
-                        aria-label={`${insurance.provider} ${t("common.delete")}`}
-                      >
-                        <Trash2 size={16} aria-hidden="true" />
-                      </button>
-                    </div>
-                  </td>
+                  {canWrite ? (
+                    <td>
+                      <div className="table-actions">
+                        <button
+                          className="icon-button"
+                          type="button"
+                          onClick={() => openEditModal(insurance)}
+                          aria-label={`${insurance.provider} ${t("common.edit")}`}
+                        >
+                          <Pencil size={16} aria-hidden="true" />
+                        </button>
+                        <button
+                          className="icon-button danger"
+                          type="button"
+                          onClick={() => setInsuranceToDelete(insurance)}
+                          aria-label={`${insurance.provider} ${t("common.delete")}`}
+                        >
+                          <Trash2 size={16} aria-hidden="true" />
+                        </button>
+                      </div>
+                    </td>
+                  ) : null}
                 </tr>
               ))}
             </tbody>
