@@ -1,6 +1,19 @@
 import { prisma } from "@/lib/prisma";
 import { getPasswordHash } from "@/lib/auth";
-import type { AccessLevel, Expense, FinanceDb, GeneralContract, Income, Insurance, Loan, MonthlyPayment, SharedUser } from "@/lib/types";
+import type {
+  AccessLevel,
+  Expense,
+  FinanceDb,
+  GeneralContract,
+  Income,
+  Insurance,
+  Investment,
+  InvestmentQuote,
+  InvestmentWithQuote,
+  Loan,
+  MonthlyPayment,
+  SharedUser
+} from "@/lib/types";
 
 function toDateInput(date: Date) {
   return date.toISOString().slice(0, 10);
@@ -99,13 +112,29 @@ function mapExpense(expense: {
   };
 }
 
+function mapInvestment(investment: {
+  id: string;
+  assetName: string;
+  symbol: string;
+  quantity: number;
+  purchasePrice: number;
+  purchaseDate: Date;
+}): Investment {
+  return {
+    ...investment,
+    purchaseDate: toDateInput(investment.purchaseDate)
+  };
+}
+
 export async function readFinanceDb(ownerId: string): Promise<FinanceDb> {
-  const [loans, insurances, generalContracts, incomes, expenses, monthlyBudgets, paymentConfirmations] = await Promise.all([
+  const [loans, insurances, generalContracts, incomes, expenses, investments, monthlyBudgets, paymentConfirmations] =
+    await Promise.all([
     prisma.loan.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } }),
     prisma.insurance.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } }),
     prisma.generalContract.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } }),
     prisma.income.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } }),
     prisma.expense.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } }),
+    prisma.investment.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } }),
     prisma.monthlyBudget.findMany({ orderBy: { category: "asc" }, where: { ownerId } }),
     prisma.paymentConfirmation.findMany({ where: { ownerId } })
   ]);
@@ -114,6 +143,7 @@ export async function readFinanceDb(ownerId: string): Promise<FinanceDb> {
     expenses: expenses.map(mapExpense),
     generalContracts: generalContracts.map(mapGeneralContract),
     incomes: incomes.map(mapIncome),
+    investments: investments.map(mapInvestment),
     insurances: insurances.map(mapInsurance),
     loans: loans.map(mapLoan),
     monthlyBudgets,
@@ -400,6 +430,96 @@ export async function deleteExpense(ownerId: string, id: string): Promise<boolea
   } catch {
     return false;
   }
+}
+
+export async function listInvestments(ownerId: string): Promise<Investment[]> {
+  const investments = await prisma.investment.findMany({
+    orderBy: { createdAt: "desc" },
+    where: { ownerId }
+  });
+  return investments.map(mapInvestment);
+}
+
+export async function createInvestment(ownerId: string, investment: Investment): Promise<Investment> {
+  const createdInvestment = await prisma.investment.create({
+    data: {
+      ...investment,
+      ownerId,
+      purchaseDate: toDate(investment.purchaseDate),
+      symbol: investment.symbol.toUpperCase()
+    }
+  });
+  return mapInvestment(createdInvestment);
+}
+
+export async function deleteInvestment(ownerId: string, id: string): Promise<boolean> {
+  const result = await prisma.investment.deleteMany({ where: { id, ownerId } });
+  return result.count > 0;
+}
+
+export async function fetchInvestmentQuotes(symbols: string[]): Promise<Record<string, InvestmentQuote>> {
+  const uniqueSymbols = Array.from(new Set(symbols.map((symbol) => symbol.toUpperCase()).filter(Boolean)));
+
+  if (uniqueSymbols.length === 0) {
+    return {};
+  }
+
+  const quoteEntries = await Promise.all(
+    uniqueSymbols.map(async (symbol) => {
+      try {
+        const response = await fetch(
+          `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=1d&interval=1m`,
+          { next: { revalidate: 300 } }
+        );
+
+        if (!response.ok) {
+          return null;
+        }
+
+        const body = (await response.json()) as {
+          chart?: {
+            result?: Array<{
+              meta?: {
+                currency?: string;
+                regularMarketPrice?: number;
+                symbol?: string;
+              };
+            }>;
+          };
+        };
+        const meta = body.chart?.result?.[0]?.meta;
+        const quoteSymbol = meta?.symbol?.toUpperCase() ?? symbol;
+
+        return [
+          quoteSymbol,
+          {
+            currency: meta?.currency || "USD",
+            currentPrice: typeof meta?.regularMarketPrice === "number" ? meta.regularMarketPrice : null,
+            symbol: quoteSymbol
+          }
+        ] as const;
+      } catch {
+        return null;
+      }
+    })
+  );
+
+  return Object.fromEntries(quoteEntries.filter((entry): entry is NonNullable<typeof entry> => Boolean(entry)));
+}
+
+export async function listInvestmentsWithQuotes(ownerId: string): Promise<InvestmentWithQuote[]> {
+  const investments = await listInvestments(ownerId);
+  const quotes = await fetchInvestmentQuotes(investments.map((investment) => investment.symbol));
+
+  return investments.map((investment) => {
+    const quote = quotes[investment.symbol.toUpperCase()];
+
+    return {
+      ...investment,
+      currency: quote?.currency ?? "USD",
+      currentPrice: quote?.currentPrice ?? null
+    };
+  });
 }
 
 function getMonthKey(date = new Date()) {

@@ -3,7 +3,7 @@
 import { useLanguage } from "@/components/LanguageProvider";
 
 type PageHeaderProps = {
-  page: "home" | "loans" | "insurances" | "incomes" | "expenses" | "contractsGeneral" | "settings";
+  page: "home" | "loans" | "insurances" | "incomes" | "expenses" | "investments" | "contractsGeneral" | "settings";
 };
 
 export function PageHeader({ page }: PageHeaderProps) {

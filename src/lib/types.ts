@@ -56,6 +56,26 @@ export type Income = {
   entryDay?: number;
 };
 
+export type Investment = {
+  id: string;
+  assetName: string;
+  symbol: string;
+  quantity: number;
+  purchasePrice: number;
+  purchaseDate: string;
+};
+
+export type InvestmentQuote = {
+  currency: string;
+  currentPrice: number | null;
+  symbol: string;
+};
+
+export type InvestmentWithQuote = Investment & {
+  currentPrice: number | null;
+  currency: string;
+};
+
 export type MonthlyBudget = {
   category: string;
   planned: number;
@@ -98,6 +118,7 @@ export type FinanceDb = {
   insurances: Insurance[];
   generalContracts?: GeneralContract[];
   incomes?: Income[];
+  investments?: Investment[];
   expenses: Expense[];
   monthlyBudgets: MonthlyBudget[];
   paymentConfirmations?: PaymentConfirmation[];

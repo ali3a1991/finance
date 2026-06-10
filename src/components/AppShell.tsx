@@ -10,7 +10,8 @@ import { useLanguage } from "@/components/LanguageProvider";
 const navItems = [
   { href: "/", labelKey: "home", icon: Home },
   { href: "/einnahmen", labelKey: "incomes", icon: TrendingUp },
-  { href: "/ausgaben", labelKey: "expenses", icon: WalletCards }
+  { href: "/ausgaben", labelKey: "expenses", icon: WalletCards },
+  { href: "/investitionen", labelKey: "investments", icon: TrendingUp }
 ];
 
 const contractItems = [

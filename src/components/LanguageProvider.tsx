@@ -20,6 +20,7 @@ const translations = {
       insurances: "Versicherungen",
       incomes: "Einnahmen",
       expenses: "Ausgaben",
+      investments: "Investitionen",
       contracts: "Verträge",
       general: "Allgemein",
       settings: "Einstellungen",
@@ -52,6 +53,11 @@ const translations = {
         eyebrow: "Ausgaben",
         title: "Ausgaben erfassen und auswerten.",
         description: "Alle einzelnen Ausgaben werden klar erfasst und in einer Tabelle gepflegt."
+      },
+      investments: {
+        eyebrow: "Investitionen",
+        title: "Depot und Krypto verwalten.",
+        description: "Erfasse deine Käufe und vergleiche Kaufpreis, Menge und aktuellen Marktpreis."
       },
       contractsGeneral: {
         eyebrow: "Verträge",
@@ -196,6 +202,27 @@ const translations = {
       deleteTitle: "Ausgabe wirklich loschen?",
       saveError: "Die Ausgabe konnte nicht gespeichert werden."
     },
+    investments: {
+      add: "Investition hinzufugen",
+      loading: "Investitionen werden geladen...",
+      investment: "Investition",
+      addTitle: "Neue Investition eintragen",
+      asset: "Wert",
+      symbol: "Symbol",
+      quantity: "Anzahl",
+      purchasePrice: "Kaufpreis",
+      currentPrice: "Aktueller Preis",
+      currentValue: "Aktueller Wert",
+      result: "Gewinn / Verlust",
+      purchaseDate: "Kaufdatum",
+      investedTotal: "Investiert",
+      currentTotal: "Aktueller Wert",
+      priceUnavailable: "Nicht verfugbar",
+      empty: "Noch keine Investitionen vorhanden.",
+      deleteLabel: "Investition loschen",
+      deleteTitle: "Investition wirklich loschen?",
+      deleteText: "wird aus deinem Depot entfernt."
+    },
     settings: {
       themeLabel: "Theme",
       themeTitle: "Farbmodus",
@@ -266,6 +293,7 @@ const translations = {
       insurances: "Insurance",
       incomes: "Income",
       expenses: "Expenses",
+      investments: "Investments",
       contracts: "Contracts",
       general: "General",
       settings: "Settings",
@@ -298,6 +326,11 @@ const translations = {
         eyebrow: "Expenses",
         title: "Track and review expenses.",
         description: "All individual expenses are tracked clearly and managed in one table."
+      },
+      investments: {
+        eyebrow: "Investments",
+        title: "Manage portfolio and crypto.",
+        description: "Track purchases and compare purchase price, quantity and current market price."
       },
       contractsGeneral: {
         eyebrow: "Contracts",
@@ -441,6 +474,27 @@ const translations = {
       deleteLabel: "Delete expense",
       deleteTitle: "Delete this expense?",
       saveError: "The expense could not be saved."
+    },
+    investments: {
+      add: "Add investment",
+      loading: "Loading investments...",
+      investment: "Investment",
+      addTitle: "Add new investment",
+      asset: "Asset",
+      symbol: "Symbol",
+      quantity: "Quantity",
+      purchasePrice: "Purchase price",
+      currentPrice: "Current price",
+      currentValue: "Current value",
+      result: "Gain / loss",
+      purchaseDate: "Purchase date",
+      investedTotal: "Invested",
+      currentTotal: "Current value",
+      priceUnavailable: "Unavailable",
+      empty: "No investments yet.",
+      deleteLabel: "Delete investment",
+      deleteTitle: "Delete this investment?",
+      deleteText: "will be removed from your portfolio."
     },
     settings: {
       themeLabel: "Theme",

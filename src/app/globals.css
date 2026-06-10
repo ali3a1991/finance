@@ -715,6 +715,18 @@ th {
   font-size: 1.2rem;
 }
 
+.investment-result {
+  font-weight: 900;
+}
+
+.investment-result.positive {
+  color: var(--primary);
+}
+
+.investment-result.negative {
+  color: var(--rose);
+}
+
 .payment-panel {
   display: grid;
   gap: 18px;
