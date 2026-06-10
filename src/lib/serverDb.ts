@@ -266,6 +266,25 @@ function getMonthKey(date = new Date()) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 }
 
+function getDateFromMonthKey(monthKey?: string | null) {
+  if (!monthKey || !/^\d{4}-\d{2}$/.test(monthKey)) {
+    return new Date();
+  }
+
+  const [year, month] = monthKey.split("-").map(Number);
+
+  if (!year || !month || month < 1 || month > 12) {
+    return new Date();
+  }
+
+  return new Date(year, month - 1, 1);
+}
+
+function getMonthKeyFromPaymentId(id: string) {
+  const monthKey = id.split(":").at(-1);
+  return /^\d{4}-\d{2}$/.test(monthKey ?? "") ? monthKey : null;
+}
+
 function getCurrentMonthDate(day: number, date = new Date()) {
   const safeDay = Math.min(Math.max(day, 1), 28);
   return new Date(date.getFullYear(), date.getMonth(), safeDay).toISOString();
@@ -336,10 +355,10 @@ export function buildMonthlyPayments(db: FinanceDb, date = new Date()): MonthlyP
   );
 }
 
-export async function getDashboardData() {
+export async function getDashboardData(monthKey?: string | null) {
   const db = await readFinanceDb();
-  const monthlyPayments = buildMonthlyPayments(db);
-  const now = new Date();
+  const selectedDate = getDateFromMonthKey(monthKey);
+  const monthlyPayments = buildMonthlyPayments(db, selectedDate);
   const incomeTotal = (db.incomes ?? [])
     .filter((income) => {
       if (income.recurring) {
@@ -347,15 +366,25 @@ export async function getDashboardData() {
       }
 
       const incomeDate = new Date(`${income.date}T00:00:00`);
-      return incomeDate.getFullYear() === now.getFullYear() && incomeDate.getMonth() === now.getMonth();
+      return incomeDate.getFullYear() === selectedDate.getFullYear() && incomeDate.getMonth() === selectedDate.getMonth();
     })
     .reduce((sum, income) => sum + income.amount, 0);
-  const monthlyExpenseTotal = db.expenses.reduce((sum, expense) => sum + expense.amount, 0);
+  const monthlyExpenseTotal = db.expenses
+    .filter((expense) => {
+      if (expense.recurring) {
+        return true;
+      }
+
+      const expenseDate = new Date(`${expense.date}T00:00:00`);
+      return expenseDate.getFullYear() === selectedDate.getFullYear() && expenseDate.getMonth() === selectedDate.getMonth();
+    })
+    .reduce((sum, expense) => sum + expense.amount, 0);
   const loanTotal = db.loans.reduce((sum, loan) => sum + loan.balance, 0);
   const insuranceTotal = db.insurances.reduce((sum, insurance) => sum + insurance.monthlyPremium, 0);
   const committed = monthlyPayments.reduce((sum, payment) => sum + payment.amount, 0);
 
   return {
+    month: getMonthKey(selectedDate),
     monthlyPayments,
     summary: {
       freeAmount: incomeTotal - committed,
@@ -370,7 +399,7 @@ export async function getDashboardData() {
 
 export async function updateMonthlyPayment(id: string, paidAmount: number) {
   const db = await readFinanceDb();
-  const payments = buildMonthlyPayments(db);
+  const payments = buildMonthlyPayments(db, getDateFromMonthKey(getMonthKeyFromPaymentId(id)));
   const payment = payments.find((item) => item.id === id);
 
   if (!payment) {

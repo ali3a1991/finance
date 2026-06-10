@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent, useEffect, useState } from "react";
-import { Banknote, Check, PiggyBank, ShieldCheck, WalletCards } from "lucide-react";
+import { Banknote, CalendarDays, Check, ChevronLeft, ChevronRight, PiggyBank, ShieldCheck, WalletCards } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { formatCurrency, formatDate } from "@/lib/formatting";
 import { requestJson } from "@/lib/requestJson";
@@ -17,6 +17,7 @@ type DashboardSummary = {
 };
 
 type DashboardPayload = {
+  month: string;
   monthlyPayments: MonthlyPayment[];
   summary: DashboardSummary;
 };
@@ -30,7 +31,23 @@ const emptySummary: DashboardSummary = {
   monthlyExpenseTotal: 0
 };
 
+function getMonthKey(date = new Date()) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function addMonths(monthKey: string, amount: number) {
+  const [year, month] = monthKey.split("-").map(Number);
+  const date = new Date(year, month - 1 + amount, 1);
+  return getMonthKey(date);
+}
+
+function formatMonthLabel(monthKey: string) {
+  const [year, month] = monthKey.split("-").map(Number);
+  return new Intl.DateTimeFormat("de-DE", { month: "long", year: "numeric" }).format(new Date(year, month - 1, 1));
+}
+
 export function HomeDashboard() {
+  const [selectedMonth, setSelectedMonth] = useState(getMonthKey());
   const [isLoading, setIsLoading] = useState(true);
   const [payments, setPayments] = useState<MonthlyPayment[]>([]);
   const [summary, setSummary] = useState<DashboardSummary>(emptySummary);
@@ -38,14 +55,16 @@ export function HomeDashboard() {
 
   useEffect(() => {
     async function loadDashboard() {
-      const body = await requestJson<DashboardPayload>("/api/dashboard");
+      setIsLoading(true);
+      const body = await requestJson<DashboardPayload>(`/api/dashboard?month=${selectedMonth}`);
       setPayments(body.monthlyPayments);
       setSummary(body.summary);
+      setSelectedMonth(body.month);
       setIsLoading(false);
     }
 
     loadDashboard().catch(() => setIsLoading(false));
-  }, []);
+  }, [selectedMonth]);
 
   async function updatePayment(id: string, paidAmount: number) {
     setUpdatingPaymentId(id);
@@ -73,9 +92,41 @@ export function HomeDashboard() {
   const needleRotation = -72 + Math.min(pressureRatio, 1) * 144;
   const gaugeStatus =
     pressureRatio <= 0.55 ? "Entspannt" : pressureRatio <= 0.85 ? "Aufmerksam bleiben" : "Kritisch";
+  const isCurrentMonth = selectedMonth === getMonthKey();
 
   return (
     <>
+      <section className="month-switcher" aria-label="Monat auswahlen">
+        <button
+          className="icon-button"
+          type="button"
+          onClick={() => setSelectedMonth((current) => addMonths(current, -1))}
+          aria-label="Vorheriger Monat"
+        >
+          <ChevronLeft size={20} aria-hidden="true" />
+        </button>
+        <div className="month-switcher-current">
+          <CalendarDays size={18} aria-hidden="true" />
+          <div>
+            <span>{isCurrentMonth ? "Aktueller Monat" : "Ausgewahlter Monat"}</span>
+            <strong>{formatMonthLabel(selectedMonth)}</strong>
+          </div>
+        </div>
+        <button
+          className="icon-button"
+          type="button"
+          onClick={() => setSelectedMonth((current) => addMonths(current, 1))}
+          aria-label="Nachster Monat"
+        >
+          <ChevronRight size={20} aria-hidden="true" />
+        </button>
+        {!isCurrentMonth ? (
+          <button className="button secondary month-today-button" type="button" onClick={() => setSelectedMonth(getMonthKey())}>
+            Heute
+          </button>
+        ) : null}
+      </section>
+
       <section className="cash-gauge-panel" aria-label="Monatlicher Finanzdruck">
         <div className="gauge-copy">
           <span>Monatskompass</span>
@@ -132,7 +183,7 @@ export function HomeDashboard() {
 
       <section className="payment-panel">
         <div className="section-title">
-          <span>Dieser Monat</span>
+          <span>{formatMonthLabel(selectedMonth)}</span>
           <strong>
             {formatCurrency(paidTotal)} / {formatCurrency(monthTotal)}
           </strong>

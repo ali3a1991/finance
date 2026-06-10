@@ -456,6 +456,54 @@ th {
   color: var(--muted);
 }
 
+.month-switcher {
+  display: grid;
+  grid-template-columns: 44px minmax(220px, auto) 44px auto;
+  align-items: center;
+  justify-content: start;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.month-switcher-current {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 14px;
+  background: var(--surface-soft);
+}
+
+.month-switcher-current svg {
+  color: var(--primary);
+}
+
+.month-switcher-current span,
+.month-switcher-current strong {
+  display: block;
+}
+
+.month-switcher-current span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.month-switcher-current strong {
+  margin-top: 2px;
+}
+
+.month-today-button {
+  min-width: 92px;
+}
+
 .cash-gauge-panel {
   display: grid;
   grid-template-columns: minmax(240px, 1fr) minmax(260px, 360px) minmax(180px, 0.7fr);
@@ -1366,6 +1414,14 @@ th {
 
   .button {
     width: 100%;
+  }
+
+  .month-switcher {
+    grid-template-columns: 42px minmax(0, 1fr) 42px;
+  }
+
+  .month-today-button {
+    grid-column: 1 / -1;
   }
 
   .payment-row {

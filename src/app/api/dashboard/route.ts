@@ -9,5 +9,5 @@ export async function GET(request: NextRequest) {
     return auth.error;
   }
 
-  return NextResponse.json(await getDashboardData());
+  return NextResponse.json(await getDashboardData(request.nextUrl.searchParams.get("month")));
 }
