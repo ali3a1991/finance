@@ -14,8 +14,6 @@ type KreditForm = {
   totalInterest: string;
   monthlyRate: string;
   interestRate: string;
-  startDate: string;
-  endDate: string;
   nextPayment: string;
 };
 
@@ -33,8 +31,6 @@ const emptyForm: KreditForm = {
   totalInterest: "",
   monthlyRate: "",
   interestRate: "",
-  startDate: "",
-  endDate: "",
   nextPayment: ""
 };
 
@@ -82,8 +78,6 @@ export function KreditManager() {
       totalInterest: String(loan.totalInterest),
       monthlyRate: String(loan.monthlyRate),
       interestRate: String(loan.interestRate),
-      startDate: loan.startDate ?? loan.nextPayment,
-      endDate: loan.endDate ?? "",
       nextPayment: loan.nextPayment
     });
   }
@@ -106,8 +100,8 @@ export function KreditManager() {
           totalInterest: Number(form.totalInterest),
           monthlyRate: Number(form.monthlyRate),
           interestRate: Number(form.interestRate),
-          startDate: form.startDate,
-          endDate: form.endDate,
+          startDate: null,
+          endDate: null,
           nextPayment: form.nextPayment
         }),
         method: "POST"
@@ -133,8 +127,8 @@ export function KreditManager() {
           totalInterest: Number(editForm.totalInterest),
           monthlyRate: Number(editForm.monthlyRate),
           interestRate: Number(editForm.interestRate),
-          startDate: editForm.startDate,
-          endDate: editForm.endDate,
+          startDate: null,
+          endDate: null,
           nextPayment: editForm.nextPayment
         }),
         method: "PUT"
@@ -223,8 +217,6 @@ export function KreditManager() {
                 <th>{t("loans.totalInterest")}</th>
                 <th>{t("loans.rate")}</th>
                 <th>{t("loans.interest")}</th>
-                <th>{t("loans.startDate")}</th>
-                <th>{t("loans.endDate")}</th>
                 <th>{t("loans.firstPayment")}</th>
                 <th>{t("loans.status")}</th>
                 <th>{t("common.actions")}</th>
@@ -244,8 +236,6 @@ export function KreditManager() {
                   <td>{formatCurrency(loan.totalInterest)}</td>
                   <td>{formatCurrency(loan.monthlyRate)}</td>
                   <td>{loan.interestRate}%</td>
-                  <td>{loan.startDate ? formatDate(loan.startDate) : "-"}</td>
-                  <td>{loan.endDate ? formatDate(loan.endDate) : "-"}</td>
                   <td>{formatDate(loan.nextPayment)}</td>
                   <td>{loan.status}</td>
                   <td>
@@ -361,24 +351,6 @@ export function KreditManager() {
                   value={form.interestRate}
                   onChange={(event) => updateForm("interestRate", event.target.value)}
                   placeholder="3.8"
-                />
-              </label>
-              <label>
-                <span>{t("loans.startDate")}</span>
-                <input
-                  required
-                  type="date"
-                  value={form.startDate}
-                  onChange={(event) => updateForm("startDate", event.target.value)}
-                />
-              </label>
-              <label>
-                <span>{t("loans.endDate")}</span>
-                <input
-                  required
-                  type="date"
-                  value={form.endDate}
-                  onChange={(event) => updateForm("endDate", event.target.value)}
                 />
               </label>
               <label>
@@ -581,24 +553,6 @@ export function KreditManager() {
                   value={editForm.interestRate}
                   onChange={(event) => updateEditForm("interestRate", event.target.value)}
                   placeholder="3.8"
-                />
-              </label>
-              <label>
-                <span>{t("loans.startDate")}</span>
-                <input
-                  required
-                  type="date"
-                  value={editForm.startDate}
-                  onChange={(event) => updateEditForm("startDate", event.target.value)}
-                />
-              </label>
-              <label>
-                <span>{t("loans.endDate")}</span>
-                <input
-                  required
-                  type="date"
-                  value={editForm.endDate}
-                  onChange={(event) => updateEditForm("endDate", event.target.value)}
                 />
               </label>
               <label>

@@ -455,7 +455,6 @@ export function buildMonthlyPayments(db: FinanceDb, date = new Date()): MonthlyP
   const monthKey = getMonthKey(date);
   const loanPayments: MonthlyPayment[] = db.loans
     .filter((loan) => isSameOrBeforeCurrentMonth(new Date(`${loan.nextPayment}T00:00:00`), date))
-    .filter((loan) => isActiveInMonth(loan.startDate ?? loan.nextPayment, loan.endDate, date))
     .map((loan) => {
       const dueDay = new Date(`${loan.nextPayment}T00:00:00`).getDate();
       const id = `loan:${loan.id}:${monthKey}`;
