@@ -92,6 +92,23 @@ body:has(.login-page) .main-content {
   padding: 0;
 }
 
+body:has(.error-page) {
+  background: var(--bg);
+}
+
+body:has(.error-page) .app-shell {
+  display: block;
+}
+
+body:has(.error-page) .sidebar,
+body:has(.error-page) .mobile-header {
+  display: none;
+}
+
+body:has(.error-page) .main-content {
+  padding: 0;
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -1303,6 +1320,49 @@ th {
   margin: 0;
   color: var(--rose);
   font-weight: 700;
+}
+
+.error-page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 24px;
+  background:
+    linear-gradient(135deg, rgba(180, 35, 91, 0.1), transparent 44%),
+    var(--bg);
+}
+
+.error-panel {
+  display: grid;
+  gap: 18px;
+  width: min(520px, 100%);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 28px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.error-panel span {
+  color: var(--primary);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.error-panel h1,
+.error-panel p {
+  margin: 0;
+}
+
+.error-panel h1 {
+  font-size: clamp(1.8rem, 6vw, 2.6rem);
+  line-height: 1.08;
+}
+
+.error-panel p {
+  color: var(--muted);
+  line-height: 1.55;
 }
 
 @media (max-width: 980px) {
