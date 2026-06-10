@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import type { Expense, FinanceDb, Income, Insurance, Loan, MonthlyPayment } from "@/lib/types";
+import type { Expense, FinanceDb, GeneralContract, Income, Insurance, Loan, MonthlyPayment } from "@/lib/types";
 
 function toDateInput(date: Date) {
   return date.toISOString().slice(0, 10);
@@ -41,6 +41,23 @@ function mapInsurance(insurance: {
   };
 }
 
+function mapGeneralContract(contract: {
+  id: string;
+  title: string;
+  provider: string;
+  category: string;
+  monthlyAmount: number;
+  debitDay: number;
+  startDate: Date;
+  note: string | null;
+  status: string;
+}): GeneralContract {
+  return {
+    ...contract,
+    startDate: toDateInput(contract.startDate)
+  };
+}
+
 function mapIncome(income: {
   id: string;
   title: string;
@@ -72,9 +89,10 @@ function mapExpense(expense: {
 }
 
 export async function readFinanceDb(): Promise<FinanceDb> {
-  const [loans, insurances, incomes, expenses, monthlyBudgets, paymentConfirmations] = await Promise.all([
+  const [loans, insurances, generalContracts, incomes, expenses, monthlyBudgets, paymentConfirmations] = await Promise.all([
     prisma.loan.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.insurance.findMany({ orderBy: { createdAt: "desc" } }),
+    prisma.generalContract.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.income.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.expense.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.monthlyBudget.findMany({ orderBy: { category: "asc" } }),
@@ -83,6 +101,7 @@ export async function readFinanceDb(): Promise<FinanceDb> {
 
   return {
     expenses: expenses.map(mapExpense),
+    generalContracts: generalContracts.map(mapGeneralContract),
     incomes: incomes.map(mapIncome),
     insurances: insurances.map(mapInsurance),
     loans: loans.map(mapLoan),
@@ -176,6 +195,50 @@ export async function updateInsurance(id: string, patch: Omit<Insurance, "id">):
 export async function deleteInsurance(id: string): Promise<boolean> {
   try {
     await prisma.insurance.delete({ where: { id } });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function listGeneralContracts(): Promise<GeneralContract[]> {
+  const contracts = await prisma.generalContract.findMany({ orderBy: { createdAt: "desc" } });
+  return contracts.map(mapGeneralContract);
+}
+
+export async function createGeneralContract(contract: GeneralContract): Promise<GeneralContract> {
+  const createdContract = await prisma.generalContract.create({
+    data: {
+      ...contract,
+      note: contract.note || null,
+      startDate: toDate(contract.startDate)
+    }
+  });
+  return mapGeneralContract(createdContract);
+}
+
+export async function updateGeneralContract(
+  id: string,
+  patch: Omit<GeneralContract, "id">
+): Promise<GeneralContract | null> {
+  try {
+    const contract = await prisma.generalContract.update({
+      data: {
+        ...patch,
+        note: patch.note || null,
+        startDate: toDate(patch.startDate)
+      },
+      where: { id }
+    });
+    return mapGeneralContract(contract);
+  } catch {
+    return null;
+  }
+}
+
+export async function deleteGeneralContract(id: string): Promise<boolean> {
+  try {
+    await prisma.generalContract.delete({ where: { id } });
     return true;
   } catch {
     return false;
@@ -350,7 +413,24 @@ export function buildMonthlyPayments(db: FinanceDb, date = new Date()): MonthlyP
       };
     });
 
-  return [...loanPayments, ...insurancePayments, ...recurringExpensePayments].sort(
+  const contractPayments: MonthlyPayment[] = (db.generalContracts ?? [])
+    .filter((contract) => contract.status === "Aktiv")
+    .filter((contract) => isSameOrBeforeCurrentMonth(new Date(`${contract.startDate}T00:00:00`), date))
+    .map((contract) => {
+      const id = `contract:${contract.id}:${monthKey}`;
+
+      return {
+        amount: contract.monthlyAmount,
+        category: contract.provider,
+        dueDate: getCurrentMonthDate(contract.debitDay, date),
+        id,
+        paidAmount: getPaymentStatus(db, id),
+        sourceType: "contract",
+        title: contract.title
+      };
+    });
+
+  return [...loanPayments, ...insurancePayments, ...recurringExpensePayments, ...contractPayments].sort(
     (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
   );
 }

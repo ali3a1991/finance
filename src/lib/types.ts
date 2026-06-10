@@ -20,6 +20,18 @@ export type Insurance = {
   coverage: string;
 };
 
+export type GeneralContract = {
+  id: string;
+  title: string;
+  provider: string;
+  category: string;
+  monthlyAmount: number;
+  debitDay: number;
+  startDate: string;
+  note: string | null;
+  status: string;
+};
+
 export type Expense = {
   id: string;
   title: string;
@@ -54,7 +66,7 @@ export type PaymentConfirmation = {
 export type MonthlyPayment = {
   id: string;
   title: string;
-  sourceType: "loan" | "insurance" | "expense";
+  sourceType: "loan" | "insurance" | "expense" | "contract";
   category: string;
   amount: number;
   dueDate: string;
@@ -69,6 +81,7 @@ export type FinanceDb = {
   };
   loans: Loan[];
   insurances: Insurance[];
+  generalContracts?: GeneralContract[];
   incomes?: Income[];
   expenses: Expense[];
   monthlyBudgets: MonthlyBudget[];

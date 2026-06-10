@@ -218,7 +218,26 @@ const translations = {
     contracts: {
       generalLabel: "Allgemein",
       generalTitle: "Weitere Verträge",
-      generalDescription: "Hier kann später eine eigene Tabelle für allgemeine Verträge wie Mobilfunk, Streaming oder Mitgliedschaften entstehen."
+      generalDescription: "Hier kann später eine eigene Tabelle für allgemeine Verträge wie Mobilfunk, Streaming oder Mitgliedschaften entstehen.",
+      add: "Vertrag hinzufügen",
+      loading: "Verträge werden geladen...",
+      title: "Titel",
+      provider: "Anbieter",
+      category: "Kategorie",
+      monthlyAmount: "Monatlich",
+      debitDay: "Abbuchungstag",
+      startDate: "Startdatum",
+      status: "Status",
+      note: "Notiz",
+      active: "Aktiv",
+      paused: "Pausiert",
+      cancelled: "Gekündigt",
+      addTitle: "Neuen Vertrag hinzufügen",
+      editTitle: "Vertrag bearbeiten",
+      deleteLabel: "Vertrag löschen",
+      deleteTitle: "Vertrag wirklich löschen?",
+      deleteText: "wird aus der aktuellen Tabelle entfernt.",
+      empty: "Noch keine allgemeinen Verträge vorhanden."
     }
   },
   en: {
@@ -430,7 +449,26 @@ const translations = {
     contracts: {
       generalLabel: "General",
       generalTitle: "Other contracts",
-      generalDescription: "A dedicated table for general contracts such as mobile plans, streaming or memberships can be added here later."
+      generalDescription: "A dedicated table for general contracts such as mobile plans, streaming or memberships can be added here later.",
+      add: "Add contract",
+      loading: "Loading contracts...",
+      title: "Title",
+      provider: "Provider",
+      category: "Category",
+      monthlyAmount: "Monthly",
+      debitDay: "Debit day",
+      startDate: "Start date",
+      status: "Status",
+      note: "Note",
+      active: "Active",
+      paused: "Paused",
+      cancelled: "Cancelled",
+      addTitle: "Add new contract",
+      editTitle: "Edit contract",
+      deleteLabel: "Delete contract",
+      deleteTitle: "Delete this contract?",
+      deleteText: "will be removed from the current table.",
+      empty: "No general contracts yet."
     }
   }
 } as const;

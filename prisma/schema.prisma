@@ -32,6 +32,20 @@ model Insurance {
   updatedAt      DateTime @updatedAt
 }
 
+model GeneralContract {
+  id            String   @id
+  title         String
+  provider      String
+  category      String
+  monthlyAmount Float
+  debitDay      Int
+  startDate     DateTime
+  note          String?
+  status        String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
 model Income {
   id        String @id
   title     String

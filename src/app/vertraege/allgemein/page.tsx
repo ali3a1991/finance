@@ -1,4 +1,4 @@
-import { GeneralContractsIntro } from "@/components/GeneralContractsIntro";
+import { GeneralContractsManager } from "@/components/GeneralContractsManager";
 import { PageHeader } from "@/components/PageHeader";
 
 export default function AllgemeineVertraegePage() {
@@ -6,7 +6,7 @@ export default function AllgemeineVertraegePage() {
     <div className="page-stack">
       <PageHeader page="contractsGeneral" />
 
-      <GeneralContractsIntro />
+      <GeneralContractsManager />
     </div>
   );
 }
