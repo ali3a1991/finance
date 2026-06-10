@@ -457,6 +457,47 @@ export async function deleteInvestment(ownerId: string, id: string): Promise<boo
   return result.count > 0;
 }
 
+type YahooChartResponse = {
+  chart?: {
+    result?: Array<{
+      meta?: {
+        currency?: string;
+        regularMarketPrice?: number;
+        symbol?: string;
+      };
+    }>;
+  };
+};
+
+async function fetchYahooChartMeta(symbol: string) {
+  const response = await fetch(
+    `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=1d&interval=1m`,
+    { next: { revalidate: 300 } }
+  );
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const body = (await response.json()) as YahooChartResponse;
+  return body.chart?.result?.[0]?.meta ?? null;
+}
+
+async function fetchUsdToEurRate() {
+  try {
+    const meta = await fetchYahooChartMeta("EURUSD=X");
+    const eurUsdRate = meta?.regularMarketPrice;
+
+    if (typeof eurUsdRate !== "number" || eurUsdRate <= 0) {
+      return null;
+    }
+
+    return 1 / eurUsdRate;
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchInvestmentQuotes(symbols: string[]): Promise<Record<string, InvestmentQuote>> {
   const uniqueSymbols = Array.from(new Set(symbols.map((symbol) => symbol.toUpperCase()).filter(Boolean)));
 
@@ -464,37 +505,28 @@ export async function fetchInvestmentQuotes(symbols: string[]): Promise<Record<s
     return {};
   }
 
+  const usdToEurRate = await fetchUsdToEurRate();
   const quoteEntries = await Promise.all(
     uniqueSymbols.map(async (symbol) => {
       try {
-        const response = await fetch(
-          `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=1d&interval=1m`,
-          { next: { revalidate: 300 } }
-        );
-
-        if (!response.ok) {
-          return null;
-        }
-
-        const body = (await response.json()) as {
-          chart?: {
-            result?: Array<{
-              meta?: {
-                currency?: string;
-                regularMarketPrice?: number;
-                symbol?: string;
-              };
-            }>;
-          };
-        };
-        const meta = body.chart?.result?.[0]?.meta;
+        const meta = await fetchYahooChartMeta(symbol);
         const quoteSymbol = meta?.symbol?.toUpperCase() ?? symbol;
+        const quoteCurrency = meta?.currency?.toUpperCase() ?? "USD";
+        const rawPrice = typeof meta?.regularMarketPrice === "number" ? meta.regularMarketPrice : null;
+        const currentPrice =
+          rawPrice === null
+            ? null
+            : quoteCurrency === "EUR"
+              ? rawPrice
+              : quoteCurrency === "USD" && usdToEurRate
+                ? rawPrice * usdToEurRate
+                : null;
 
         return [
           quoteSymbol,
           {
-            currency: meta?.currency || "USD",
-            currentPrice: typeof meta?.regularMarketPrice === "number" ? meta.regularMarketPrice : null,
+            currency: "EUR",
+            currentPrice,
             symbol: quoteSymbol
           }
         ] as const;
@@ -516,7 +548,7 @@ export async function listInvestmentsWithQuotes(ownerId: string): Promise<Invest
 
     return {
       ...investment,
-      currency: quote?.currency ?? "USD",
+      currency: quote?.currency ?? "EUR",
       currentPrice: quote?.currentPrice ?? null
     };
   });

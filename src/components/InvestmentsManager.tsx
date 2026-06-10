@@ -176,16 +176,16 @@ export function InvestmentsManager() {
                     </td>
                     <td>{investment.symbol}</td>
                     <td>{investment.quantity}</td>
-                    <td>{formatCurrency(investment.purchasePrice, investment.currency)}</td>
+                    <td>{formatCurrency(investment.purchasePrice, "EUR")}</td>
                     <td>
                       {investment.currentPrice === null
                         ? t("investments.priceUnavailable")
-                        : formatCurrency(investment.currentPrice, investment.currency)}
+                        : formatCurrency(investment.currentPrice, "EUR")}
                     </td>
-                    <td>{formatCurrency(currentValue, investment.currency)}</td>
+                    <td>{formatCurrency(currentValue, "EUR")}</td>
                     <td>
                       <span className={`investment-result ${resultClass}`}>
-                        {formatCurrency(result, investment.currency)}
+                        {formatCurrency(result, "EUR")}
                       </span>
                     </td>
                     <td>{formatDate(investment.purchaseDate)}</td>
@@ -212,9 +212,9 @@ export function InvestmentsManager() {
         {!isLoading && investments.length === 0 ? <p className="empty-table-text">{t("investments.empty")}</p> : null}
         <div className="table-total-row">
           <span>{t("investments.investedTotal")}</span>
-          <strong>{formatCurrency(investedTotal, "USD")}</strong>
+          <strong>{formatCurrency(investedTotal, "EUR")}</strong>
           <span>{t("investments.currentTotal")}</span>
-          <strong>{formatCurrency(currentTotal, "USD")}</strong>
+          <strong>{formatCurrency(currentTotal, "EUR")}</strong>
         </div>
       </section>
 
