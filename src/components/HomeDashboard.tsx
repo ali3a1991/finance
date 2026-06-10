@@ -149,6 +149,44 @@ export function HomeDashboard() {
 
   return (
     <>
+      <section className="investment-summary-panel" aria-label={t("dashboard.investmentOverview")}>
+        <div className="investment-summary-heading">
+          <div className="summary-icon">
+            <LineChart size={20} aria-hidden="true" />
+          </div>
+          <div>
+            <span>{t("dashboard.investmentOverview")}</span>
+            <strong>
+              {summary.investmentItemCount} {t("dashboard.investmentItems")}
+            </strong>
+          </div>
+        </div>
+        <div className="investment-summary-grid">
+          <div>
+            <span>{t("dashboard.investedTotal")}</span>
+            <strong>{formatCurrency(summary.investmentInvestedTotal)}</strong>
+          </div>
+          <div>
+            <span>{t("dashboard.currentInvestmentValue")}</span>
+            <strong>{formatCurrency(summary.investmentCurrentTotal)}</strong>
+          </div>
+          <div>
+            <span>{t("dashboard.returnRate")}</span>
+            <strong className={investmentResultClass}>
+              {summary.investmentReturnRate.toLocaleString(language === "de" ? "de-DE" : "en-US", {
+                maximumFractionDigits: 2,
+                minimumFractionDigits: 2
+              })}
+              %
+            </strong>
+          </div>
+          <div>
+            <span>{t("dashboard.investmentResult")}</span>
+            <strong className={investmentResultClass}>{formatCurrency(summary.investmentResult)}</strong>
+          </div>
+        </div>
+      </section>
+
       <section className="month-switcher" aria-label={t("dashboard.monthPicker")}>
         <button
           className="icon-button"
@@ -234,42 +272,6 @@ export function HomeDashboard() {
           value={formatCurrency(summary.freeAmount)}
           helper={t("dashboard.afterFixedPayments")}
         />
-      </section>
-
-      <section className="investment-summary-panel" aria-label={t("dashboard.investmentOverview")}>
-        <div className="investment-summary-heading">
-          <div className="summary-icon">
-            <LineChart size={20} aria-hidden="true" />
-          </div>
-          <div>
-            <span>{t("dashboard.investmentOverview")}</span>
-            <strong>{summary.investmentItemCount} {t("dashboard.investmentItems")}</strong>
-          </div>
-        </div>
-        <div className="investment-summary-grid">
-          <div>
-            <span>{t("dashboard.investedTotal")}</span>
-            <strong>{formatCurrency(summary.investmentInvestedTotal)}</strong>
-          </div>
-          <div>
-            <span>{t("dashboard.currentInvestmentValue")}</span>
-            <strong>{formatCurrency(summary.investmentCurrentTotal)}</strong>
-          </div>
-          <div>
-            <span>{t("dashboard.returnRate")}</span>
-            <strong className={investmentResultClass}>
-              {summary.investmentReturnRate.toLocaleString(language === "de" ? "de-DE" : "en-US", {
-                maximumFractionDigits: 2,
-                minimumFractionDigits: 2
-              })}
-              %
-            </strong>
-          </div>
-          <div>
-            <span>{t("dashboard.investmentResult")}</span>
-            <strong className={investmentResultClass}>{formatCurrency(summary.investmentResult)}</strong>
-          </div>
-        </div>
       </section>
 
       <section className="payment-panel">
