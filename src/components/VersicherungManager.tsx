@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { Pencil, PlusCircle, Save, ShieldCheck, Trash2, X } from "lucide-react";
+import { useLanguage } from "@/components/LanguageProvider";
 import { formatCurrency, formatDate } from "@/lib/formatting";
 import { requestJson } from "@/lib/requestJson";
 import type { Insurance } from "@/lib/types";
@@ -40,6 +41,7 @@ const coverageOptions = [
 ];
 
 export function VersicherungManager() {
+  const { t } = useLanguage();
   const [insurances, setInsurances] = useState<Insurance[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
@@ -162,23 +164,23 @@ export function VersicherungManager() {
       <div className="action-row">
         <button className="button primary" type="button" onClick={() => setIsOpen(true)}>
           <PlusCircle size={18} aria-hidden="true" />
-          Versicherung hinzufugen
+          {t("insurances.add")}
         </button>
       </div>
 
-      {isLoading ? <p className="muted-text">Versicherungen werden geladen...</p> : null}
+      {isLoading ? <p className="muted-text">{t("insurances.loading")}</p> : null}
 
       <section className="table-panel">
         <div className="responsive-table">
           <table>
             <thead>
               <tr>
-                <th>Anbieter</th>
-                <th>Schutz</th>
-                <th>Monatlich</th>
-                <th>Abbuchungstag</th>
-                <th>Verlangerung</th>
-                <th>Aktionen</th>
+                <th>{t("insurances.provider")}</th>
+                <th>{t("insurances.coverage")}</th>
+                <th>{t("insurances.monthly")}</th>
+                <th>{t("insurances.debitDay")}</th>
+                <th>{t("insurances.renewal")}</th>
+                <th>{t("common.actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -192,15 +194,15 @@ export function VersicherungManager() {
                   </td>
                   <td>{insurance.coverage}</td>
                   <td>{formatCurrency(insurance.monthlyPremium)}</td>
-                  <td>{insurance.debitDay}. Tag</td>
-                  <td>{insurance.renewalDate ? formatDate(insurance.renewalDate) : "Keine Laufzeit"}</td>
+                  <td>{insurance.debitDay}. {t("common.day")}</td>
+                  <td>{insurance.renewalDate ? formatDate(insurance.renewalDate) : t("insurances.noTerm")}</td>
                   <td>
                     <div className="table-actions">
                       <button
                         className="icon-button"
                         type="button"
                         onClick={() => openEditModal(insurance)}
-                        aria-label={`${insurance.provider} bearbeiten`}
+                        aria-label={`${insurance.provider} ${t("common.edit")}`}
                       >
                         <Pencil size={16} aria-hidden="true" />
                       </button>
@@ -208,7 +210,7 @@ export function VersicherungManager() {
                         className="icon-button danger"
                         type="button"
                         onClick={() => setInsuranceToDelete(insurance)}
-                        aria-label={`${insurance.provider} loschen`}
+                        aria-label={`${insurance.provider} ${t("common.delete")}`}
                       >
                         <Trash2 size={16} aria-hidden="true" />
                       </button>
@@ -226,17 +228,17 @@ export function VersicherungManager() {
           <section className="modal-panel" role="dialog" aria-modal="true" aria-labelledby="insurance-modal-title">
             <div className="modal-header">
               <div>
-                <span>Versicherung</span>
-                <h2 id="insurance-modal-title">Neue Versicherung hinzufugen</h2>
+                <span>{t("insurances.insurance")}</span>
+                <h2 id="insurance-modal-title">{t("insurances.addTitle")}</h2>
               </div>
-              <button className="icon-button" type="button" onClick={closeAddModal} aria-label="Dialog schliessen">
+              <button className="icon-button" type="button" onClick={closeAddModal} aria-label={t("common.closeDialog")}>
                 <X size={20} aria-hidden="true" />
               </button>
             </div>
 
             <form className="modal-form" onSubmit={handleSubmit}>
               <label>
-                <span>Anbieter</span>
+                <span>{t("insurances.provider")}</span>
                 <input
                   required
                   value={form.provider}
@@ -245,13 +247,13 @@ export function VersicherungManager() {
                 />
               </label>
               <label>
-                <span>Schutz</span>
+                <span>{t("insurances.coverage")}</span>
                 <select
                   required
                   value={form.coverage}
                   onChange={(event) => updateForm("coverage", event.target.value)}
                 >
-                  <option value="">Bitte auswahlen</option>
+                  <option value="">{t("common.selectPlaceholder")}</option>
                   {coverageOptions.map((option) => (
                     <option key={option} value={option}>
                       {option}
@@ -260,7 +262,7 @@ export function VersicherungManager() {
                 </select>
               </label>
               <label>
-                <span>Monatlich</span>
+                <span>{t("insurances.monthly")}</span>
                 <input
                   required
                   min="0"
@@ -272,7 +274,7 @@ export function VersicherungManager() {
                 />
               </label>
               <label>
-                <span>Abbuchungstag</span>
+                <span>{t("insurances.debitDay")}</span>
                 <input
                   required
                   min="1"
@@ -285,7 +287,7 @@ export function VersicherungManager() {
                 />
               </label>
               <label>
-                <span>Verlangerung</span>
+                <span>{t("insurances.renewal")}</span>
                 <input
                   required={!form.hasNoRenewalDate}
                   disabled={form.hasNoRenewalDate}
@@ -305,15 +307,15 @@ export function VersicherungManager() {
                     }
                   }}
                 />
-                <span>Keine Verlangerung / kein Ablaufdatum</span>
+                <span>{t("insurances.noRenewal")}</span>
               </label>
               <div className="modal-actions">
                 <button className="button secondary" type="button" onClick={closeAddModal}>
-                  Abbrechen
+                  {t("common.cancel")}
                 </button>
                 <button className="button primary" type="submit" disabled={operationLabel === "save-insurance"}>
                   <Save size={18} aria-hidden="true" />
-                  {operationLabel === "save-insurance" ? "Speichern..." : "Speichern"}
+                  {operationLabel === "save-insurance" ? t("common.saving") : t("common.save")}
                 </button>
               </div>
             </form>
@@ -333,15 +335,15 @@ export function VersicherungManager() {
               <Trash2 size={24} />
             </div>
             <div className="confirm-content">
-              <span>Versicherung loschen</span>
-              <h2 id="insurance-delete-modal-title">Versicherung wirklich loschen?</h2>
+              <span>{t("insurances.deleteLabel")}</span>
+              <h2 id="insurance-delete-modal-title">{t("insurances.deleteTitle")}</h2>
               <p>
-                Die Versicherung <strong>{insuranceToDelete.provider}</strong> wird aus der aktuellen Tabelle entfernt.
+                <strong>{insuranceToDelete.provider}</strong> {t("insurances.deleteText")}
               </p>
             </div>
             <div className="modal-actions">
               <button className="button secondary" type="button" onClick={() => setInsuranceToDelete(null)}>
-                Abbrechen
+                {t("common.cancel")}
               </button>
               <button
                 className="button danger"
@@ -350,7 +352,7 @@ export function VersicherungManager() {
                 disabled={operationLabel === "delete-insurance"}
               >
                 <Trash2 size={18} aria-hidden="true" />
-                {operationLabel === "delete-insurance" ? "Loschen..." : "Loschen"}
+                {operationLabel === "delete-insurance" ? t("common.deleting") : t("common.delete")}
               </button>
             </div>
           </section>
@@ -362,17 +364,17 @@ export function VersicherungManager() {
           <section className="modal-panel" role="dialog" aria-modal="true" aria-labelledby="insurance-edit-modal-title">
             <div className="modal-header">
               <div>
-                <span>Versicherung</span>
-                <h2 id="insurance-edit-modal-title">Versicherung bearbeiten</h2>
+                <span>{t("insurances.insurance")}</span>
+                <h2 id="insurance-edit-modal-title">{t("insurances.editTitle")}</h2>
               </div>
-              <button className="icon-button" type="button" onClick={closeEditModal} aria-label="Dialog schliessen">
+              <button className="icon-button" type="button" onClick={closeEditModal} aria-label={t("common.closeDialog")}>
                 <X size={20} aria-hidden="true" />
               </button>
             </div>
 
             <form className="modal-form" onSubmit={handleEditSubmit}>
               <label>
-                <span>Anbieter</span>
+                <span>{t("insurances.provider")}</span>
                 <input
                   required
                   value={editForm.provider}
@@ -381,13 +383,13 @@ export function VersicherungManager() {
                 />
               </label>
               <label>
-                <span>Schutz</span>
+                <span>{t("insurances.coverage")}</span>
                 <select
                   required
                   value={editForm.coverage}
                   onChange={(event) => updateEditForm("coverage", event.target.value)}
                 >
-                  <option value="">Bitte auswahlen</option>
+                  <option value="">{t("common.selectPlaceholder")}</option>
                   {coverageOptions.map((option) => (
                     <option key={option} value={option}>
                       {option}
@@ -396,7 +398,7 @@ export function VersicherungManager() {
                 </select>
               </label>
               <label>
-                <span>Monatlich</span>
+                <span>{t("insurances.monthly")}</span>
                 <input
                   required
                   min="0"
@@ -408,7 +410,7 @@ export function VersicherungManager() {
                 />
               </label>
               <label>
-                <span>Abbuchungstag</span>
+                <span>{t("insurances.debitDay")}</span>
                 <input
                   required
                   min="1"
@@ -421,7 +423,7 @@ export function VersicherungManager() {
                 />
               </label>
               <label>
-                <span>Verlangerung</span>
+                <span>{t("insurances.renewal")}</span>
                 <input
                   required={!editForm.hasNoRenewalDate}
                   disabled={editForm.hasNoRenewalDate}
@@ -441,15 +443,15 @@ export function VersicherungManager() {
                     }
                   }}
                 />
-                <span>Keine Verlangerung / kein Ablaufdatum</span>
+                <span>{t("insurances.noRenewal")}</span>
               </label>
               <div className="modal-actions">
                 <button className="button secondary" type="button" onClick={closeEditModal}>
-                  Abbrechen
+                  {t("common.cancel")}
                 </button>
                 <button className="button primary" type="submit" disabled={operationLabel === "edit-insurance"}>
                   <Save size={18} aria-hidden="true" />
-                  {operationLabel === "edit-insurance" ? "Speichern..." : "Speichern"}
+                  {operationLabel === "edit-insurance" ? t("common.saving") : t("common.save")}
                 </button>
               </div>
             </form>

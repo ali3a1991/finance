@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { Landmark, ListOrdered, Pencil, PlusCircle, Save, Trash2, X } from "lucide-react";
+import { useLanguage } from "@/components/LanguageProvider";
 import { formatCurrency, formatDate } from "@/lib/formatting";
 import { requestJson } from "@/lib/requestJson";
 import type { Loan } from "@/lib/types";
@@ -34,6 +35,7 @@ const emptyForm: KreditForm = {
 };
 
 export function KreditManager() {
+  const { t } = useLanguage();
   const [loans, setLoans] = useState<Loan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
@@ -194,26 +196,26 @@ export function KreditManager() {
       <div className="action-row">
         <button className="button primary" type="button" onClick={() => setIsOpen(true)}>
           <PlusCircle size={18} aria-hidden="true" />
-          Kredit hinzufugen
+          {t("loans.add")}
         </button>
       </div>
 
-      {isLoading ? <p className="muted-text">Kredite werden geladen...</p> : null}
+      {isLoading ? <p className="muted-text">{t("loans.loading")}</p> : null}
 
       <section className="table-panel">
         <div className="responsive-table">
           <table>
             <thead>
               <tr>
-                <th>Kredit</th>
-                <th>Bank</th>
-                <th>Kreditbetrag</th>
-                <th>Gesamtzinsen</th>
-                <th>Rate</th>
-                <th>Zins</th>
-                <th>Erste Zahlung</th>
-                <th>Status</th>
-                <th>Aktionen</th>
+                <th>{t("loans.loan")}</th>
+                <th>{t("loans.bank")}</th>
+                <th>{t("loans.amount")}</th>
+                <th>{t("loans.totalInterest")}</th>
+                <th>{t("loans.rate")}</th>
+                <th>{t("loans.interest")}</th>
+                <th>{t("loans.firstPayment")}</th>
+                <th>{t("loans.status")}</th>
+                <th>{t("common.actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -238,7 +240,7 @@ export function KreditManager() {
                         className="icon-button"
                         type="button"
                         onClick={() => setDetailLoan(loan)}
-                        aria-label={`${loan.name} Details anzeigen`}
+                        aria-label={`${loan.name} ${t("loans.details")}`}
                       >
                         <ListOrdered size={16} aria-hidden="true" />
                       </button>
@@ -246,7 +248,7 @@ export function KreditManager() {
                         className="icon-button"
                         type="button"
                         onClick={() => openEditModal(loan)}
-                        aria-label={`${loan.name} bearbeiten`}
+                        aria-label={`${loan.name} ${t("common.edit")}`}
                       >
                         <Pencil size={16} aria-hidden="true" />
                       </button>
@@ -254,7 +256,7 @@ export function KreditManager() {
                         className="icon-button danger"
                         type="button"
                         onClick={() => setLoanToDelete(loan)}
-                        aria-label={`${loan.name} loschen`}
+                        aria-label={`${loan.name} ${t("common.delete")}`}
                       >
                         <Trash2 size={16} aria-hidden="true" />
                       </button>
@@ -272,17 +274,17 @@ export function KreditManager() {
           <section className="modal-panel" role="dialog" aria-modal="true" aria-labelledby="kredit-modal-title">
             <div className="modal-header">
               <div>
-                <span>Kredit</span>
-                <h2 id="kredit-modal-title">Neuen Kredit hinzufugen</h2>
+                <span>{t("loans.loan")}</span>
+                <h2 id="kredit-modal-title">{t("loans.addTitle")}</h2>
               </div>
-              <button className="icon-button" type="button" onClick={closeModal} aria-label="Dialog schliessen">
+              <button className="icon-button" type="button" onClick={closeModal} aria-label={t("common.closeDialog")}>
                 <X size={20} aria-hidden="true" />
               </button>
             </div>
 
             <form className="modal-form" onSubmit={handleSubmit}>
               <label>
-                <span>Kreditname</span>
+                <span>{t("loans.name")}</span>
                 <input
                   required
                   value={form.name}
@@ -291,7 +293,7 @@ export function KreditManager() {
                 />
               </label>
               <label>
-                <span>Bank</span>
+                <span>{t("loans.bank")}</span>
                 <input
                   required
                   value={form.bank}
@@ -300,7 +302,7 @@ export function KreditManager() {
                 />
               </label>
               <label>
-                <span>Kreditbetrag</span>
+                <span>{t("loans.amount")}</span>
                 <input
                   required
                   min="0"
@@ -312,7 +314,7 @@ export function KreditManager() {
                 />
               </label>
               <label>
-                <span>Gesamtzinsen</span>
+                <span>{t("loans.totalInterest")}</span>
                 <input
                   required
                   min="0"
@@ -324,7 +326,7 @@ export function KreditManager() {
                 />
               </label>
               <label>
-                <span>Monatsrate</span>
+                <span>{t("loans.monthlyRate")}</span>
                 <input
                   required
                   min="0"
@@ -336,7 +338,7 @@ export function KreditManager() {
                 />
               </label>
               <label>
-                <span>Zinssatz</span>
+                <span>{t("loans.interestRate")}</span>
                 <input
                   required
                   min="0"
@@ -348,7 +350,7 @@ export function KreditManager() {
                 />
               </label>
               <label>
-                <span>Erste Zahlung</span>
+                <span>{t("loans.firstPayment")}</span>
                 <input
                   required
                   type="date"
@@ -358,11 +360,11 @@ export function KreditManager() {
               </label>
               <div className="modal-actions">
                 <button className="button secondary" type="button" onClick={closeModal}>
-                  Abbrechen
+                  {t("common.cancel")}
                 </button>
                 <button className="button primary" type="submit" disabled={operationLabel === "save-loan"}>
                   <Save size={18} aria-hidden="true" />
-                  {operationLabel === "save-loan" ? "Speichern..." : "Speichern"}
+                  {operationLabel === "save-loan" ? t("common.saving") : t("common.save")}
                 </button>
               </div>
             </form>
@@ -380,29 +382,29 @@ export function KreditManager() {
           >
             <div className="modal-header">
               <div>
-                <span>Tilgungsplan</span>
+                <span>{t("loans.amortization")}</span>
                 <h2 id="kredit-detail-modal-title">{detailLoan.name}</h2>
               </div>
-              <button className="icon-button" type="button" onClick={() => setDetailLoan(null)} aria-label="Dialog schliessen">
+              <button className="icon-button" type="button" onClick={() => setDetailLoan(null)} aria-label={t("common.closeDialog")}>
                 <X size={20} aria-hidden="true" />
               </button>
             </div>
 
             <div className="detail-summary">
               <div>
-                <span>Kreditbetrag</span>
+                <span>{t("loans.amount")}</span>
                 <strong>{formatCurrency(detailLoan.balance)}</strong>
               </div>
               <div>
-                <span>Gesamtzinsen</span>
+                <span>{t("loans.totalInterest")}</span>
                 <strong>{formatCurrency(detailLoan.totalInterest)}</strong>
               </div>
               <div>
-                <span>Monatsrate</span>
+                <span>{t("loans.monthlyRate")}</span>
                 <strong>{formatCurrency(detailLoan.monthlyRate)}</strong>
               </div>
               <div>
-                <span>Anzahl Raten</span>
+                <span>{t("loans.installments")}</span>
                 <strong>{detailInstallments.length}</strong>
               </div>
             </div>
@@ -411,10 +413,10 @@ export function KreditManager() {
               <table className="detail-table">
                 <thead>
                   <tr>
-                    <th>Rate</th>
-                    <th>Datum</th>
-                    <th>Betrag</th>
-                    <th>Rest danach</th>
+                    <th>{t("loans.rate")}</th>
+                    <th>{t("loans.date")}</th>
+                    <th>{t("incomes.amount")}</th>
+                    <th>{t("loans.remainingAfter")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -445,15 +447,15 @@ export function KreditManager() {
               <Trash2 size={24} />
             </div>
             <div className="confirm-content">
-              <span>Kredit loschen</span>
-              <h2 id="kredit-delete-modal-title">Kredit wirklich loschen?</h2>
+              <span>{t("loans.deleteLabel")}</span>
+              <h2 id="kredit-delete-modal-title">{t("loans.deleteTitle")}</h2>
               <p>
-                Der Kredit <strong>{loanToDelete.name}</strong> wird aus der aktuellen Tabelle entfernt.
+                <strong>{loanToDelete.name}</strong> {t("loans.deleteText")}
               </p>
             </div>
             <div className="modal-actions">
               <button className="button secondary" type="button" onClick={() => setLoanToDelete(null)}>
-                Abbrechen
+                {t("common.cancel")}
               </button>
               <button
                 className="button danger"
@@ -462,7 +464,7 @@ export function KreditManager() {
                 disabled={operationLabel === "delete-loan"}
               >
                 <Trash2 size={18} aria-hidden="true" />
-                {operationLabel === "delete-loan" ? "Loschen..." : "Loschen"}
+                {operationLabel === "delete-loan" ? t("common.deleting") : t("common.delete")}
               </button>
             </div>
           </section>
@@ -474,17 +476,17 @@ export function KreditManager() {
           <section className="modal-panel" role="dialog" aria-modal="true" aria-labelledby="kredit-edit-modal-title">
             <div className="modal-header">
               <div>
-                <span>Kredit</span>
-                <h2 id="kredit-edit-modal-title">Kredit bearbeiten</h2>
+                <span>{t("loans.loan")}</span>
+                <h2 id="kredit-edit-modal-title">{t("loans.editTitle")}</h2>
               </div>
-              <button className="icon-button" type="button" onClick={closeEditModal} aria-label="Dialog schliessen">
+              <button className="icon-button" type="button" onClick={closeEditModal} aria-label={t("common.closeDialog")}>
                 <X size={20} aria-hidden="true" />
               </button>
             </div>
 
             <form className="modal-form" onSubmit={handleEditSubmit}>
               <label>
-                <span>Kreditname</span>
+                <span>{t("loans.name")}</span>
                 <input
                   required
                   value={editForm.name}
@@ -493,7 +495,7 @@ export function KreditManager() {
                 />
               </label>
               <label>
-                <span>Bank</span>
+                <span>{t("loans.bank")}</span>
                 <input
                   required
                   value={editForm.bank}
@@ -502,7 +504,7 @@ export function KreditManager() {
                 />
               </label>
               <label>
-                <span>Kreditbetrag</span>
+                <span>{t("loans.amount")}</span>
                 <input
                   required
                   min="0"
@@ -514,7 +516,7 @@ export function KreditManager() {
                 />
               </label>
               <label>
-                <span>Gesamtzinsen</span>
+                <span>{t("loans.totalInterest")}</span>
                 <input
                   required
                   min="0"
@@ -526,7 +528,7 @@ export function KreditManager() {
                 />
               </label>
               <label>
-                <span>Monatsrate</span>
+                <span>{t("loans.monthlyRate")}</span>
                 <input
                   required
                   min="0"
@@ -538,7 +540,7 @@ export function KreditManager() {
                 />
               </label>
               <label>
-                <span>Zinssatz</span>
+                <span>{t("loans.interestRate")}</span>
                 <input
                   required
                   min="0"
@@ -550,7 +552,7 @@ export function KreditManager() {
                 />
               </label>
               <label>
-                <span>Erste Zahlung</span>
+                <span>{t("loans.firstPayment")}</span>
                 <input
                   required
                   type="date"
@@ -560,11 +562,11 @@ export function KreditManager() {
               </label>
               <div className="modal-actions">
                 <button className="button secondary" type="button" onClick={closeEditModal}>
-                  Abbrechen
+                  {t("common.cancel")}
                 </button>
                 <button className="button primary" type="submit" disabled={operationLabel === "edit-loan"}>
                   <Save size={18} aria-hidden="true" />
-                  {operationLabel === "edit-loan" ? "Speichern..." : "Speichern"}
+                  {operationLabel === "edit-loan" ? t("common.saving") : t("common.save")}
                 </button>
               </div>
             </form>

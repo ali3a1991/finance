@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { Pencil, PlusCircle, Save, Trash2, TrendingUp, X } from "lucide-react";
+import { useLanguage } from "@/components/LanguageProvider";
 import { formatCurrency, formatDate } from "@/lib/formatting";
 import { requestJson } from "@/lib/requestJson";
 import type { Income } from "@/lib/types";
@@ -36,6 +37,7 @@ function toPayload(form: IncomeForm): Omit<Income, "id"> {
 }
 
 export function EinkommenManager() {
+  const { t } = useLanguage();
   const [activeType, setActiveType] = useState<"recurring" | "oneTime">("recurring");
   const [editForm, setEditForm] = useState<IncomeForm>(emptyForm);
   const [editingIncomeId, setEditingIncomeId] = useState<string | null>(null);
@@ -146,40 +148,40 @@ export function EinkommenManager() {
       <div className="action-row">
         <button className="button primary" type="button" onClick={() => setIsOpen(true)}>
           <PlusCircle size={18} aria-hidden="true" />
-          Einnahme hinzufugen
+          {t("incomes.add")}
         </button>
       </div>
 
-      <nav className="tab-row" aria-label="Einnahmenarten">
+      <nav className="tab-row" aria-label={t("incomes.ariaTabs")}>
         <button
           className={`tab-link ${activeType === "recurring" ? "active" : ""}`}
           type="button"
           onClick={() => setActiveType("recurring")}
         >
-          Feste Einnahmen
+          {t("incomes.recurringTab")}
         </button>
         <button
           className={`tab-link ${activeType === "oneTime" ? "active" : ""}`}
           type="button"
           onClick={() => setActiveType("oneTime")}
         >
-          Einmalige Eingange
+          {t("incomes.oneTimeTab")}
         </button>
       </nav>
 
-      {isLoading ? <p className="muted-text">Einnahmen werden geladen...</p> : null}
+      {isLoading ? <p className="muted-text">{t("incomes.loading")}</p> : null}
 
       <section className="table-panel">
         <div className="responsive-table">
           <table>
             <thead>
               <tr>
-                <th>Titel</th>
-                <th>Quelle</th>
-                <th>Betrag</th>
-                <th>Datum</th>
-                <th>Typ</th>
-                <th>Aktionen</th>
+                <th>{t("incomes.title")}</th>
+                <th>{t("incomes.source")}</th>
+                <th>{t("incomes.amount")}</th>
+                <th>{t("incomes.date")}</th>
+                <th>{t("incomes.type")}</th>
+                <th>{t("common.actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -193,15 +195,15 @@ export function EinkommenManager() {
                   </td>
                   <td>{income.source}</td>
                   <td>{formatCurrency(income.amount)}</td>
-                  <td>{income.recurring ? `${income.entryDay}. Tag` : formatDate(income.date)}</td>
-                  <td>{income.recurring ? "Fest" : "Einmalig"}</td>
+                  <td>{income.recurring ? `${income.entryDay}. ${t("common.day")}` : formatDate(income.date)}</td>
+                  <td>{income.recurring ? t("incomes.fixed") : t("common.oneTime")}</td>
                   <td>
                     <div className="table-actions">
                       <button
                         className="icon-button"
                         type="button"
                         onClick={() => openEditModal(income)}
-                        aria-label={`${income.title} bearbeiten`}
+                        aria-label={`${income.title} ${t("common.edit")}`}
                       >
                         <Pencil size={16} aria-hidden="true" />
                       </button>
@@ -209,7 +211,7 @@ export function EinkommenManager() {
                         className="icon-button danger"
                         type="button"
                         onClick={() => setIncomeToDelete(income)}
-                        aria-label={`${income.title} loschen`}
+                        aria-label={`${income.title} ${t("common.delete")}`}
                       >
                         <Trash2 size={16} aria-hidden="true" />
                       </button>
@@ -221,10 +223,10 @@ export function EinkommenManager() {
           </table>
         </div>
         {!isLoading && visibleIncomes.length === 0 ? (
-          <p className="empty-table-text">Keine Einnahmen in dieser Kategorie vorhanden.</p>
+          <p className="empty-table-text">{t("incomes.empty")}</p>
         ) : null}
         <div className="table-total-row">
-          <span>Summe</span>
+          <span>{t("common.total")}</span>
           <strong>{formatCurrency(visibleIncomeTotal)}</strong>
         </div>
       </section>
@@ -236,7 +238,7 @@ export function EinkommenManager() {
           onSubmit={handleSubmit}
           onUpdate={updateForm}
           isSubmitting={operationLabel === "save-income"}
-          title="Neue Einnahme hinzufugen"
+          title={t("incomes.addTitle")}
         />
       ) : null}
 
@@ -247,7 +249,7 @@ export function EinkommenManager() {
           onSubmit={handleEditSubmit}
           onUpdate={updateEditForm}
           isSubmitting={operationLabel === "edit-income"}
-          title="Einnahme bearbeiten"
+          title={t("incomes.editTitle")}
         />
       ) : null}
 
@@ -258,15 +260,15 @@ export function EinkommenManager() {
               <Trash2 size={24} />
             </div>
             <div className="confirm-content">
-              <span>Einnahme loschen</span>
-              <h2 id="income-delete-modal-title">Einnahme wirklich loschen?</h2>
+              <span>{t("incomes.deleteLabel")}</span>
+              <h2 id="income-delete-modal-title">{t("incomes.deleteTitle")}</h2>
               <p>
-                <strong>{incomeToDelete.title}</strong> wird aus der aktuellen Tabelle entfernt.
+                <strong>{incomeToDelete.title}</strong> {t("loans.deleteText")}
               </p>
             </div>
             <div className="modal-actions">
               <button className="button secondary" type="button" onClick={() => setIncomeToDelete(null)}>
-                Abbrechen
+                {t("common.cancel")}
               </button>
               <button
                 className="button danger"
@@ -275,7 +277,7 @@ export function EinkommenManager() {
                 disabled={operationLabel === "delete-income"}
               >
                 <Trash2 size={18} aria-hidden="true" />
-                {operationLabel === "delete-income" ? "Loschen..." : "Loschen"}
+                {operationLabel === "delete-income" ? t("common.deleting") : t("common.delete")}
               </button>
             </div>
           </section>
@@ -300,22 +302,24 @@ function IncomeModal({
   isSubmitting: boolean;
   title: string;
 }) {
+  const { t } = useLanguage();
+
   return (
     <div className="modal-backdrop" role="presentation">
       <section className="modal-panel" role="dialog" aria-modal="true" aria-labelledby="income-modal-title">
         <div className="modal-header">
           <div>
-            <span>Einnahmen</span>
+            <span>{t("nav.incomes")}</span>
             <h2 id="income-modal-title">{title}</h2>
           </div>
-          <button className="icon-button" type="button" onClick={onClose} aria-label="Dialog schliessen">
+          <button className="icon-button" type="button" onClick={onClose} aria-label={t("common.closeDialog")}>
             <X size={20} aria-hidden="true" />
           </button>
         </div>
 
         <form className="modal-form" onSubmit={onSubmit}>
           <label>
-            <span>Titel</span>
+            <span>{t("incomes.title")}</span>
             <input
               required
               value={form.title}
@@ -324,7 +328,7 @@ function IncomeModal({
             />
           </label>
           <label>
-            <span>Quelle</span>
+            <span>{t("incomes.source")}</span>
             <input
               required
               value={form.source}
@@ -333,7 +337,7 @@ function IncomeModal({
             />
           </label>
           <label>
-            <span>Betrag</span>
+            <span>{t("incomes.amount")}</span>
             <input
               required
               min="0"
@@ -350,11 +354,11 @@ function IncomeModal({
               type="checkbox"
               onChange={(event) => onUpdate("recurring", event.target.checked)}
             />
-            <span>Feste monatliche Einnahme</span>
+            <span>{t("incomes.recurringMonthly")}</span>
           </label>
           {form.recurring ? (
             <label>
-              <span>Eingangstag</span>
+              <span>{t("incomes.entryDay")}</span>
               <input
                 required
                 min="1"
@@ -368,17 +372,17 @@ function IncomeModal({
             </label>
           ) : (
             <label>
-              <span>Datum</span>
+              <span>{t("incomes.date")}</span>
               <input required type="date" value={form.date} onChange={(event) => onUpdate("date", event.target.value)} />
             </label>
           )}
           <div className="modal-actions">
             <button className="button secondary" type="button" onClick={onClose}>
-              Abbrechen
+              {t("common.cancel")}
             </button>
             <button className="button primary" type="submit" disabled={isSubmitting}>
               <Save size={18} aria-hidden="true" />
-              {isSubmitting ? "Speichern..." : "Speichern"}
+              {isSubmitting ? t("common.saving") : t("common.save")}
             </button>
           </div>
         </form>

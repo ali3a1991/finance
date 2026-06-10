@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Save } from "lucide-react";
+import { useLanguage } from "@/components/LanguageProvider";
 import { requestJson } from "@/lib/requestJson";
 import type { Expense } from "@/lib/types";
 
@@ -13,6 +14,7 @@ function getTodayInputValue() {
 }
 
 export function AusgabeForm() {
+  const { t } = useLanguage();
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState(categories[0]);
@@ -42,7 +44,7 @@ export function AusgabeForm() {
       router.push(`/ausgaben?typ=${recurring ? "wiederkehrend" : "einmalig"}`);
       router.refresh();
     } catch {
-      setError("Die Ausgabe konnte nicht gespeichert werden.");
+      setError(t("expenses.saveError"));
     } finally {
       setIsSaving(false);
     }
@@ -51,11 +53,11 @@ export function AusgabeForm() {
   return (
     <form className="form-panel" onSubmit={handleSubmit}>
       <label>
-        <span>Titel</span>
+        <span>{t("expenses.title")}</span>
         <input required value={title} onChange={(event) => setTitle(event.target.value)} placeholder="z. B. Lebensmittel" />
       </label>
       <label>
-        <span>Kategorie</span>
+        <span>{t("expenses.category")}</span>
         <select required value={category} onChange={(event) => setCategory(event.target.value)}>
           {categories.map((option) => (
             <option key={option} value={option}>
@@ -65,7 +67,7 @@ export function AusgabeForm() {
         </select>
       </label>
       <label>
-        <span>Betrag</span>
+        <span>{t("expenses.amount")}</span>
         <input
           required
           value={amount}
@@ -77,17 +79,17 @@ export function AusgabeForm() {
         />
       </label>
       <label>
-        <span>Datum</span>
+        <span>{t("expenses.date")}</span>
         <input required value={date} onChange={(event) => setDate(event.target.value)} type="date" />
       </label>
       <label className="checkbox-row">
         <input checked={recurring} type="checkbox" onChange={(event) => setRecurring(event.target.checked)} />
-        <span>Wiederkehrende Ausgabe</span>
+        <span>{t("expenses.recurringExpense")}</span>
       </label>
       {error ? <p className="form-error">{error}</p> : null}
       <button className="button primary" type="submit" disabled={isSaving}>
         <Save size={18} aria-hidden="true" />
-        {isSaving ? "Speichern..." : "Speichern"}
+        {isSaving ? t("common.saving") : t("common.save")}
       </button>
     </form>
   );

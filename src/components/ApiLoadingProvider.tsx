@@ -1,10 +1,12 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { useLanguage } from "@/components/LanguageProvider";
 
 const ApiLoadingContext = createContext(false);
 
 export function ApiLoadingProvider({ children }: { children: React.ReactNode }) {
+  const { t } = useLanguage();
   const [pendingRequests, setPendingRequests] = useState(0);
   const isLoading = pendingRequests > 0;
 
@@ -32,10 +34,10 @@ export function ApiLoadingProvider({ children }: { children: React.ReactNode }) 
     <ApiLoadingContext.Provider value={value}>
       {children}
       {isLoading ? (
-        <div className="api-loading-overlay" role="status" aria-live="polite" aria-label="Daten werden geladen">
+        <div className="api-loading-overlay" role="status" aria-live="polite" aria-label={t("loading.data")}>
           <div className="api-loading-card">
             <div className="api-loading-spinner" aria-hidden="true" />
-            <span>Bitte warten...</span>
+            <span>{t("loading.wait")}</span>
           </div>
         </div>
       ) : null}

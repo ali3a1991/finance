@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { Pencil, PlusCircle, Repeat, ReceiptText, Save, Trash2, X } from "lucide-react";
+import { useLanguage } from "@/components/LanguageProvider";
 import { formatCurrency, formatDate } from "@/lib/formatting";
 import { requestJson } from "@/lib/requestJson";
 import type { Expense } from "@/lib/types";
@@ -36,6 +37,7 @@ function toPayload(form: ExpenseForm): Omit<Expense, "id"> {
 }
 
 export function AusgabenManager({ initialType }: { initialType: "einmalig" | "wiederkehrend" }) {
+  const { t } = useLanguage();
   const [editForm, setEditForm] = useState<ExpenseForm>(emptyForm);
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
   const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
@@ -118,37 +120,37 @@ export function AusgabenManager({ initialType }: { initialType: "einmalig" | "wi
       <div className="action-row">
         <Link className="button primary" href="/ausgaben/erfassung">
           <PlusCircle size={18} aria-hidden="true" />
-          Neue Ausgabe
+          {t("expenses.add")}
         </Link>
       </div>
 
-      <nav className="tab-row" aria-label="Ausgabenarten">
+      <nav className="tab-row" aria-label={t("expenses.ariaTabs")}>
         <Link className={`tab-link ${activeType === "einmalig" ? "active" : ""}`} href="/ausgaben?typ=einmalig">
           <ReceiptText size={18} aria-hidden="true" />
-          Einmalig
+          {t("expenses.oneTimeTab")}
         </Link>
         <Link
           className={`tab-link ${activeType === "wiederkehrend" ? "active" : ""}`}
           href="/ausgaben?typ=wiederkehrend"
         >
           <Repeat size={18} aria-hidden="true" />
-          Wiederkehrend
+          {t("expenses.recurringTab")}
         </Link>
       </nav>
 
-      {isLoading ? <p className="muted-text">Ausgaben werden geladen...</p> : null}
+      {isLoading ? <p className="muted-text">{t("expenses.loading")}</p> : null}
 
       <section className="table-panel">
         <div className="responsive-table">
           <table>
             <thead>
               <tr>
-                <th>Titel</th>
-                <th>Kategorie</th>
-                <th>Datum</th>
-                <th>Betrag</th>
-                <th>Typ</th>
-                <th>Aktionen</th>
+                <th>{t("expenses.title")}</th>
+                <th>{t("expenses.category")}</th>
+                <th>{t("expenses.date")}</th>
+                <th>{t("expenses.amount")}</th>
+                <th>{t("expenses.type")}</th>
+                <th>{t("common.actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -158,14 +160,14 @@ export function AusgabenManager({ initialType }: { initialType: "einmalig" | "wi
                   <td>{expense.category}</td>
                   <td>{formatDate(expense.date)}</td>
                   <td>{formatCurrency(expense.amount)}</td>
-                  <td>{expense.recurring ? "Wiederkehrend" : "Einmalig"}</td>
+                  <td>{expense.recurring ? t("common.recurring") : t("common.oneTime")}</td>
                   <td>
                     <div className="table-actions">
                       <button
                         className="icon-button"
                         type="button"
                         onClick={() => openEditModal(expense)}
-                        aria-label={`${expense.title} bearbeiten`}
+                        aria-label={`${expense.title} ${t("common.edit")}`}
                       >
                         <Pencil size={16} aria-hidden="true" />
                       </button>
@@ -173,7 +175,7 @@ export function AusgabenManager({ initialType }: { initialType: "einmalig" | "wi
                         className="icon-button danger"
                         type="button"
                         onClick={() => setExpenseToDelete(expense)}
-                        aria-label={`${expense.title} loschen`}
+                        aria-label={`${expense.title} ${t("common.delete")}`}
                       >
                         <Trash2 size={16} aria-hidden="true" />
                       </button>
@@ -185,7 +187,7 @@ export function AusgabenManager({ initialType }: { initialType: "einmalig" | "wi
           </table>
         </div>
         {!isLoading && visibleExpenses.length === 0 ? (
-          <p className="empty-table-text">Keine Ausgaben in dieser Kategorie vorhanden.</p>
+          <p className="empty-table-text">{t("expenses.empty")}</p>
         ) : null}
       </section>
 
@@ -206,15 +208,15 @@ export function AusgabenManager({ initialType }: { initialType: "einmalig" | "wi
               <Trash2 size={24} />
             </div>
             <div className="confirm-content">
-              <span>Ausgabe loschen</span>
-              <h2 id="expense-delete-modal-title">Ausgabe wirklich loschen?</h2>
+              <span>{t("expenses.deleteLabel")}</span>
+              <h2 id="expense-delete-modal-title">{t("expenses.deleteTitle")}</h2>
               <p>
-                <strong>{expenseToDelete.title}</strong> wird aus der aktuellen Tabelle entfernt.
+                <strong>{expenseToDelete.title}</strong> {t("loans.deleteText")}
               </p>
             </div>
             <div className="modal-actions">
               <button className="button secondary" type="button" onClick={() => setExpenseToDelete(null)}>
-                Abbrechen
+                {t("common.cancel")}
               </button>
               <button
                 className="button danger"
@@ -223,7 +225,7 @@ export function AusgabenManager({ initialType }: { initialType: "einmalig" | "wi
                 disabled={operationLabel === "delete-expense"}
               >
                 <Trash2 size={18} aria-hidden="true" />
-                {operationLabel === "delete-expense" ? "Loschen..." : "Loschen"}
+                {operationLabel === "delete-expense" ? t("common.deleting") : t("common.delete")}
               </button>
             </div>
           </section>
@@ -246,22 +248,24 @@ function ExpenseModal({
   onUpdate: (field: keyof ExpenseForm, value: string | boolean) => void;
   isSubmitting: boolean;
 }) {
+  const { t } = useLanguage();
+
   return (
     <div className="modal-backdrop" role="presentation">
       <section className="modal-panel" role="dialog" aria-modal="true" aria-labelledby="expense-modal-title">
         <div className="modal-header">
           <div>
-            <span>Ausgaben</span>
-            <h2 id="expense-modal-title">Ausgabe bearbeiten</h2>
+            <span>{t("nav.expenses")}</span>
+            <h2 id="expense-modal-title">{t("expenses.editTitle")}</h2>
           </div>
-          <button className="icon-button" type="button" onClick={onClose} aria-label="Dialog schliessen">
+          <button className="icon-button" type="button" onClick={onClose} aria-label={t("common.closeDialog")}>
             <X size={20} aria-hidden="true" />
           </button>
         </div>
 
         <form className="modal-form" onSubmit={onSubmit}>
           <label>
-            <span>Titel</span>
+            <span>{t("expenses.title")}</span>
             <input
               required
               value={form.title}
@@ -270,7 +274,7 @@ function ExpenseModal({
             />
           </label>
           <label>
-            <span>Kategorie</span>
+            <span>{t("expenses.category")}</span>
             <select required value={form.category} onChange={(event) => onUpdate("category", event.target.value)}>
               {categories.map((option) => (
                 <option key={option} value={option}>
@@ -280,7 +284,7 @@ function ExpenseModal({
             </select>
           </label>
           <label>
-            <span>Betrag</span>
+            <span>{t("expenses.amount")}</span>
             <input
               required
               min="0"
@@ -292,7 +296,7 @@ function ExpenseModal({
             />
           </label>
           <label>
-            <span>Datum</span>
+            <span>{t("expenses.date")}</span>
             <input required type="date" value={form.date} onChange={(event) => onUpdate("date", event.target.value)} />
           </label>
           <label className="checkbox-row">
@@ -301,15 +305,15 @@ function ExpenseModal({
               type="checkbox"
               onChange={(event) => onUpdate("recurring", event.target.checked)}
             />
-            <span>Wiederkehrende Ausgabe</span>
+            <span>{t("expenses.recurringExpense")}</span>
           </label>
           <div className="modal-actions">
             <button className="button secondary" type="button" onClick={onClose}>
-              Abbrechen
+              {t("common.cancel")}
             </button>
             <button className="button primary" type="submit" disabled={isSubmitting}>
               <Save size={18} aria-hidden="true" />
-              {isSubmitting ? "Speichern..." : "Speichern"}
+              {isSubmitting ? t("common.saving") : t("common.save")}
             </button>
           </div>
         </form>
