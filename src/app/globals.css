@@ -186,6 +186,16 @@ button:disabled {
 
 .main-content {
   padding: 36px;
+  transition:
+    filter 160ms ease,
+    transform 160ms ease;
+}
+
+.app-shell.api-loading-active .main-content {
+  filter: blur(2px);
+  transform: scale(0.998);
+  pointer-events: none;
+  user-select: none;
 }
 
 .page-stack {
@@ -444,63 +454,6 @@ th {
   margin: 0;
   padding: 18px;
   color: var(--muted);
-}
-
-.page-loading {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 18px;
-  background: var(--surface);
-  box-shadow: var(--shadow);
-}
-
-.page-loading strong,
-.page-loading span {
-  display: block;
-}
-
-.page-loading span {
-  margin-top: 2px;
-  color: var(--muted);
-}
-
-.loading-spinner {
-  width: 34px;
-  height: 34px;
-  border: 3px solid rgba(17, 107, 95, 0.16);
-  border-top-color: var(--primary);
-  border-radius: 50%;
-  animation: loading-spin 800ms linear infinite;
-}
-
-.loading-skeleton-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.loading-skeleton-grid span {
-  min-height: 140px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--skeleton);
-  background-size: 220% 100%;
-  animation: loading-shimmer 1.2s ease-in-out infinite;
-}
-
-@keyframes loading-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes loading-shimmer {
-  to {
-    background-position: -220% 0;
-  }
 }
 
 .cash-gauge-panel {
@@ -1101,6 +1054,50 @@ th {
 .muted-text {
   margin: 0;
   color: var(--muted);
+}
+
+.api-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: color-mix(in srgb, var(--bg) 44%, transparent);
+  backdrop-filter: blur(1px);
+}
+
+.api-loading-card {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  min-width: 148px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 18px 20px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: var(--shadow);
+}
+
+.api-loading-card span {
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.api-loading-spinner {
+  width: 42px;
+  height: 42px;
+  border: 4px solid color-mix(in srgb, var(--primary) 18%, var(--line));
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: api-loading-spin 780ms linear infinite;
+}
+
+@keyframes api-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .login-page {

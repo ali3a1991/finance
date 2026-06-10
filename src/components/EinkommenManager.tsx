@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Pencil, PlusCircle, Save, Trash2, TrendingUp, X } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/formatting";
+import { requestJson } from "@/lib/requestJson";
 import type { Income } from "@/lib/types";
 
 type IncomeForm = {
@@ -22,36 +23,6 @@ const emptyForm: IncomeForm = {
   recurring: true,
   entryDay: ""
 };
-
-function getAuthHeaders() {
-  const token = localStorage.getItem("finance_token");
-
-  return {
-    Authorization: `Bearer ${token}`,
-    "Content-Type": "application/json"
-  };
-}
-
-async function requestJson<T>(url: string, options: RequestInit = {}) {
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      ...getAuthHeaders(),
-      ...options.headers
-    }
-  });
-
-  if (response.status === 401) {
-    window.location.href = "/login";
-    throw new Error("Nicht autorisiert");
-  }
-
-  if (!response.ok) {
-    throw new Error("API request failed");
-  }
-
-  return (await response.json()) as T;
-}
 
 function toPayload(form: IncomeForm): Omit<Income, "id"> {
   return {

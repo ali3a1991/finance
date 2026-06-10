@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Banknote, Home, Menu, Settings, ShieldCheck, TrendingUp, WalletCards, X } from "lucide-react";
 import { useState } from "react";
+import { useApiLoading } from "@/components/ApiLoadingProvider";
 
 const navItems = [
   { href: "/", label: "Startseite", icon: Home },
@@ -14,6 +15,7 @@ const navItems = [
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const isApiLoading = useApiLoading();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   function closeMobileMenu() {
@@ -21,7 +23,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className={`app-shell ${isMobileMenuOpen ? "menu-open" : ""}`}>
+    <div className={`app-shell ${isMobileMenuOpen ? "menu-open" : ""} ${isApiLoading ? "api-loading-active" : ""}`}>
       <header className="mobile-header">
         <Link className="mobile-brand" href="/" onClick={closeMobileMenu}>
           <span className="brand-mark">FM</span>

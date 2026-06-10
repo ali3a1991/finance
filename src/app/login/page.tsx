@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { LockKeyhole } from "lucide-react";
+import { requestJson } from "@/lib/requestJson";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
@@ -14,24 +15,19 @@ export default function LoginPage() {
     setError("");
     setIsLoading(true);
 
-    const response = await fetch("/api/auth/login", {
-      body: JSON.stringify({ password, username }),
-      headers: {
-        "Content-Type": "application/json"
-      },
-      method: "POST"
-    });
+    try {
+      const body = await requestJson<{ token: string }>("/api/auth/login", {
+        authenticated: false,
+        body: JSON.stringify({ password, username }),
+        method: "POST"
+      });
 
-    if (!response.ok) {
-      const body = (await response.json()) as { message?: string };
-      setError(body.message || "Login fehlgeschlagen.");
+      localStorage.setItem("finance_token", body.token);
+      window.location.href = "/";
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Login fehlgeschlagen.");
       setIsLoading(false);
-      return;
     }
-
-    const body = (await response.json()) as { token: string };
-    localStorage.setItem("finance_token", body.token);
-    window.location.href = "/";
   }
 
   return (

@@ -3,42 +3,13 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Save } from "lucide-react";
+import { requestJson } from "@/lib/requestJson";
 import type { Expense } from "@/lib/types";
 
 const categories = ["Haushalt", "Wohnen", "Mobilitat", "Versicherungen", "Freizeit"];
 
 function getTodayInputValue() {
   return new Date().toISOString().slice(0, 10);
-}
-
-function getAuthHeaders() {
-  const token = localStorage.getItem("finance_token");
-
-  return {
-    Authorization: `Bearer ${token}`,
-    "Content-Type": "application/json"
-  };
-}
-
-async function requestJson<T>(url: string, options: RequestInit = {}) {
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      ...getAuthHeaders(),
-      ...options.headers
-    }
-  });
-
-  if (response.status === 401) {
-    window.location.href = "/login";
-    throw new Error("Nicht autorisiert");
-  }
-
-  if (!response.ok) {
-    throw new Error("API request failed");
-  }
-
-  return (await response.json()) as T;
 }
 
 export function AusgabeForm() {

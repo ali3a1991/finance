@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ApiLoadingProvider } from "@/components/ApiLoadingProvider";
 import { AppShell } from "@/components/AppShell";
 
 export const metadata: Metadata = {
@@ -23,7 +24,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
-        <AppShell>{children}</AppShell>
+        <ApiLoadingProvider>
+          <AppShell>{children}</AppShell>
+        </ApiLoadingProvider>
       </body>
     </html>
   );
