@@ -3,6 +3,7 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import { Banknote, CalendarDays, Check, ChevronLeft, ChevronRight, PiggyBank, Save, ShieldCheck, WalletCards } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
+import { useLanguage } from "@/components/LanguageProvider";
 import { formatCurrency, formatDate } from "@/lib/formatting";
 import { requestJson } from "@/lib/requestJson";
 import type { MonthlyPayment } from "@/lib/types";
@@ -41,9 +42,11 @@ function addMonths(monthKey: string, amount: number) {
   return getMonthKey(date);
 }
 
-function formatMonthLabel(monthKey: string) {
+function formatMonthLabel(monthKey: string, language: "de" | "en") {
   const [year, month] = monthKey.split("-").map(Number);
-  return new Intl.DateTimeFormat("de-DE", { month: "long", year: "numeric" }).format(new Date(year, month - 1, 1));
+  return new Intl.DateTimeFormat(language === "de" ? "de-DE" : "en-US", { month: "long", year: "numeric" }).format(
+    new Date(year, month - 1, 1)
+  );
 }
 
 function toPaymentInputValue(value: number) {
@@ -56,6 +59,7 @@ function parsePaymentInputValue(value: string) {
 }
 
 export function HomeDashboard() {
+  const { language, t } = useLanguage();
   const [selectedMonth, setSelectedMonth] = useState(getMonthKey());
   const [isLoading, setIsLoading] = useState(true);
   const [payments, setPayments] = useState<MonthlyPayment[]>([]);
@@ -112,46 +116,50 @@ export function HomeDashboard() {
   const pressureRatio = summary.incomeTotal > 0 ? Math.min(monthTotal / summary.incomeTotal, 1.35) : 0;
   const needleRotation = -72 + Math.min(pressureRatio, 1) * 144;
   const gaugeStatus =
-    pressureRatio <= 0.55 ? "Entspannt" : pressureRatio <= 0.85 ? "Aufmerksam bleiben" : "Kritisch";
+    pressureRatio <= 0.55
+      ? t("dashboard.relaxed")
+      : pressureRatio <= 0.85
+        ? t("dashboard.attentive")
+        : t("dashboard.critical");
   const isCurrentMonth = selectedMonth === getMonthKey();
 
   return (
     <>
-      <section className="month-switcher" aria-label="Monat auswahlen">
+      <section className="month-switcher" aria-label={t("dashboard.monthPicker")}>
         <button
           className="icon-button"
           type="button"
           onClick={() => setSelectedMonth((current) => addMonths(current, -1))}
-          aria-label="Vorheriger Monat"
+          aria-label={t("dashboard.previousMonth")}
         >
           <ChevronLeft size={20} aria-hidden="true" />
         </button>
         <div className="month-switcher-current">
           <CalendarDays size={18} aria-hidden="true" />
           <div>
-            <span>{isCurrentMonth ? "Aktueller Monat" : "Ausgewahlter Monat"}</span>
-            <strong>{formatMonthLabel(selectedMonth)}</strong>
+            <span>{isCurrentMonth ? t("dashboard.currentMonth") : t("dashboard.selectedMonth")}</span>
+            <strong>{formatMonthLabel(selectedMonth, language)}</strong>
           </div>
         </div>
         <button
           className="icon-button"
           type="button"
           onClick={() => setSelectedMonth((current) => addMonths(current, 1))}
-          aria-label="Nachster Monat"
+          aria-label={t("dashboard.nextMonth")}
         >
           <ChevronRight size={20} aria-hidden="true" />
         </button>
         {!isCurrentMonth ? (
           <button className="button secondary month-today-button" type="button" onClick={() => setSelectedMonth(getMonthKey())}>
-            Heute
+            {t("dashboard.today")}
           </button>
         ) : null}
       </section>
 
       <section className="cash-gauge-panel" aria-label="Monatlicher Finanzdruck">
         <div className="gauge-copy">
-          <span>Monatskompass</span>
-          <h2>Einnahmen gegen Zahlungen</h2>
+          <span>{t("dashboard.compass")}</span>
+          <h2>{t("dashboard.gaugeTitle")}</h2>
         </div>
         <div className="gauge-wrap">
           <div className="gauge-arc">
@@ -160,16 +168,18 @@ export function HomeDashboard() {
           </div>
           <div className="gauge-status">
             <strong>{gaugeStatus}</strong>
-            <span>{summary.incomeTotal > 0 ? `${Math.round(pressureRatio * 100)}% genutzt` : "Keine Einnahmen"}</span>
+            <span>
+              {summary.incomeTotal > 0 ? `${Math.round(pressureRatio * 100)}% ${t("dashboard.used")}` : t("dashboard.noIncome")}
+            </span>
           </div>
         </div>
         <div className="gauge-values">
           <div className="gauge-value income">
-            <span>Einnahmen</span>
+            <span>{t("dashboard.income")}</span>
             <strong>{formatCurrency(summary.incomeTotal)}</strong>
           </div>
           <div className="gauge-value outgoing">
-            <span>Zahlungen</span>
+            <span>{t("dashboard.payments")}</span>
             <strong>{formatCurrency(monthTotal)}</strong>
           </div>
         </div>
@@ -178,42 +188,42 @@ export function HomeDashboard() {
       <section className="stats-grid" aria-label="Finanzubersicht">
         <StatCard
           icon={WalletCards}
-          label="Monatliche Ausgaben"
+          label={t("dashboard.monthlyExpenses")}
           value={formatCurrency(summary.monthlyExpenseTotal)}
-          helper="Aktuelle Buchungen"
+          helper={t("dashboard.currentBookings")}
         />
         <StatCard
           icon={Banknote}
-          label="Kreditbetrag"
+          label={t("dashboard.loanAmount")}
           value={formatCurrency(summary.loanTotal)}
-          helper={`${summary.loanCount} aktive Kredite`}
+          helper={`${summary.loanCount} ${t("dashboard.activeLoans")}`}
         />
         <StatCard
           icon={ShieldCheck}
-          label="Versicherungen"
+          label={t("dashboard.insurances")}
           value={formatCurrency(summary.insuranceTotal)}
-          helper="Monatliche Pramien"
+          helper={t("dashboard.monthlyPremiums")}
         />
         <StatCard
           icon={PiggyBank}
-          label="Freier Betrag"
+          label={t("dashboard.freeAmount")}
           value={formatCurrency(summary.freeAmount)}
-          helper="Nach festen Zahlungen"
+          helper={t("dashboard.afterFixedPayments")}
         />
       </section>
 
       <section className="payment-panel">
         <div className="section-title">
-          <span>{formatMonthLabel(selectedMonth)}</span>
+          <span>{formatMonthLabel(selectedMonth, language)}</span>
           <strong>
             {formatCurrency(paidTotal)} / {formatCurrency(monthTotal)}
           </strong>
         </div>
 
-        {isLoading ? <p className="muted-text">Zahlungen werden geladen...</p> : null}
+        {isLoading ? <p className="muted-text">{t("dashboard.loadingPayments")}</p> : null}
 
         {!isLoading && payments.length === 0 ? (
-          <p className="empty-table-text">Fur diesen Monat sind noch keine Zahlungen vorhanden.</p>
+          <p className="empty-table-text">{t("dashboard.noPayments")}</p>
         ) : null}
 
         <div className="payment-list">
@@ -234,7 +244,7 @@ export function HomeDashboard() {
                   className="payment-check"
                   type="button"
                   onClick={() => updatePayment(payment.id, isPaid ? 0 : payment.amount)}
-                  aria-label={`${payment.title} als bezahlt markieren`}
+                  aria-label={`${payment.title} ${t("dashboard.markPaid")}`}
                   disabled={isUpdating}
                 >
                   {isPaid ? <Check size={18} aria-hidden="true" /> : null}
@@ -247,11 +257,19 @@ export function HomeDashboard() {
                 </div>
                 <div className="payment-amount">
                   <strong>{formatCurrency(payment.amount)}</strong>
-                  <span>{isUpdating ? "Aktualisiert..." : isPaid ? "Bezahlt" : isPartial ? "Teilweise bezahlt" : "Offen"}</span>
+                  <span>
+                    {isUpdating
+                      ? t("dashboard.updating")
+                      : isPaid
+                        ? t("dashboard.paid")
+                        : isPartial
+                          ? t("dashboard.partiallyPaid")
+                          : t("dashboard.open")}
+                  </span>
                 </div>
                 <div className="partial-input">
                   <label>
-                    <span>Bezahlt</span>
+                    <span>{t("dashboard.paidAmount")}</span>
                     <input
                       inputMode="decimal"
                       min="0"
@@ -269,7 +287,7 @@ export function HomeDashboard() {
                       type="button"
                       onClick={() => submitPartialPayment(payment)}
                       disabled={isUpdating}
-                      aria-label={`${payment.title} bezahlten Betrag speichern`}
+                      aria-label={`${payment.title} ${t("dashboard.savePaidAmount")}`}
                     >
                       <Save size={18} aria-hidden="true" />
                     </button>

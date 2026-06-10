@@ -1048,6 +1048,11 @@ th {
   padding: 18px;
 }
 
+.settings-stack {
+  display: grid;
+  gap: 16px;
+}
+
 .settings-panel {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;

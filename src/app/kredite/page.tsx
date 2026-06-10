@@ -4,11 +4,7 @@ import { PageHeader } from "@/components/PageHeader";
 export default function KreditePage() {
   return (
     <div className="page-stack">
-      <PageHeader
-        eyebrow="Kredite"
-        title="Kreditverpflichtungen verwalten."
-        description="Alle laufenden Kredite mit Betrag, Gesamtzinsen, Rate und erster Zahlung."
-      />
+      <PageHeader page="loans" />
 
       <KreditManager />
     </div>

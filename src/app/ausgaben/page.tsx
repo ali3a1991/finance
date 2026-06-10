@@ -13,11 +13,7 @@ export default async function AusgabenPage({ searchParams }: AusgabenPageProps) 
 
   return (
     <div className="page-stack">
-      <PageHeader
-        eyebrow="Ausgaben"
-        title="Ausgaben erfassen und auswerten."
-        description="Ausgaben werden nach einmaligen und wiederkehrenden Buchungen getrennt."
-      />
+      <PageHeader page="expenses" />
 
       <AusgabenManager initialType={activeType} />
     </div>

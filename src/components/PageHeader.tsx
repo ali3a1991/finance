@@ -1,15 +1,19 @@
+"use client";
+
+import { useLanguage } from "@/components/LanguageProvider";
+
 type PageHeaderProps = {
-  eyebrow: string;
-  title: string;
-  description: string;
+  page: "home" | "loans" | "insurances" | "incomes" | "expenses" | "expenseCapture" | "settings";
 };
 
-export function PageHeader({ eyebrow, title, description }: PageHeaderProps) {
+export function PageHeader({ page }: PageHeaderProps) {
+  const { t } = useLanguage();
+
   return (
     <header className="page-header">
-      <span>{eyebrow}</span>
-      <h1>{title}</h1>
-      <p>{description}</p>
+      <span>{t(`pages.${page}.eyebrow`)}</span>
+      <h1>{t(`pages.${page}.title`)}</h1>
+      <p>{t(`pages.${page}.description`)}</p>
     </header>
   );
 }

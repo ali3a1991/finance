@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ApiLoadingProvider } from "@/components/ApiLoadingProvider";
 import { AppShell } from "@/components/AppShell";
+import { LanguageProvider } from "@/components/LanguageProvider";
 
 export const metadata: Metadata = {
   title: "Finanzmanager",
@@ -15,6 +16,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       if (theme === "dark" || theme === "light") {
         document.documentElement.dataset.theme = theme;
       }
+      var language = localStorage.getItem("finance-language");
+      if (language === "de" || language === "en") {
+        document.documentElement.lang = language;
+        document.documentElement.dataset.language = language;
+      }
     } catch (error) {}
   `;
 
@@ -24,9 +30,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
-        <ApiLoadingProvider>
-          <AppShell>{children}</AppShell>
-        </ApiLoadingProvider>
+        <LanguageProvider>
+          <ApiLoadingProvider>
+            <AppShell>{children}</AppShell>
+          </ApiLoadingProvider>
+        </LanguageProvider>
       </body>
     </html>
   );
