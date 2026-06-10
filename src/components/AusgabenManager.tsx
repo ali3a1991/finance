@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
-import { Pencil, PlusCircle, Repeat, ReceiptText, Save, Trash2, X } from "lucide-react";
+import { Pencil, PlusCircle, Save, Trash2, X } from "lucide-react";
 import { useLanguage } from "@/components/LanguageProvider";
 import { formatCurrency, formatDate } from "@/lib/formatting";
 import { requestJson } from "@/lib/requestJson";
@@ -13,7 +13,6 @@ type ExpenseForm = {
   category: string;
   amount: string;
   date: string;
-  recurring: boolean;
 };
 
 const categories = ["Haushalt", "Wohnen", "Mobilitat", "Versicherungen", "Freizeit"];
@@ -22,8 +21,7 @@ const emptyForm: ExpenseForm = {
   title: "",
   category: categories[0],
   amount: "",
-  date: new Date().toISOString().slice(0, 10),
-  recurring: false
+  date: new Date().toISOString().slice(0, 10)
 };
 
 function toPayload(form: ExpenseForm): Omit<Expense, "id"> {
@@ -31,12 +29,12 @@ function toPayload(form: ExpenseForm): Omit<Expense, "id"> {
     amount: Number(form.amount),
     category: form.category,
     date: form.date,
-    recurring: form.recurring,
+    recurring: false,
     title: form.title.trim()
   };
 }
 
-export function AusgabenManager({ initialType }: { initialType: "einmalig" | "wiederkehrend" }) {
+export function AusgabenManager() {
   const { t } = useLanguage();
   const [editForm, setEditForm] = useState<ExpenseForm>(emptyForm);
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
@@ -44,7 +42,6 @@ export function AusgabenManager({ initialType }: { initialType: "einmalig" | "wi
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [operationLabel, setOperationLabel] = useState("");
-  const activeType = initialType;
 
   useEffect(() => {
     async function loadExpenses() {
@@ -56,7 +53,7 @@ export function AusgabenManager({ initialType }: { initialType: "einmalig" | "wi
     loadExpenses().catch(() => setIsLoading(false));
   }, []);
 
-  function updateEditForm(field: keyof ExpenseForm, value: string | boolean) {
+  function updateEditForm(field: keyof ExpenseForm, value: string) {
     setEditForm((current) => ({ ...current, [field]: value }));
   }
 
@@ -66,7 +63,6 @@ export function AusgabenManager({ initialType }: { initialType: "einmalig" | "wi
       amount: String(expense.amount),
       category: expense.category,
       date: expense.date,
-      recurring: expense.recurring,
       title: expense.title
     });
   }
@@ -111,9 +107,7 @@ export function AusgabenManager({ initialType }: { initialType: "einmalig" | "wi
     }
   }
 
-  const visibleExpenses = expenses.filter((expense) =>
-    activeType === "wiederkehrend" ? expense.recurring : !expense.recurring
-  );
+  const visibleExpenses = expenses;
 
   return (
     <>
@@ -123,20 +117,6 @@ export function AusgabenManager({ initialType }: { initialType: "einmalig" | "wi
           {t("expenses.add")}
         </Link>
       </div>
-
-      <nav className="tab-row" aria-label={t("expenses.ariaTabs")}>
-        <Link className={`tab-link ${activeType === "einmalig" ? "active" : ""}`} href="/ausgaben?typ=einmalig">
-          <ReceiptText size={18} aria-hidden="true" />
-          {t("expenses.oneTimeTab")}
-        </Link>
-        <Link
-          className={`tab-link ${activeType === "wiederkehrend" ? "active" : ""}`}
-          href="/ausgaben?typ=wiederkehrend"
-        >
-          <Repeat size={18} aria-hidden="true" />
-          {t("expenses.recurringTab")}
-        </Link>
-      </nav>
 
       {isLoading ? <p className="muted-text">{t("expenses.loading")}</p> : null}
 
@@ -149,7 +129,6 @@ export function AusgabenManager({ initialType }: { initialType: "einmalig" | "wi
                 <th>{t("expenses.category")}</th>
                 <th>{t("expenses.date")}</th>
                 <th>{t("expenses.amount")}</th>
-                <th>{t("expenses.type")}</th>
                 <th>{t("common.actions")}</th>
               </tr>
             </thead>
@@ -160,7 +139,6 @@ export function AusgabenManager({ initialType }: { initialType: "einmalig" | "wi
                   <td>{expense.category}</td>
                   <td>{formatDate(expense.date)}</td>
                   <td>{formatCurrency(expense.amount)}</td>
-                  <td>{expense.recurring ? t("common.recurring") : t("common.oneTime")}</td>
                   <td>
                     <div className="table-actions">
                       <button
@@ -245,7 +223,7 @@ function ExpenseModal({
   form: ExpenseForm;
   onClose: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
-  onUpdate: (field: keyof ExpenseForm, value: string | boolean) => void;
+  onUpdate: (field: keyof ExpenseForm, value: string) => void;
   isSubmitting: boolean;
 }) {
   const { t } = useLanguage();
@@ -298,14 +276,6 @@ function ExpenseModal({
           <label>
             <span>{t("expenses.date")}</span>
             <input required type="date" value={form.date} onChange={(event) => onUpdate("date", event.target.value)} />
-          </label>
-          <label className="checkbox-row">
-            <input
-              checked={form.recurring}
-              type="checkbox"
-              onChange={(event) => onUpdate("recurring", event.target.checked)}
-            />
-            <span>{t("expenses.recurringExpense")}</span>
           </label>
           <div className="modal-actions">
             <button className="button secondary" type="button" onClick={onClose}>

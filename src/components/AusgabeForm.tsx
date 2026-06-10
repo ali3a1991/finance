@@ -20,7 +20,6 @@ export function AusgabeForm() {
   const [category, setCategory] = useState(categories[0]);
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(getTodayInputValue());
-  const [recurring, setRecurring] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -35,13 +34,13 @@ export function AusgabeForm() {
           amount: Number(amount),
           category,
           date,
-          recurring,
+          recurring: false,
           title: title.trim()
         }),
         method: "POST"
       });
 
-      router.push(`/ausgaben?typ=${recurring ? "wiederkehrend" : "einmalig"}`);
+      router.push("/ausgaben");
       router.refresh();
     } catch {
       setError(t("expenses.saveError"));
@@ -81,10 +80,6 @@ export function AusgabeForm() {
       <label>
         <span>{t("expenses.date")}</span>
         <input required value={date} onChange={(event) => setDate(event.target.value)} type="date" />
-      </label>
-      <label className="checkbox-row">
-        <input checked={recurring} type="checkbox" onChange={(event) => setRecurring(event.target.checked)} />
-        <span>{t("expenses.recurringExpense")}</span>
       </label>
       {error ? <p className="form-error">{error}</p> : null}
       <button className="button primary" type="submit" disabled={isSaving}>

@@ -51,7 +51,7 @@ const translations = {
       expenses: {
         eyebrow: "Ausgaben",
         title: "Ausgaben erfassen und auswerten.",
-        description: "Ausgaben werden nach einmaligen und wiederkehrenden Buchungen getrennt."
+        description: "Alle einzelnen Ausgaben werden klar erfasst und in einer Tabelle gepflegt."
       },
       expenseCapture: {
         eyebrow: "Ausgaben / Erfassung",
@@ -188,19 +188,14 @@ const translations = {
     expenses: {
       add: "Neue Ausgabe",
       loading: "Ausgaben werden geladen...",
-      ariaTabs: "Ausgabenarten",
-      oneTimeTab: "Einmalig",
-      recurringTab: "Wiederkehrend",
       title: "Titel",
       category: "Kategorie",
       date: "Datum",
       amount: "Betrag",
-      type: "Typ",
       empty: "Keine Ausgaben in dieser Kategorie vorhanden.",
       editTitle: "Ausgabe bearbeiten",
       deleteLabel: "Ausgabe loschen",
       deleteTitle: "Ausgabe wirklich loschen?",
-      recurringExpense: "Wiederkehrende Ausgabe",
       saveError: "Die Ausgabe konnte nicht gespeichert werden."
     },
     settings: {
@@ -282,7 +277,7 @@ const translations = {
       expenses: {
         eyebrow: "Expenses",
         title: "Track and review expenses.",
-        description: "Expenses are separated into one-time and recurring bookings."
+        description: "All individual expenses are tracked clearly and managed in one table."
       },
       expenseCapture: {
         eyebrow: "Expenses / Capture",
@@ -419,19 +414,14 @@ const translations = {
     expenses: {
       add: "New expense",
       loading: "Loading expenses...",
-      ariaTabs: "Expense types",
-      oneTimeTab: "One-time",
-      recurringTab: "Recurring",
       title: "Title",
       category: "Category",
       date: "Date",
       amount: "Amount",
-      type: "Type",
       empty: "No expenses exist in this category.",
       editTitle: "Edit expense",
       deleteLabel: "Delete expense",
       deleteTitle: "Delete this expense?",
-      recurringExpense: "Recurring expense",
       saveError: "The expense could not be saved."
     },
     settings: {
