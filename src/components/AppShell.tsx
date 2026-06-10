@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Banknote, Home, Menu, ShieldCheck, TrendingUp, WalletCards, X } from "lucide-react";
+import { Banknote, Home, Menu, Settings, ShieldCheck, TrendingUp, WalletCards, X } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
@@ -9,7 +9,8 @@ const navItems = [
   { href: "/kredite", label: "Kredite", icon: Banknote },
   { href: "/versicherungen", label: "Versicherungen", icon: ShieldCheck },
   { href: "/einnahmen", label: "Einnahmen", icon: TrendingUp },
-  { href: "/ausgaben", label: "Ausgaben", icon: WalletCards }
+  { href: "/ausgaben", label: "Ausgaben", icon: WalletCards },
+  { href: "/einstellungen", label: "Einstellungen", icon: Settings }
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
