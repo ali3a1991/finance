@@ -224,7 +224,12 @@ const translations = {
       noUsers: "Noch keine freigegebenen Benutzer vorhanden.",
       deleteUserLabel: "Benutzer loschen",
       deleteUserTitle: "Benutzer wirklich loschen?",
-      deleteUserText: "verliert den Zugriff auf deine Daten."
+      deleteUserText: "verliert den Zugriff auf deine Daten.",
+      logoutLabel: "Sitzung",
+      logoutTitle: "Abmelden",
+      logoutDescription: "Beende deine aktuelle Sitzung auf diesem Gerat.",
+      logout: "Logout",
+      loggingOut: "Abmelden..."
     },
     contracts: {
       generalLabel: "Allgemein",
@@ -467,7 +472,12 @@ const translations = {
       noUsers: "No shared users yet.",
       deleteUserLabel: "Delete user",
       deleteUserTitle: "Delete this user?",
-      deleteUserText: "will lose access to your data."
+      deleteUserText: "will lose access to your data.",
+      logoutLabel: "Session",
+      logoutTitle: "Sign out",
+      logoutDescription: "End your current session on this device.",
+      logout: "Logout",
+      loggingOut: "Logging out..."
     },
     contracts: {
       generalLabel: "General",

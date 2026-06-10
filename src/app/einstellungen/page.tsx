@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/PageHeader";
 import { AccessSettings } from "@/components/AccessSettings";
+import { LogoutSettings } from "@/components/LogoutSettings";
 import { ThemeSettings } from "@/components/ThemeSettings";
 
 export default function EinstellungenPage() {
@@ -8,6 +9,7 @@ export default function EinstellungenPage() {
       <PageHeader page="settings" />
       <ThemeSettings />
       <AccessSettings />
+      <LogoutSettings />
     </div>
   );
 }
