@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Banknote, FileText, Home, Menu, Settings, ShieldCheck, TrendingUp, WalletCards, X } from "lucide-react";
 import { useState } from "react";
 import { useApiLoading } from "@/components/ApiLoadingProvider";
@@ -20,12 +21,23 @@ const contractItems = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const isApiLoading = useApiLoading();
+  const pathname = usePathname();
   const { t } = useLanguage();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  function isActivePath(href: string) {
+    if (href === "/") {
+      return pathname === "/";
+    }
+
+    return pathname === href || pathname.startsWith(`${href}/`);
+  }
 
   function closeMobileMenu() {
     setIsMobileMenuOpen(false);
   }
+
+  const hasActiveContract = contractItems.some((item) => isActivePath(item.href));
 
   return (
     <div className={`app-shell ${isMobileMenuOpen ? "menu-open" : ""} ${isApiLoading ? "api-loading-active" : ""}`}>
@@ -76,25 +88,39 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <nav className="nav-list" aria-label={t("nav.main")}>
           {navItems.map((item) => {
             const Icon = item.icon;
+            const isActive = isActivePath(item.href);
 
             return (
-              <Link href={item.href} className="nav-item" key={item.href} onClick={closeMobileMenu}>
+              <Link
+                href={item.href}
+                className={`nav-item ${isActive ? "active" : ""}`}
+                key={item.href}
+                onClick={closeMobileMenu}
+                aria-current={isActive ? "page" : undefined}
+              >
                 <Icon size={18} aria-hidden="true" />
                 <span>{t(`nav.${item.labelKey}`)}</span>
               </Link>
             );
           })}
           <div className="nav-group">
-            <div className="nav-group-label">
+            <div className={`nav-group-label ${hasActiveContract ? "active" : ""}`}>
               <FileText size={18} aria-hidden="true" />
               <span>{t("nav.contracts")}</span>
             </div>
             <div className="nav-sublist">
               {contractItems.map((item) => {
                 const Icon = item.icon;
+                const isActive = isActivePath(item.href);
 
                 return (
-                  <Link href={item.href} className="nav-subitem" key={item.href} onClick={closeMobileMenu}>
+                  <Link
+                    href={item.href}
+                    className={`nav-subitem ${isActive ? "active" : ""}`}
+                    key={item.href}
+                    onClick={closeMobileMenu}
+                    aria-current={isActive ? "page" : undefined}
+                  >
                     <Icon size={16} aria-hidden="true" />
                     <span>{t(`nav.${item.labelKey}`)}</span>
                   </Link>
@@ -102,7 +128,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               })}
             </div>
           </div>
-          <Link href="/einstellungen" className="nav-item" onClick={closeMobileMenu}>
+          <Link
+            href="/einstellungen"
+            className={`nav-item ${isActivePath("/einstellungen") ? "active" : ""}`}
+            onClick={closeMobileMenu}
+            aria-current={isActivePath("/einstellungen") ? "page" : undefined}
+          >
             <Settings size={18} aria-hidden="true" />
             <span>{t("nav.settings")}</span>
           </Link>

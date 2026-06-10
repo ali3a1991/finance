@@ -187,14 +187,30 @@ button:disabled {
   color: var(--sidebar-text);
 }
 
+.nav-item.active,
+.nav-subitem.active {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.nav-item.active svg,
+.nav-subitem.active svg {
+  color: currentColor;
+}
+
 .nav-group {
   display: grid;
   gap: 6px;
 }
 
 .nav-group-label {
+  color: var(--sidebar-link);
+  font-weight: 700;
+}
+
+.nav-group-label.active {
+  background: var(--sidebar-hover);
   color: var(--sidebar-text);
-  font-weight: 800;
 }
 
 .nav-sublist {
