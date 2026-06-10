@@ -14,6 +14,8 @@ model Loan {
   totalInterest Float
   monthlyRate   Float
   interestRate  Float
+  startDate     DateTime?
+  endDate       DateTime?
   nextPayment   DateTime
   status        String
   createdAt     DateTime @default(now())
@@ -26,6 +28,8 @@ model Insurance {
   provider       String
   monthlyPremium Float
   debitDay       Int
+  startDate      DateTime?
+  endDate        DateTime?
   renewalDate    DateTime?
   coverage       String
   createdAt      DateTime @default(now())
@@ -40,6 +44,7 @@ model GeneralContract {
   monthlyAmount Float
   debitDay      Int
   startDate     DateTime
+  endDate       DateTime?
   note          String?
   status        String
   createdAt     DateTime @default(now())

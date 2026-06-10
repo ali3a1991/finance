@@ -12,8 +12,8 @@ type InsuranceForm = {
   coverage: string;
   monthlyPremium: string;
   debitDay: string;
-  renewalDate: string;
-  hasNoRenewalDate: boolean;
+  startDate: string;
+  endDate: string;
 };
 
 const emptyForm: InsuranceForm = {
@@ -21,8 +21,8 @@ const emptyForm: InsuranceForm = {
   coverage: "",
   monthlyPremium: "",
   debitDay: "",
-  renewalDate: "",
-  hasNoRenewalDate: false
+  startDate: "",
+  endDate: ""
 };
 
 const coverageOptions = [
@@ -81,8 +81,8 @@ export function VersicherungManager() {
       coverage: insurance.coverage,
       monthlyPremium: String(insurance.monthlyPremium),
       debitDay: String(insurance.debitDay),
-      renewalDate: insurance.renewalDate ?? "",
-      hasNoRenewalDate: !insurance.renewalDate
+      startDate: insurance.startDate ?? "",
+      endDate: insurance.endDate ?? insurance.renewalDate ?? ""
     });
   }
 
@@ -103,7 +103,9 @@ export function VersicherungManager() {
           coverage: form.coverage.trim(),
           monthlyPremium: Number(form.monthlyPremium),
           debitDay: Number(form.debitDay),
-          renewalDate: form.hasNoRenewalDate ? null : form.renewalDate
+          startDate: form.startDate,
+          endDate: form.endDate,
+          renewalDate: form.endDate
         }),
         method: "POST"
       });
@@ -127,7 +129,9 @@ export function VersicherungManager() {
           coverage: editForm.coverage.trim(),
           monthlyPremium: Number(editForm.monthlyPremium),
           debitDay: Number(editForm.debitDay),
-          renewalDate: editForm.hasNoRenewalDate ? null : editForm.renewalDate
+          startDate: editForm.startDate,
+          endDate: editForm.endDate,
+          renewalDate: editForm.endDate
         }),
         method: "PUT"
       });
@@ -179,7 +183,8 @@ export function VersicherungManager() {
                 <th>{t("insurances.coverage")}</th>
                 <th>{t("insurances.monthly")}</th>
                 <th>{t("insurances.debitDay")}</th>
-                <th>{t("insurances.renewal")}</th>
+                <th>{t("insurances.startDate")}</th>
+                <th>{t("insurances.endDate")}</th>
                 <th>{t("common.actions")}</th>
               </tr>
             </thead>
@@ -195,7 +200,8 @@ export function VersicherungManager() {
                   <td>{insurance.coverage}</td>
                   <td>{formatCurrency(insurance.monthlyPremium)}</td>
                   <td>{insurance.debitDay}. {t("common.day")}</td>
-                  <td>{insurance.renewalDate ? formatDate(insurance.renewalDate) : t("insurances.noTerm")}</td>
+                  <td>{insurance.startDate ? formatDate(insurance.startDate) : "-"}</td>
+                  <td>{insurance.endDate ? formatDate(insurance.endDate) : "-"}</td>
                   <td>
                     <div className="table-actions">
                       <button
@@ -287,27 +293,22 @@ export function VersicherungManager() {
                 />
               </label>
               <label>
-                <span>{t("insurances.renewal")}</span>
+                <span>{t("insurances.startDate")}</span>
                 <input
-                  required={!form.hasNoRenewalDate}
-                  disabled={form.hasNoRenewalDate}
+                  required
                   type="date"
-                  value={form.renewalDate}
-                  onChange={(event) => updateForm("renewalDate", event.target.value)}
+                  value={form.startDate}
+                  onChange={(event) => updateForm("startDate", event.target.value)}
                 />
               </label>
-              <label className="checkbox-row">
+              <label>
+                <span>{t("insurances.endDate")}</span>
                 <input
-                  checked={form.hasNoRenewalDate}
-                  type="checkbox"
-                  onChange={(event) => {
-                    updateForm("hasNoRenewalDate", event.target.checked);
-                    if (event.target.checked) {
-                      updateForm("renewalDate", "");
-                    }
-                  }}
+                  required
+                  type="date"
+                  value={form.endDate}
+                  onChange={(event) => updateForm("endDate", event.target.value)}
                 />
-                <span>{t("insurances.noRenewal")}</span>
               </label>
               <div className="modal-actions">
                 <button className="button secondary" type="button" onClick={closeAddModal}>
@@ -423,27 +424,22 @@ export function VersicherungManager() {
                 />
               </label>
               <label>
-                <span>{t("insurances.renewal")}</span>
+                <span>{t("insurances.startDate")}</span>
                 <input
-                  required={!editForm.hasNoRenewalDate}
-                  disabled={editForm.hasNoRenewalDate}
+                  required
                   type="date"
-                  value={editForm.renewalDate}
-                  onChange={(event) => updateEditForm("renewalDate", event.target.value)}
+                  value={editForm.startDate}
+                  onChange={(event) => updateEditForm("startDate", event.target.value)}
                 />
               </label>
-              <label className="checkbox-row">
+              <label>
+                <span>{t("insurances.endDate")}</span>
                 <input
-                  checked={editForm.hasNoRenewalDate}
-                  type="checkbox"
-                  onChange={(event) => {
-                    updateEditForm("hasNoRenewalDate", event.target.checked);
-                    if (event.target.checked) {
-                      updateEditForm("renewalDate", "");
-                    }
-                  }}
+                  required
+                  type="date"
+                  value={editForm.endDate}
+                  onChange={(event) => updateEditForm("endDate", event.target.value)}
                 />
-                <span>{t("insurances.noRenewal")}</span>
               </label>
               <div className="modal-actions">
                 <button className="button secondary" type="button" onClick={closeEditModal}>

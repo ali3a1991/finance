@@ -14,6 +14,7 @@ type ContractForm = {
   monthlyAmount: string;
   debitDay: string;
   startDate: string;
+  endDate: string;
   note: string;
   status: string;
 };
@@ -25,6 +26,7 @@ const emptyForm: ContractForm = {
   monthlyAmount: "",
   debitDay: "",
   startDate: new Date().toISOString().slice(0, 10),
+  endDate: "",
   note: "",
   status: "Aktiv"
 };
@@ -39,6 +41,7 @@ function toPayload(form: ContractForm): Omit<GeneralContract, "id"> {
     monthlyAmount: Number(form.monthlyAmount),
     note: form.note.trim() || null,
     provider: form.provider.trim(),
+    endDate: form.endDate,
     startDate: form.startDate,
     status: form.status,
     title: form.title.trim()
@@ -52,6 +55,7 @@ function toForm(contract: GeneralContract): ContractForm {
     monthlyAmount: String(contract.monthlyAmount),
     note: contract.note ?? "",
     provider: contract.provider,
+    endDate: contract.endDate ?? "",
     startDate: contract.startDate,
     status: contract.status,
     title: contract.title
@@ -188,6 +192,7 @@ export function GeneralContractsManager() {
                 <th>{t("contracts.monthlyAmount")}</th>
                 <th>{t("contracts.debitDay")}</th>
                 <th>{t("contracts.startDate")}</th>
+                <th>{t("contracts.endDate")}</th>
                 <th>{t("contracts.status")}</th>
                 <th>{t("common.actions")}</th>
               </tr>
@@ -206,6 +211,7 @@ export function GeneralContractsManager() {
                   <td>{formatCurrency(contract.monthlyAmount)}</td>
                   <td>{contract.debitDay}. {t("common.day")}</td>
                   <td>{formatDate(contract.startDate)}</td>
+                  <td>{contract.endDate ? formatDate(contract.endDate) : "-"}</td>
                   <td>{getStatusLabel(contract.status, t)}</td>
                   <td>
                     <div className="table-actions">
@@ -379,6 +385,10 @@ function ContractModal({
           <label>
             <span>{t("contracts.startDate")}</span>
             <input required type="date" value={form.startDate} onChange={(event) => onUpdate("startDate", event.target.value)} />
+          </label>
+          <label>
+            <span>{t("contracts.endDate")}</span>
+            <input required type="date" value={form.endDate} onChange={(event) => onUpdate("endDate", event.target.value)} />
           </label>
           <label>
             <span>{t("contracts.status")}</span>

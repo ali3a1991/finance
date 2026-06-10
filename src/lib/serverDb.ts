@@ -17,12 +17,16 @@ function mapLoan(loan: {
   totalInterest: number;
   monthlyRate: number;
   interestRate: number;
+  startDate: Date | null;
+  endDate: Date | null;
   nextPayment: Date;
   status: string;
 }): Loan {
   return {
     ...loan,
-    nextPayment: toDateInput(loan.nextPayment)
+    endDate: loan.endDate ? toDateInput(loan.endDate) : null,
+    nextPayment: toDateInput(loan.nextPayment),
+    startDate: loan.startDate ? toDateInput(loan.startDate) : null
   };
 }
 
@@ -32,12 +36,16 @@ function mapInsurance(insurance: {
   provider: string;
   monthlyPremium: number;
   debitDay: number;
+  startDate: Date | null;
+  endDate: Date | null;
   renewalDate: Date | null;
   coverage: string;
 }): Insurance {
   return {
     ...insurance,
-    renewalDate: insurance.renewalDate ? toDateInput(insurance.renewalDate) : null
+    endDate: insurance.endDate ? toDateInput(insurance.endDate) : null,
+    renewalDate: insurance.renewalDate ? toDateInput(insurance.renewalDate) : null,
+    startDate: insurance.startDate ? toDateInput(insurance.startDate) : null
   };
 }
 
@@ -49,11 +57,13 @@ function mapGeneralContract(contract: {
   monthlyAmount: number;
   debitDay: number;
   startDate: Date;
+  endDate: Date | null;
   note: string | null;
   status: string;
 }): GeneralContract {
   return {
     ...contract,
+    endDate: contract.endDate ? toDateInput(contract.endDate) : null,
     startDate: toDateInput(contract.startDate)
   };
 }
@@ -132,7 +142,9 @@ export async function createLoan(loan: Loan): Promise<Loan> {
   const createdLoan = await prisma.loan.create({
     data: {
       ...loan,
-      nextPayment: toDate(loan.nextPayment)
+      endDate: loan.endDate ? toDate(loan.endDate) : null,
+      nextPayment: toDate(loan.nextPayment),
+      startDate: loan.startDate ? toDate(loan.startDate) : null
     }
   });
   return mapLoan(createdLoan);
@@ -143,7 +155,9 @@ export async function updateLoan(id: string, patch: Omit<Loan, "id" | "status">)
     const loan = await prisma.loan.update({
       data: {
         ...patch,
-        nextPayment: toDate(patch.nextPayment)
+        endDate: patch.endDate ? toDate(patch.endDate) : null,
+        nextPayment: toDate(patch.nextPayment),
+        startDate: patch.startDate ? toDate(patch.startDate) : null
       },
       where: { id }
     });
@@ -171,7 +185,9 @@ export async function createInsurance(insurance: Insurance): Promise<Insurance> 
   const createdInsurance = await prisma.insurance.create({
     data: {
       ...insurance,
-      renewalDate: insurance.renewalDate ? toDate(insurance.renewalDate) : null
+      endDate: insurance.endDate ? toDate(insurance.endDate) : null,
+      renewalDate: insurance.renewalDate ? toDate(insurance.renewalDate) : null,
+      startDate: insurance.startDate ? toDate(insurance.startDate) : null
     }
   });
   return mapInsurance(createdInsurance);
@@ -182,7 +198,9 @@ export async function updateInsurance(id: string, patch: Omit<Insurance, "id">):
     const insurance = await prisma.insurance.update({
       data: {
         ...patch,
-        renewalDate: patch.renewalDate ? toDate(patch.renewalDate) : null
+        endDate: patch.endDate ? toDate(patch.endDate) : null,
+        renewalDate: patch.renewalDate ? toDate(patch.renewalDate) : null,
+        startDate: patch.startDate ? toDate(patch.startDate) : null
       },
       where: { id }
     });
@@ -210,6 +228,7 @@ export async function createGeneralContract(contract: GeneralContract): Promise<
   const createdContract = await prisma.generalContract.create({
     data: {
       ...contract,
+      endDate: contract.endDate ? toDate(contract.endDate) : null,
       note: contract.note || null,
       startDate: toDate(contract.startDate)
     }
@@ -225,6 +244,7 @@ export async function updateGeneralContract(
     const contract = await prisma.generalContract.update({
       data: {
         ...patch,
+        endDate: patch.endDate ? toDate(patch.endDate) : null,
         note: patch.note || null,
         startDate: toDate(patch.startDate)
       },
@@ -359,6 +379,17 @@ function isSameOrBeforeCurrentMonth(startDate: Date, date = new Date()) {
   return startMonth <= currentMonth;
 }
 
+function isActiveInMonth(startValue: string | null | undefined, endValue: string | null | undefined, date = new Date()) {
+  const monthStart = new Date(date.getFullYear(), date.getMonth(), 1).getTime();
+  const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0).getTime();
+  const start = startValue ? new Date(`${startValue}T00:00:00`) : null;
+  const end = endValue ? new Date(`${endValue}T00:00:00`) : null;
+  const startsBeforeMonthEnds = !start || start.getTime() <= monthEnd;
+  const endsAfterMonthStarts = !end || end.getTime() >= monthStart;
+
+  return startsBeforeMonthEnds && endsAfterMonthStarts;
+}
+
 function getPaymentStatus(db: FinanceDb, id: string) {
   return db.paymentConfirmations?.find((payment) => payment.id === id)?.paidAmount ?? 0;
 }
@@ -367,6 +398,7 @@ export function buildMonthlyPayments(db: FinanceDb, date = new Date()): MonthlyP
   const monthKey = getMonthKey(date);
   const loanPayments: MonthlyPayment[] = db.loans
     .filter((loan) => isSameOrBeforeCurrentMonth(new Date(`${loan.nextPayment}T00:00:00`), date))
+    .filter((loan) => isActiveInMonth(loan.startDate ?? loan.nextPayment, loan.endDate, date))
     .map((loan) => {
       const dueDay = new Date(`${loan.nextPayment}T00:00:00`).getDate();
       const id = `loan:${loan.id}:${monthKey}`;
@@ -382,19 +414,21 @@ export function buildMonthlyPayments(db: FinanceDb, date = new Date()): MonthlyP
       };
     });
 
-  const insurancePayments: MonthlyPayment[] = db.insurances.map((insurance) => {
-    const id = `insurance:${insurance.id}:${monthKey}`;
+  const insurancePayments: MonthlyPayment[] = db.insurances
+    .filter((insurance) => isActiveInMonth(insurance.startDate, insurance.endDate ?? insurance.renewalDate, date))
+    .map((insurance) => {
+      const id = `insurance:${insurance.id}:${monthKey}`;
 
-    return {
-      amount: insurance.monthlyPremium,
-      category: insurance.provider,
-      dueDate: getCurrentMonthDate(insurance.debitDay, date),
-      id,
-      paidAmount: getPaymentStatus(db, id),
-      sourceType: "insurance",
-      title: insurance.coverage
-    };
-  });
+      return {
+        amount: insurance.monthlyPremium,
+        category: insurance.provider,
+        dueDate: getCurrentMonthDate(insurance.debitDay, date),
+        id,
+        paidAmount: getPaymentStatus(db, id),
+        sourceType: "insurance",
+        title: insurance.coverage
+      };
+    });
 
   const recurringExpensePayments: MonthlyPayment[] = db.expenses
     .filter((expense) => expense.recurring)
@@ -416,6 +450,7 @@ export function buildMonthlyPayments(db: FinanceDb, date = new Date()): MonthlyP
   const contractPayments: MonthlyPayment[] = (db.generalContracts ?? [])
     .filter((contract) => contract.status === "Aktiv")
     .filter((contract) => isSameOrBeforeCurrentMonth(new Date(`${contract.startDate}T00:00:00`), date))
+    .filter((contract) => isActiveInMonth(contract.startDate, contract.endDate, date))
     .map((contract) => {
       const id = `contract:${contract.id}:${monthKey}`;
 

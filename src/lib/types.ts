@@ -6,6 +6,8 @@ export type Loan = {
   totalInterest: number;
   monthlyRate: number;
   interestRate: number;
+  startDate: string | null;
+  endDate: string | null;
   nextPayment: string;
   status: string;
 };
@@ -16,6 +18,8 @@ export type Insurance = {
   provider: string;
   monthlyPremium: number;
   debitDay: number;
+  startDate: string | null;
+  endDate: string | null;
   renewalDate: string | null;
   coverage: string;
 };
@@ -28,6 +32,7 @@ export type GeneralContract = {
   monthlyAmount: number;
   debitDay: number;
   startDate: string;
+  endDate: string | null;
   note: string | null;
   status: string;
 };
