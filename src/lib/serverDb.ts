@@ -238,6 +238,30 @@ export async function createExpense(expense: Expense): Promise<Expense> {
   return mapExpense(createdExpense);
 }
 
+export async function updateExpense(id: string, patch: Omit<Expense, "id">): Promise<Expense | null> {
+  try {
+    const expense = await prisma.expense.update({
+      data: {
+        ...patch,
+        date: toDate(patch.date)
+      },
+      where: { id }
+    });
+    return mapExpense(expense);
+  } catch {
+    return null;
+  }
+}
+
+export async function deleteExpense(id: string): Promise<boolean> {
+  try {
+    await prisma.expense.delete({ where: { id } });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function getMonthKey(date = new Date()) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 }
