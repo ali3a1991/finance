@@ -71,6 +71,7 @@ export function KreditManager() {
   const [detailLoan, setDetailLoan] = useState<Loan | null>(null);
   const [form, setForm] = useState<KreditForm>(emptyForm);
   const [editForm, setEditForm] = useState<KreditForm>(emptyForm);
+  const [operationLabel, setOperationLabel] = useState("");
 
   useEffect(() => {
     async function loadLoans() {
@@ -115,42 +116,52 @@ export function KreditManager() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setOperationLabel("save-loan");
 
-    const body = await requestJson<{ loan: Loan }>("/api/loans", {
-      body: JSON.stringify({
-      name: form.name.trim(),
-      bank: form.bank.trim(),
-      balance: Number(form.balance),
-      totalInterest: Number(form.totalInterest),
-      monthlyRate: Number(form.monthlyRate),
-      interestRate: Number(form.interestRate),
-        nextPayment: form.nextPayment
-      }),
-      method: "POST"
-    });
+    try {
+      const body = await requestJson<{ loan: Loan }>("/api/loans", {
+        body: JSON.stringify({
+          name: form.name.trim(),
+          bank: form.bank.trim(),
+          balance: Number(form.balance),
+          totalInterest: Number(form.totalInterest),
+          monthlyRate: Number(form.monthlyRate),
+          interestRate: Number(form.interestRate),
+          nextPayment: form.nextPayment
+        }),
+        method: "POST"
+      });
 
-    setLoans((current) => [body.loan, ...current]);
-    closeModal();
+      setLoans((current) => [body.loan, ...current]);
+      closeModal();
+    } finally {
+      setOperationLabel("");
+    }
   }
 
   async function handleEditSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setOperationLabel("edit-loan");
 
-    const body = await requestJson<{ loan: Loan }>(`/api/loans/${editingLoanId}`, {
-      body: JSON.stringify({
-        name: editForm.name.trim(),
-        bank: editForm.bank.trim(),
-        balance: Number(editForm.balance),
-        totalInterest: Number(editForm.totalInterest),
-        monthlyRate: Number(editForm.monthlyRate),
-        interestRate: Number(editForm.interestRate),
-        nextPayment: editForm.nextPayment
-      }),
-      method: "PUT"
-    });
+    try {
+      const body = await requestJson<{ loan: Loan }>(`/api/loans/${editingLoanId}`, {
+        body: JSON.stringify({
+          name: editForm.name.trim(),
+          bank: editForm.bank.trim(),
+          balance: Number(editForm.balance),
+          totalInterest: Number(editForm.totalInterest),
+          monthlyRate: Number(editForm.monthlyRate),
+          interestRate: Number(editForm.interestRate),
+          nextPayment: editForm.nextPayment
+        }),
+        method: "PUT"
+      });
 
-    setLoans((current) => current.map((loan) => (loan.id === editingLoanId ? body.loan : loan)));
-    closeEditModal();
+      setLoans((current) => current.map((loan) => (loan.id === editingLoanId ? body.loan : loan)));
+      closeEditModal();
+    } finally {
+      setOperationLabel("");
+    }
   }
 
   async function confirmDeleteLoan() {
@@ -158,11 +169,17 @@ export function KreditManager() {
       return;
     }
 
-    await requestJson(`/api/loans/${loanToDelete.id}`, {
-      method: "DELETE"
-    });
-    setLoans((current) => current.filter((item) => item.id !== loanToDelete.id));
-    setLoanToDelete(null);
+    setOperationLabel("delete-loan");
+
+    try {
+      await requestJson(`/api/loans/${loanToDelete.id}`, {
+        method: "DELETE"
+      });
+      setLoans((current) => current.filter((item) => item.id !== loanToDelete.id));
+      setLoanToDelete(null);
+    } finally {
+      setOperationLabel("");
+    }
   }
 
   function getInstallmentPlan(loan: Loan): Installment[] {
@@ -372,9 +389,9 @@ export function KreditManager() {
                 <button className="button secondary" type="button" onClick={closeModal}>
                   Abbrechen
                 </button>
-                <button className="button primary" type="submit">
+                <button className="button primary" type="submit" disabled={operationLabel === "save-loan"}>
                   <Save size={18} aria-hidden="true" />
-                  Speichern
+                  {operationLabel === "save-loan" ? "Speichern..." : "Speichern"}
                 </button>
               </div>
             </form>
@@ -467,9 +484,14 @@ export function KreditManager() {
               <button className="button secondary" type="button" onClick={() => setLoanToDelete(null)}>
                 Abbrechen
               </button>
-              <button className="button danger" type="button" onClick={confirmDeleteLoan}>
+              <button
+                className="button danger"
+                type="button"
+                onClick={confirmDeleteLoan}
+                disabled={operationLabel === "delete-loan"}
+              >
                 <Trash2 size={18} aria-hidden="true" />
-                Loschen
+                {operationLabel === "delete-loan" ? "Loschen..." : "Loschen"}
               </button>
             </div>
           </section>
@@ -569,9 +591,9 @@ export function KreditManager() {
                 <button className="button secondary" type="button" onClick={closeEditModal}>
                   Abbrechen
                 </button>
-                <button className="button primary" type="submit">
+                <button className="button primary" type="submit" disabled={operationLabel === "edit-loan"}>
                   <Save size={18} aria-hidden="true" />
-                  Speichern
+                  {operationLabel === "edit-loan" ? "Speichern..." : "Speichern"}
                 </button>
               </div>
             </form>

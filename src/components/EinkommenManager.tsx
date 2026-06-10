@@ -73,6 +73,7 @@ export function EinkommenManager() {
   const [incomes, setIncomes] = useState<Income[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
+  const [operationLabel, setOperationLabel] = useState("");
 
   useEffect(() => {
     async function loadIncomes() {
@@ -116,24 +117,36 @@ export function EinkommenManager() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const body = await requestJson<{ income: Income }>("/api/incomes", {
-      body: JSON.stringify(toPayload(form)),
-      method: "POST"
-    });
+    setOperationLabel("save-income");
 
-    setIncomes((current) => [body.income, ...current]);
-    closeAddModal();
+    try {
+      const body = await requestJson<{ income: Income }>("/api/incomes", {
+        body: JSON.stringify(toPayload(form)),
+        method: "POST"
+      });
+
+      setIncomes((current) => [body.income, ...current]);
+      closeAddModal();
+    } finally {
+      setOperationLabel("");
+    }
   }
 
   async function handleEditSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const body = await requestJson<{ income: Income }>(`/api/incomes/${editingIncomeId}`, {
-      body: JSON.stringify(toPayload(editForm)),
-      method: "PUT"
-    });
+    setOperationLabel("edit-income");
 
-    setIncomes((current) => current.map((income) => (income.id === editingIncomeId ? body.income : income)));
-    closeEditModal();
+    try {
+      const body = await requestJson<{ income: Income }>(`/api/incomes/${editingIncomeId}`, {
+        body: JSON.stringify(toPayload(editForm)),
+        method: "PUT"
+      });
+
+      setIncomes((current) => current.map((income) => (income.id === editingIncomeId ? body.income : income)));
+      closeEditModal();
+    } finally {
+      setOperationLabel("");
+    }
   }
 
   async function confirmDeleteIncome() {
@@ -141,11 +154,17 @@ export function EinkommenManager() {
       return;
     }
 
-    await requestJson(`/api/incomes/${incomeToDelete.id}`, {
-      method: "DELETE"
-    });
-    setIncomes((current) => current.filter((income) => income.id !== incomeToDelete.id));
-    setIncomeToDelete(null);
+    setOperationLabel("delete-income");
+
+    try {
+      await requestJson(`/api/incomes/${incomeToDelete.id}`, {
+        method: "DELETE"
+      });
+      setIncomes((current) => current.filter((income) => income.id !== incomeToDelete.id));
+      setIncomeToDelete(null);
+    } finally {
+      setOperationLabel("");
+    }
   }
 
   const visibleIncomes = incomes.filter((income) => (activeType === "recurring" ? income.recurring : !income.recurring));
@@ -245,6 +264,7 @@ export function EinkommenManager() {
           onClose={closeAddModal}
           onSubmit={handleSubmit}
           onUpdate={updateForm}
+          isSubmitting={operationLabel === "save-income"}
           title="Neue Einnahme hinzufugen"
         />
       ) : null}
@@ -255,6 +275,7 @@ export function EinkommenManager() {
           onClose={closeEditModal}
           onSubmit={handleEditSubmit}
           onUpdate={updateEditForm}
+          isSubmitting={operationLabel === "edit-income"}
           title="Einnahme bearbeiten"
         />
       ) : null}
@@ -276,9 +297,14 @@ export function EinkommenManager() {
               <button className="button secondary" type="button" onClick={() => setIncomeToDelete(null)}>
                 Abbrechen
               </button>
-              <button className="button danger" type="button" onClick={confirmDeleteIncome}>
+              <button
+                className="button danger"
+                type="button"
+                onClick={confirmDeleteIncome}
+                disabled={operationLabel === "delete-income"}
+              >
                 <Trash2 size={18} aria-hidden="true" />
-                Loschen
+                {operationLabel === "delete-income" ? "Loschen..." : "Loschen"}
               </button>
             </div>
           </section>
@@ -293,12 +319,14 @@ function IncomeModal({
   onClose,
   onSubmit,
   onUpdate,
+  isSubmitting,
   title
 }: {
   form: IncomeForm;
   onClose: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onUpdate: (field: keyof IncomeForm, value: string | boolean) => void;
+  isSubmitting: boolean;
   title: string;
 }) {
   return (
@@ -377,9 +405,9 @@ function IncomeModal({
             <button className="button secondary" type="button" onClick={onClose}>
               Abbrechen
             </button>
-            <button className="button primary" type="submit">
+            <button className="button primary" type="submit" disabled={isSubmitting}>
               <Save size={18} aria-hidden="true" />
-              Speichern
+              {isSubmitting ? "Speichern..." : "Speichern"}
             </button>
           </div>
         </form>

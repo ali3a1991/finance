@@ -76,6 +76,7 @@ export function VersicherungManager() {
   const [insuranceToDelete, setInsuranceToDelete] = useState<Insurance | null>(null);
   const [form, setForm] = useState<InsuranceForm>(emptyForm);
   const [editForm, setEditForm] = useState<InsuranceForm>(emptyForm);
+  const [operationLabel, setOperationLabel] = useState("");
 
   useEffect(() => {
     async function loadInsurances() {
@@ -119,42 +120,52 @@ export function VersicherungManager() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setOperationLabel("save-insurance");
 
-    const body = await requestJson<{ insurance: Insurance }>("/api/insurances", {
-      body: JSON.stringify({
-        name: `${form.coverage} - ${form.provider}`.trim(),
-        provider: form.provider.trim(),
-        coverage: form.coverage.trim(),
-        monthlyPremium: Number(form.monthlyPremium),
-        debitDay: Number(form.debitDay),
-        renewalDate: form.hasNoRenewalDate ? null : form.renewalDate
-      }),
-      method: "POST"
-    });
+    try {
+      const body = await requestJson<{ insurance: Insurance }>("/api/insurances", {
+        body: JSON.stringify({
+          name: `${form.coverage} - ${form.provider}`.trim(),
+          provider: form.provider.trim(),
+          coverage: form.coverage.trim(),
+          monthlyPremium: Number(form.monthlyPremium),
+          debitDay: Number(form.debitDay),
+          renewalDate: form.hasNoRenewalDate ? null : form.renewalDate
+        }),
+        method: "POST"
+      });
 
-    setInsurances((current) => [body.insurance, ...current]);
-    closeAddModal();
+      setInsurances((current) => [body.insurance, ...current]);
+      closeAddModal();
+    } finally {
+      setOperationLabel("");
+    }
   }
 
   async function handleEditSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setOperationLabel("edit-insurance");
 
-    const body = await requestJson<{ insurance: Insurance }>(`/api/insurances/${editingInsuranceId}`, {
-      body: JSON.stringify({
-        name: `${editForm.coverage} - ${editForm.provider}`.trim(),
-        provider: editForm.provider.trim(),
-        coverage: editForm.coverage.trim(),
-        monthlyPremium: Number(editForm.monthlyPremium),
-        debitDay: Number(editForm.debitDay),
-        renewalDate: editForm.hasNoRenewalDate ? null : editForm.renewalDate
-      }),
-      method: "PUT"
-    });
+    try {
+      const body = await requestJson<{ insurance: Insurance }>(`/api/insurances/${editingInsuranceId}`, {
+        body: JSON.stringify({
+          name: `${editForm.coverage} - ${editForm.provider}`.trim(),
+          provider: editForm.provider.trim(),
+          coverage: editForm.coverage.trim(),
+          monthlyPremium: Number(editForm.monthlyPremium),
+          debitDay: Number(editForm.debitDay),
+          renewalDate: editForm.hasNoRenewalDate ? null : editForm.renewalDate
+        }),
+        method: "PUT"
+      });
 
-    setInsurances((current) =>
-      current.map((insurance) => (insurance.id === editingInsuranceId ? body.insurance : insurance))
-    );
-    closeEditModal();
+      setInsurances((current) =>
+        current.map((insurance) => (insurance.id === editingInsuranceId ? body.insurance : insurance))
+      );
+      closeEditModal();
+    } finally {
+      setOperationLabel("");
+    }
   }
 
   async function confirmDeleteInsurance() {
@@ -162,11 +173,17 @@ export function VersicherungManager() {
       return;
     }
 
-    await requestJson(`/api/insurances/${insuranceToDelete.id}`, {
-      method: "DELETE"
-    });
-    setInsurances((current) => current.filter((insurance) => insurance.id !== insuranceToDelete.id));
-    setInsuranceToDelete(null);
+    setOperationLabel("delete-insurance");
+
+    try {
+      await requestJson(`/api/insurances/${insuranceToDelete.id}`, {
+        method: "DELETE"
+      });
+      setInsurances((current) => current.filter((insurance) => insurance.id !== insuranceToDelete.id));
+      setInsuranceToDelete(null);
+    } finally {
+      setOperationLabel("");
+    }
   }
 
   return (
@@ -323,9 +340,9 @@ export function VersicherungManager() {
                 <button className="button secondary" type="button" onClick={closeAddModal}>
                   Abbrechen
                 </button>
-                <button className="button primary" type="submit">
+                <button className="button primary" type="submit" disabled={operationLabel === "save-insurance"}>
                   <Save size={18} aria-hidden="true" />
-                  Speichern
+                  {operationLabel === "save-insurance" ? "Speichern..." : "Speichern"}
                 </button>
               </div>
             </form>
@@ -355,9 +372,14 @@ export function VersicherungManager() {
               <button className="button secondary" type="button" onClick={() => setInsuranceToDelete(null)}>
                 Abbrechen
               </button>
-              <button className="button danger" type="button" onClick={confirmDeleteInsurance}>
+              <button
+                className="button danger"
+                type="button"
+                onClick={confirmDeleteInsurance}
+                disabled={operationLabel === "delete-insurance"}
+              >
                 <Trash2 size={18} aria-hidden="true" />
-                Loschen
+                {operationLabel === "delete-insurance" ? "Loschen..." : "Loschen"}
               </button>
             </div>
           </section>
@@ -454,9 +476,9 @@ export function VersicherungManager() {
                 <button className="button secondary" type="button" onClick={closeEditModal}>
                   Abbrechen
                 </button>
-                <button className="button primary" type="submit">
+                <button className="button primary" type="submit" disabled={operationLabel === "edit-insurance"}>
                   <Save size={18} aria-hidden="true" />
-                  Speichern
+                  {operationLabel === "edit-insurance" ? "Speichern..." : "Speichern"}
                 </button>
               </div>
             </form>

@@ -63,6 +63,7 @@ export function HomeDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [payments, setPayments] = useState<MonthlyPayment[]>([]);
   const [summary, setSummary] = useState<DashboardSummary>(emptySummary);
+  const [updatingPaymentId, setUpdatingPaymentId] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadDashboard() {
@@ -76,12 +77,18 @@ export function HomeDashboard() {
   }, []);
 
   async function updatePayment(id: string, paidAmount: number) {
-    const body = await requestJson<{ payment: MonthlyPayment }>("/api/monthly-payments", {
-      body: JSON.stringify({ id, paidAmount }),
-      method: "PATCH"
-    });
+    setUpdatingPaymentId(id);
 
-    setPayments((current) => current.map((payment) => (payment.id === id ? body.payment : payment)));
+    try {
+      const body = await requestJson<{ payment: MonthlyPayment }>("/api/monthly-payments", {
+        body: JSON.stringify({ id, paidAmount }),
+        method: "PATCH"
+      });
+
+      setPayments((current) => current.map((payment) => (payment.id === id ? body.payment : payment)));
+    } finally {
+      setUpdatingPaymentId(null);
+    }
   }
 
   function handlePartialChange(payment: MonthlyPayment, event: ChangeEvent<HTMLInputElement>) {
@@ -170,6 +177,7 @@ export function HomeDashboard() {
           {payments.map((payment) => {
             const isPaid = payment.paidAmount >= payment.amount;
             const isPartial = payment.paidAmount > 0 && !isPaid;
+            const isUpdating = updatingPaymentId === payment.id;
 
             return (
               <article
@@ -181,6 +189,7 @@ export function HomeDashboard() {
                   type="button"
                   onClick={() => updatePayment(payment.id, isPaid ? 0 : payment.amount)}
                   aria-label={`${payment.title} als bezahlt markieren`}
+                  disabled={isUpdating}
                 >
                   {isPaid ? <Check size={18} aria-hidden="true" /> : null}
                 </button>
@@ -192,7 +201,7 @@ export function HomeDashboard() {
                 </div>
                 <div className="payment-amount">
                   <strong>{formatCurrency(payment.amount)}</strong>
-                  <span>{isPaid ? "Bezahlt" : isPartial ? "Teilweise bezahlt" : "Offen"}</span>
+                  <span>{isUpdating ? "Aktualisiert..." : isPaid ? "Bezahlt" : isPartial ? "Teilweise bezahlt" : "Offen"}</span>
                 </div>
                 <label className="partial-input">
                   <span>Bezahlt</span>
@@ -203,6 +212,7 @@ export function HomeDashboard() {
                     type="number"
                     value={payment.paidAmount}
                     onChange={(event) => handlePartialChange(payment, event)}
+                    disabled={isUpdating}
                   />
                 </label>
               </article>

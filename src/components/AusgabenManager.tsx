@@ -70,6 +70,7 @@ export function AusgabenManager({ initialType }: { initialType: "einmalig" | "wi
   const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [operationLabel, setOperationLabel] = useState("");
   const activeType = initialType;
 
   useEffect(() => {
@@ -104,13 +105,19 @@ export function AusgabenManager({ initialType }: { initialType: "einmalig" | "wi
 
   async function handleEditSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const body = await requestJson<{ expense: Expense }>(`/api/expenses/${editingExpenseId}`, {
-      body: JSON.stringify(toPayload(editForm)),
-      method: "PUT"
-    });
+    setOperationLabel("edit-expense");
 
-    setExpenses((current) => current.map((expense) => (expense.id === editingExpenseId ? body.expense : expense)));
-    closeEditModal();
+    try {
+      const body = await requestJson<{ expense: Expense }>(`/api/expenses/${editingExpenseId}`, {
+        body: JSON.stringify(toPayload(editForm)),
+        method: "PUT"
+      });
+
+      setExpenses((current) => current.map((expense) => (expense.id === editingExpenseId ? body.expense : expense)));
+      closeEditModal();
+    } finally {
+      setOperationLabel("");
+    }
   }
 
   async function confirmDeleteExpense() {
@@ -118,11 +125,17 @@ export function AusgabenManager({ initialType }: { initialType: "einmalig" | "wi
       return;
     }
 
-    await requestJson(`/api/expenses/${expenseToDelete.id}`, {
-      method: "DELETE"
-    });
-    setExpenses((current) => current.filter((expense) => expense.id !== expenseToDelete.id));
-    setExpenseToDelete(null);
+    setOperationLabel("delete-expense");
+
+    try {
+      await requestJson(`/api/expenses/${expenseToDelete.id}`, {
+        method: "DELETE"
+      });
+      setExpenses((current) => current.filter((expense) => expense.id !== expenseToDelete.id));
+      setExpenseToDelete(null);
+    } finally {
+      setOperationLabel("");
+    }
   }
 
   const visibleExpenses = expenses.filter((expense) =>
@@ -211,6 +224,7 @@ export function AusgabenManager({ initialType }: { initialType: "einmalig" | "wi
           onClose={closeEditModal}
           onSubmit={handleEditSubmit}
           onUpdate={updateEditForm}
+          isSubmitting={operationLabel === "edit-expense"}
         />
       ) : null}
 
@@ -231,9 +245,14 @@ export function AusgabenManager({ initialType }: { initialType: "einmalig" | "wi
               <button className="button secondary" type="button" onClick={() => setExpenseToDelete(null)}>
                 Abbrechen
               </button>
-              <button className="button danger" type="button" onClick={confirmDeleteExpense}>
+              <button
+                className="button danger"
+                type="button"
+                onClick={confirmDeleteExpense}
+                disabled={operationLabel === "delete-expense"}
+              >
                 <Trash2 size={18} aria-hidden="true" />
-                Loschen
+                {operationLabel === "delete-expense" ? "Loschen..." : "Loschen"}
               </button>
             </div>
           </section>
@@ -247,12 +266,14 @@ function ExpenseModal({
   form,
   onClose,
   onSubmit,
-  onUpdate
+  onUpdate,
+  isSubmitting
 }: {
   form: ExpenseForm;
   onClose: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onUpdate: (field: keyof ExpenseForm, value: string | boolean) => void;
+  isSubmitting: boolean;
 }) {
   return (
     <div className="modal-backdrop" role="presentation">
@@ -315,9 +336,9 @@ function ExpenseModal({
             <button className="button secondary" type="button" onClick={onClose}>
               Abbrechen
             </button>
-            <button className="button primary" type="submit">
+            <button className="button primary" type="submit" disabled={isSubmitting}>
               <Save size={18} aria-hidden="true" />
-              Speichern
+              {isSubmitting ? "Speichern..." : "Speichern"}
             </button>
           </div>
         </form>
