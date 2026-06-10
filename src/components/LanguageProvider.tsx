@@ -53,11 +53,6 @@ const translations = {
         title: "Ausgaben erfassen und auswerten.",
         description: "Alle einzelnen Ausgaben werden klar erfasst und in einer Tabelle gepflegt."
       },
-      expenseCapture: {
-        eyebrow: "Ausgaben / Erfassung",
-        title: "Neue Ausgabe eintragen.",
-        description: "Ein klares Formular fur schnelle Testbuchungen im Finanzmanager."
-      },
       contractsGeneral: {
         eyebrow: "Verträge",
         title: "Allgemeine Verträge.",
@@ -197,6 +192,7 @@ const translations = {
       date: "Datum",
       amount: "Betrag",
       empty: "Keine Ausgaben in dieser Kategorie vorhanden.",
+      addTitle: "Neue Ausgabe eintragen",
       editTitle: "Ausgabe bearbeiten",
       deleteLabel: "Ausgabe loschen",
       deleteTitle: "Ausgabe wirklich loschen?",
@@ -299,11 +295,6 @@ const translations = {
         eyebrow: "Expenses",
         title: "Track and review expenses.",
         description: "All individual expenses are tracked clearly and managed in one table."
-      },
-      expenseCapture: {
-        eyebrow: "Expenses / Capture",
-        title: "Add a new expense.",
-        description: "A clear form for quick test bookings in the finance manager."
       },
       contractsGeneral: {
         eyebrow: "Contracts",
@@ -444,6 +435,7 @@ const translations = {
       date: "Date",
       amount: "Amount",
       empty: "No expenses exist in this category.",
+      addTitle: "Add new expense",
       editTitle: "Edit expense",
       deleteLabel: "Delete expense",
       deleteTitle: "Delete this expense?",

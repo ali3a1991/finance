@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { Pencil, PlusCircle, Save, Trash2, X } from "lucide-react";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -40,6 +39,8 @@ export function AusgabenManager() {
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
   const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [form, setForm] = useState<ExpenseForm>(emptyForm);
+  const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [operationLabel, setOperationLabel] = useState("");
 
@@ -55,6 +56,32 @@ export function AusgabenManager() {
 
   function updateEditForm(field: keyof ExpenseForm, value: string) {
     setEditForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function updateForm(field: keyof ExpenseForm, value: string) {
+    setForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function closeAddModal() {
+    setIsOpen(false);
+    setForm(emptyForm);
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setOperationLabel("save-expense");
+
+    try {
+      const body = await requestJson<{ expense: Expense }>("/api/expenses", {
+        body: JSON.stringify(toPayload(form)),
+        method: "POST"
+      });
+
+      setExpenses((current) => [body.expense, ...current]);
+      closeAddModal();
+    } finally {
+      setOperationLabel("");
+    }
   }
 
   function openEditModal(expense: Expense) {
@@ -112,10 +139,10 @@ export function AusgabenManager() {
   return (
     <>
       <div className="action-row">
-        <Link className="button primary" href="/ausgaben/erfassung">
+        <button className="button primary" type="button" onClick={() => setIsOpen(true)}>
           <PlusCircle size={18} aria-hidden="true" />
           {t("expenses.add")}
-        </Link>
+        </button>
       </div>
 
       {isLoading ? <p className="muted-text">{t("expenses.loading")}</p> : null}
@@ -169,6 +196,17 @@ export function AusgabenManager() {
         ) : null}
       </section>
 
+      {isOpen ? (
+        <ExpenseModal
+          form={form}
+          onClose={closeAddModal}
+          onSubmit={handleSubmit}
+          onUpdate={updateForm}
+          isSubmitting={operationLabel === "save-expense"}
+          title={t("expenses.addTitle")}
+        />
+      ) : null}
+
       {editingExpenseId ? (
         <ExpenseModal
           form={editForm}
@@ -176,6 +214,7 @@ export function AusgabenManager() {
           onSubmit={handleEditSubmit}
           onUpdate={updateEditForm}
           isSubmitting={operationLabel === "edit-expense"}
+          title={t("expenses.editTitle")}
         />
       ) : null}
 
@@ -218,13 +257,15 @@ function ExpenseModal({
   onClose,
   onSubmit,
   onUpdate,
-  isSubmitting
+  isSubmitting,
+  title
 }: {
   form: ExpenseForm;
   onClose: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onUpdate: (field: keyof ExpenseForm, value: string) => void;
   isSubmitting: boolean;
+  title: string;
 }) {
   const { t } = useLanguage();
 
@@ -234,7 +275,7 @@ function ExpenseModal({
         <div className="modal-header">
           <div>
             <span>{t("nav.expenses")}</span>
-            <h2 id="expense-modal-title">{t("expenses.editTitle")}</h2>
+            <h2 id="expense-modal-title">{title}</h2>
           </div>
           <button className="icon-button" type="button" onClick={onClose} aria-label={t("common.closeDialog")}>
             <X size={20} aria-hidden="true" />
