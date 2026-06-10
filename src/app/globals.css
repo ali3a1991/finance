@@ -1184,12 +1184,50 @@ th {
   }
 
   .payment-row {
-    grid-template-columns: 40px minmax(0, 1fr);
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 10px;
+    padding: 10px;
   }
 
-  .payment-amount,
+  .payment-main {
+    min-width: 0;
+  }
+
+  .payment-main strong {
+    font-size: 1rem;
+  }
+
+  .payment-main span {
+    font-size: 0.8rem;
+  }
+
+  .payment-amount {
+    grid-column: 3;
+    justify-items: end;
+    min-width: 82px;
+    text-align: right;
+  }
+
+  .payment-amount strong {
+    font-size: 1rem;
+  }
+
+  .payment-amount span {
+    font-size: 0.78rem;
+  }
+
   .partial-input {
-    grid-column: 2;
+    grid-column: 2 / -1;
+  }
+
+  .partial-input input {
+    min-height: 34px;
+  }
+
+  .payment-check {
+    width: 34px;
+    height: 34px;
   }
 
   .modal-backdrop {
