@@ -612,7 +612,8 @@ function getMonthKeyFromPaymentId(id: string) {
 }
 
 function getCurrentMonthDate(day: number, date = new Date()) {
-  const safeDay = Math.min(Math.max(day, 1), 28);
+  const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  const safeDay = Math.min(Math.max(day, 1), lastDayOfMonth);
   return new Date(date.getFullYear(), date.getMonth(), safeDay).toISOString();
 }
 
@@ -631,6 +632,22 @@ function isActiveInMonth(startValue: string | null | undefined, endValue: string
   const endsAfterMonthStarts = !end || end.getTime() >= monthStart;
 
   return startsBeforeMonthEnds && endsAfterMonthStarts;
+}
+
+function hasDebitDateReachedStart(startValue: string | null | undefined, debitDay: number, date = new Date()) {
+  if (!startValue) {
+    return true;
+  }
+
+  const start = new Date(`${startValue}T00:00:00`);
+
+  if (start.getFullYear() !== date.getFullYear() || start.getMonth() !== date.getMonth()) {
+    return true;
+  }
+
+  const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  const safeDebitDay = Math.min(Math.max(debitDay, 1), lastDayOfMonth);
+  return safeDebitDay >= start.getDate();
 }
 
 function getPaymentStatus(db: FinanceDb, id: string) {
@@ -658,6 +675,7 @@ export function buildMonthlyPayments(db: FinanceDb, date = new Date()): MonthlyP
 
   const insurancePayments: MonthlyPayment[] = db.insurances
     .filter((insurance) => isActiveInMonth(insurance.startDate, insurance.endDate ?? insurance.renewalDate, date))
+    .filter((insurance) => hasDebitDateReachedStart(insurance.startDate, insurance.debitDay, date))
     .map((insurance) => {
       const id = `insurance:${insurance.id}:${monthKey}`;
 
@@ -693,6 +711,7 @@ export function buildMonthlyPayments(db: FinanceDb, date = new Date()): MonthlyP
     .filter((contract) => contract.status === "Aktiv")
     .filter((contract) => isSameOrBeforeCurrentMonth(new Date(`${contract.startDate}T00:00:00`), date))
     .filter((contract) => isActiveInMonth(contract.startDate, contract.endDate, date))
+    .filter((contract) => hasDebitDateReachedStart(contract.startDate, contract.debitDay, date))
     .map((contract) => {
       const id = `contract:${contract.id}:${monthKey}`;
 
