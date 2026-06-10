@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireApiAuth } from "@/lib/auth";
+import { requireWriteAccess } from "@/lib/auth";
 import { deleteLoan, updateLoan } from "@/lib/serverDb";
 import type { Loan } from "@/lib/types";
 
@@ -8,7 +8,7 @@ type RouteContext = {
 };
 
 export async function PUT(request: NextRequest, context: RouteContext) {
-  const auth = requireApiAuth(request);
+  const auth = requireWriteAccess(request);
 
   if (auth.error) {
     return auth.error;
@@ -16,7 +16,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
   const { id } = await context.params;
   const body = (await request.json()) as Omit<Loan, "id" | "status">;
-  const loan = await updateLoan(id, body);
+  const loan = await updateLoan(auth.payload.ownerId, id, body);
 
   if (!loan) {
     return NextResponse.json({ message: "Kredit nicht gefunden." }, { status: 404 });
@@ -26,14 +26,14 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 }
 
 export async function DELETE(request: NextRequest, context: RouteContext) {
-  const auth = requireApiAuth(request);
+  const auth = requireWriteAccess(request);
 
   if (auth.error) {
     return auth.error;
   }
 
   const { id } = await context.params;
-  const deleted = await deleteLoan(id);
+  const deleted = await deleteLoan(auth.payload.ownerId, id);
 
   if (!deleted) {
     return NextResponse.json({ message: "Kredit nicht gefunden." }, { status: 404 });

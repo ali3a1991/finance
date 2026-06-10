@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import type { Expense, FinanceDb, GeneralContract, Income, Insurance, Loan, MonthlyPayment } from "@/lib/types";
+import { getPasswordHash } from "@/lib/auth";
+import type { AccessLevel, Expense, FinanceDb, GeneralContract, Income, Insurance, Loan, MonthlyPayment, SharedUser } from "@/lib/types";
 
 function toDateInput(date: Date) {
   return date.toISOString().slice(0, 10);
@@ -98,15 +99,15 @@ function mapExpense(expense: {
   };
 }
 
-export async function readFinanceDb(): Promise<FinanceDb> {
+export async function readFinanceDb(ownerId: string): Promise<FinanceDb> {
   const [loans, insurances, generalContracts, incomes, expenses, monthlyBudgets, paymentConfirmations] = await Promise.all([
-    prisma.loan.findMany({ orderBy: { createdAt: "desc" } }),
-    prisma.insurance.findMany({ orderBy: { createdAt: "desc" } }),
-    prisma.generalContract.findMany({ orderBy: { createdAt: "desc" } }),
-    prisma.income.findMany({ orderBy: { createdAt: "desc" } }),
-    prisma.expense.findMany({ orderBy: { createdAt: "desc" } }),
-    prisma.monthlyBudget.findMany({ orderBy: { category: "asc" } }),
-    prisma.paymentConfirmation.findMany()
+    prisma.loan.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } }),
+    prisma.insurance.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } }),
+    prisma.generalContract.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } }),
+    prisma.income.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } }),
+    prisma.expense.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } }),
+    prisma.monthlyBudget.findMany({ orderBy: { category: "asc" }, where: { ownerId } }),
+    prisma.paymentConfirmation.findMany({ where: { ownerId } })
   ]);
 
   return {
@@ -133,59 +134,71 @@ export async function writeFinanceDb() {
   throw new Error("writeFinanceDb is not used with PostgreSQL. Use typed CRUD helpers instead.");
 }
 
-export async function listLoans(): Promise<Loan[]> {
-  const loans = await prisma.loan.findMany({ orderBy: { createdAt: "desc" } });
+export async function listLoans(ownerId: string): Promise<Loan[]> {
+  const loans = await prisma.loan.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } });
   return loans.map(mapLoan);
 }
 
-export async function createLoan(loan: Loan): Promise<Loan> {
+export async function createLoan(ownerId: string, loan: Loan): Promise<Loan> {
   const createdLoan = await prisma.loan.create({
     data: {
       ...loan,
       endDate: loan.endDate ? toDate(loan.endDate) : null,
       nextPayment: toDate(loan.nextPayment),
+      ownerId,
       startDate: loan.startDate ? toDate(loan.startDate) : null
     }
   });
   return mapLoan(createdLoan);
 }
 
-export async function updateLoan(id: string, patch: Omit<Loan, "id" | "status">): Promise<Loan | null> {
+export async function updateLoan(ownerId: string, id: string, patch: Omit<Loan, "id" | "status">): Promise<Loan | null> {
   try {
-    const loan = await prisma.loan.update({
+    const result = await prisma.loan.updateMany({
       data: {
         ...patch,
         endDate: patch.endDate ? toDate(patch.endDate) : null,
         nextPayment: toDate(patch.nextPayment),
         startDate: patch.startDate ? toDate(patch.startDate) : null
       },
-      where: { id }
+      where: { id, ownerId }
     });
+
+    if (result.count === 0) {
+      return null;
+    }
+
+    const loan = await prisma.loan.findFirst({ where: { id, ownerId } });
+    if (!loan) {
+      return null;
+    }
+
     return mapLoan(loan);
   } catch {
     return null;
   }
 }
 
-export async function deleteLoan(id: string): Promise<boolean> {
+export async function deleteLoan(ownerId: string, id: string): Promise<boolean> {
   try {
-    await prisma.loan.delete({ where: { id } });
-    return true;
+    const result = await prisma.loan.deleteMany({ where: { id, ownerId } });
+    return result.count > 0;
   } catch {
     return false;
   }
 }
 
-export async function listInsurances(): Promise<Insurance[]> {
-  const insurances = await prisma.insurance.findMany({ orderBy: { createdAt: "desc" } });
+export async function listInsurances(ownerId: string): Promise<Insurance[]> {
+  const insurances = await prisma.insurance.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } });
   return insurances.map(mapInsurance);
 }
 
-export async function createInsurance(insurance: Insurance): Promise<Insurance> {
+export async function createInsurance(ownerId: string, insurance: Insurance): Promise<Insurance> {
   const createdInsurance = await prisma.insurance.create({
     data: {
       ...insurance,
       endDate: insurance.endDate ? toDate(insurance.endDate) : null,
+      ownerId,
       renewalDate: insurance.renewalDate ? toDate(insurance.renewalDate) : null,
       startDate: insurance.startDate ? toDate(insurance.startDate) : null
     }
@@ -193,43 +206,54 @@ export async function createInsurance(insurance: Insurance): Promise<Insurance> 
   return mapInsurance(createdInsurance);
 }
 
-export async function updateInsurance(id: string, patch: Omit<Insurance, "id">): Promise<Insurance | null> {
+export async function updateInsurance(ownerId: string, id: string, patch: Omit<Insurance, "id">): Promise<Insurance | null> {
   try {
-    const insurance = await prisma.insurance.update({
+    const result = await prisma.insurance.updateMany({
       data: {
         ...patch,
         endDate: patch.endDate ? toDate(patch.endDate) : null,
         renewalDate: patch.renewalDate ? toDate(patch.renewalDate) : null,
         startDate: patch.startDate ? toDate(patch.startDate) : null
       },
-      where: { id }
+      where: { id, ownerId }
     });
+
+    if (result.count === 0) {
+      return null;
+    }
+
+    const insurance = await prisma.insurance.findFirst({ where: { id, ownerId } });
+    if (!insurance) {
+      return null;
+    }
+
     return mapInsurance(insurance);
   } catch {
     return null;
   }
 }
 
-export async function deleteInsurance(id: string): Promise<boolean> {
+export async function deleteInsurance(ownerId: string, id: string): Promise<boolean> {
   try {
-    await prisma.insurance.delete({ where: { id } });
-    return true;
+    const result = await prisma.insurance.deleteMany({ where: { id, ownerId } });
+    return result.count > 0;
   } catch {
     return false;
   }
 }
 
-export async function listGeneralContracts(): Promise<GeneralContract[]> {
-  const contracts = await prisma.generalContract.findMany({ orderBy: { createdAt: "desc" } });
+export async function listGeneralContracts(ownerId: string): Promise<GeneralContract[]> {
+  const contracts = await prisma.generalContract.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } });
   return contracts.map(mapGeneralContract);
 }
 
-export async function createGeneralContract(contract: GeneralContract): Promise<GeneralContract> {
+export async function createGeneralContract(ownerId: string, contract: GeneralContract): Promise<GeneralContract> {
   const createdContract = await prisma.generalContract.create({
     data: {
       ...contract,
       endDate: contract.endDate ? toDate(contract.endDate) : null,
       note: contract.note || null,
+      ownerId,
       startDate: toDate(contract.startDate)
     }
   });
@@ -237,109 +261,142 @@ export async function createGeneralContract(contract: GeneralContract): Promise<
 }
 
 export async function updateGeneralContract(
+  ownerId: string,
   id: string,
   patch: Omit<GeneralContract, "id">
 ): Promise<GeneralContract | null> {
   try {
-    const contract = await prisma.generalContract.update({
+    const result = await prisma.generalContract.updateMany({
       data: {
         ...patch,
         endDate: patch.endDate ? toDate(patch.endDate) : null,
         note: patch.note || null,
         startDate: toDate(patch.startDate)
       },
-      where: { id }
+      where: { id, ownerId }
     });
+
+    if (result.count === 0) {
+      return null;
+    }
+
+    const contract = await prisma.generalContract.findFirst({ where: { id, ownerId } });
+    if (!contract) {
+      return null;
+    }
+
     return mapGeneralContract(contract);
   } catch {
     return null;
   }
 }
 
-export async function deleteGeneralContract(id: string): Promise<boolean> {
+export async function deleteGeneralContract(ownerId: string, id: string): Promise<boolean> {
   try {
-    await prisma.generalContract.delete({ where: { id } });
-    return true;
+    const result = await prisma.generalContract.deleteMany({ where: { id, ownerId } });
+    return result.count > 0;
   } catch {
     return false;
   }
 }
 
-export async function listIncomes(): Promise<Income[]> {
-  const incomes = await prisma.income.findMany({ orderBy: { createdAt: "desc" } });
+export async function listIncomes(ownerId: string): Promise<Income[]> {
+  const incomes = await prisma.income.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } });
   return incomes.map(mapIncome);
 }
 
-export async function createIncome(income: Income): Promise<Income> {
+export async function createIncome(ownerId: string, income: Income): Promise<Income> {
   const createdIncome = await prisma.income.create({
     data: {
       ...income,
       date: toDate(income.date),
-      entryDay: income.entryDay ?? null
+      entryDay: income.entryDay ?? null,
+      ownerId
     }
   });
   return mapIncome(createdIncome);
 }
 
-export async function updateIncome(id: string, patch: Omit<Income, "id">): Promise<Income | null> {
+export async function updateIncome(ownerId: string, id: string, patch: Omit<Income, "id">): Promise<Income | null> {
   try {
-    const income = await prisma.income.update({
+    const result = await prisma.income.updateMany({
       data: {
         ...patch,
         date: toDate(patch.date),
         entryDay: patch.entryDay ?? null
       },
-      where: { id }
+      where: { id, ownerId }
     });
+
+    if (result.count === 0) {
+      return null;
+    }
+
+    const income = await prisma.income.findFirst({ where: { id, ownerId } });
+    if (!income) {
+      return null;
+    }
+
     return mapIncome(income);
   } catch {
     return null;
   }
 }
 
-export async function deleteIncome(id: string): Promise<boolean> {
+export async function deleteIncome(ownerId: string, id: string): Promise<boolean> {
   try {
-    await prisma.income.delete({ where: { id } });
-    return true;
+    const result = await prisma.income.deleteMany({ where: { id, ownerId } });
+    return result.count > 0;
   } catch {
     return false;
   }
 }
 
-export async function listExpenses(): Promise<Expense[]> {
-  const expenses = await prisma.expense.findMany({ orderBy: { date: "desc" } });
+export async function listExpenses(ownerId: string): Promise<Expense[]> {
+  const expenses = await prisma.expense.findMany({ orderBy: { date: "desc" }, where: { ownerId } });
   return expenses.map(mapExpense);
 }
 
-export async function createExpense(expense: Expense): Promise<Expense> {
+export async function createExpense(ownerId: string, expense: Expense): Promise<Expense> {
   const createdExpense = await prisma.expense.create({
     data: {
       ...expense,
-      date: toDate(expense.date)
+      date: toDate(expense.date),
+      ownerId
     }
   });
   return mapExpense(createdExpense);
 }
 
-export async function updateExpense(id: string, patch: Omit<Expense, "id">): Promise<Expense | null> {
+export async function updateExpense(ownerId: string, id: string, patch: Omit<Expense, "id">): Promise<Expense | null> {
   try {
-    const expense = await prisma.expense.update({
+    const result = await prisma.expense.updateMany({
       data: {
         ...patch,
         date: toDate(patch.date)
       },
-      where: { id }
+      where: { id, ownerId }
     });
+
+    if (result.count === 0) {
+      return null;
+    }
+
+    const expense = await prisma.expense.findFirst({ where: { id, ownerId } });
+    if (!expense) {
+      return null;
+    }
+
     return mapExpense(expense);
   } catch {
     return null;
   }
 }
 
-export async function deleteExpense(id: string): Promise<boolean> {
+export async function deleteExpense(ownerId: string, id: string): Promise<boolean> {
   try {
-    await prisma.expense.delete({ where: { id } });
-    return true;
+    const result = await prisma.expense.deleteMany({ where: { id, ownerId } });
+    return result.count > 0;
   } catch {
     return false;
   }
@@ -470,8 +527,8 @@ export function buildMonthlyPayments(db: FinanceDb, date = new Date()): MonthlyP
   );
 }
 
-export async function getDashboardData(monthKey?: string | null) {
-  const db = await readFinanceDb();
+export async function getDashboardData(ownerId: string, monthKey?: string | null) {
+  const db = await readFinanceDb(ownerId);
   const selectedDate = getDateFromMonthKey(monthKey);
   const monthlyPayments = buildMonthlyPayments(db, selectedDate);
   const incomeTotal = (db.incomes ?? [])
@@ -512,8 +569,8 @@ export async function getDashboardData(monthKey?: string | null) {
   };
 }
 
-export async function updateMonthlyPayment(id: string, paidAmount: number) {
-  const db = await readFinanceDb();
+export async function updateMonthlyPayment(ownerId: string, id: string, paidAmount: number) {
+  const db = await readFinanceDb(ownerId);
   const payments = buildMonthlyPayments(db, getDateFromMonthKey(getMonthKeyFromPaymentId(id)));
   const payment = payments.find((item) => item.id === id);
 
@@ -525,6 +582,7 @@ export async function updateMonthlyPayment(id: string, paidAmount: number) {
   const confirmation = await prisma.paymentConfirmation.upsert({
     create: {
       id,
+      ownerId,
       paidAmount: normalizedPaidAmount
     },
     update: {
@@ -534,4 +592,83 @@ export async function updateMonthlyPayment(id: string, paidAmount: number) {
   });
 
   return { ...payment, paidAmount: confirmation.paidAmount };
+}
+
+function mapSharedUser(user: {
+  id: string;
+  username: string;
+  accessLevel: string;
+  ownerId: string;
+  createdAt: Date;
+}): SharedUser {
+  return {
+    accessLevel: user.accessLevel === "readonly" ? "readonly" : "readwrite",
+    createdAt: user.createdAt.toISOString(),
+    id: user.id,
+    ownerId: user.ownerId,
+    username: user.username
+  };
+}
+
+export async function listSharedUsers(ownerId: string): Promise<SharedUser[]> {
+  const users = await prisma.appUser.findMany({
+    orderBy: { createdAt: "desc" },
+    where: { ownerId }
+  });
+
+  return users.map(mapSharedUser);
+}
+
+export async function createSharedUser({
+  accessLevel,
+  ownerId,
+  password,
+  username
+}: {
+  accessLevel: AccessLevel;
+  ownerId: string;
+  password: string;
+  username: string;
+}): Promise<SharedUser> {
+  const user = await prisma.appUser.create({
+    data: {
+      accessLevel,
+      ownerId,
+      passwordHash: getPasswordHash(password),
+      username
+    }
+  });
+
+  return mapSharedUser(user);
+}
+
+export async function updateSharedUser(
+  ownerId: string,
+  id: string,
+  patch: {
+    accessLevel: AccessLevel;
+    password?: string;
+    username: string;
+  }
+): Promise<SharedUser | null> {
+  const result = await prisma.appUser.updateMany({
+    data: {
+      accessLevel: patch.accessLevel,
+      passwordHash: patch.password ? getPasswordHash(patch.password) : undefined,
+      username: patch.username
+    },
+    where: { id, ownerId }
+  });
+
+  if (result.count === 0) {
+    return null;
+  }
+
+  const user = await prisma.appUser.findFirst({ where: { id, ownerId } });
+  return user ? mapSharedUser(user) : null;
+}
+
+export async function deleteSharedUser(ownerId: string, id: string) {
+  const result = await prisma.appUser.deleteMany({ where: { id, ownerId } });
+  return result.count > 0;
 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireApiAuth } from "@/lib/auth";
+import { requireApiAuth, requireWriteAccess } from "@/lib/auth";
 import { createGeneralContract, listGeneralContracts } from "@/lib/serverDb";
 import type { GeneralContract } from "@/lib/types";
 
@@ -25,11 +25,11 @@ export async function GET(request: NextRequest) {
     return auth.error;
   }
 
-  return NextResponse.json({ contracts: await listGeneralContracts() });
+  return NextResponse.json({ contracts: await listGeneralContracts(auth.payload.ownerId) });
 }
 
 export async function POST(request: NextRequest) {
-  const auth = requireApiAuth(request);
+  const auth = requireWriteAccess(request);
 
   if (auth.error) {
     return auth.error;
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "Ungultige Vertragsdaten." }, { status: 400 });
   }
 
-  const contract = await createGeneralContract({
+  const contract = await createGeneralContract(auth.payload.ownerId, {
     ...body,
     id: `contract-${Date.now()}`,
     note: body.note || null

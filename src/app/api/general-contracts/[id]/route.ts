@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireApiAuth } from "@/lib/auth";
+import { requireWriteAccess } from "@/lib/auth";
 import { deleteGeneralContract, updateGeneralContract } from "@/lib/serverDb";
 import type { GeneralContract } from "@/lib/types";
 
@@ -23,7 +23,7 @@ function isValidContract(body: Omit<GeneralContract, "id">) {
 }
 
 export async function PUT(request: NextRequest, context: RouteContext) {
-  const auth = requireApiAuth(request);
+  const auth = requireWriteAccess(request);
 
   if (auth.error) {
     return auth.error;
@@ -36,7 +36,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ message: "Ungultige Vertragsdaten." }, { status: 400 });
   }
 
-  const contract = await updateGeneralContract(id, { ...body, note: body.note || null });
+  const contract = await updateGeneralContract(auth.payload.ownerId, id, { ...body, note: body.note || null });
 
   if (!contract) {
     return NextResponse.json({ message: "Vertrag nicht gefunden." }, { status: 404 });
@@ -46,14 +46,14 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 }
 
 export async function DELETE(request: NextRequest, context: RouteContext) {
-  const auth = requireApiAuth(request);
+  const auth = requireWriteAccess(request);
 
   if (auth.error) {
     return auth.error;
   }
 
   const { id } = await context.params;
-  const deleted = await deleteGeneralContract(id);
+  const deleted = await deleteGeneralContract(auth.payload.ownerId, id);
 
   if (!deleted) {
     return NextResponse.json({ message: "Vertrag nicht gefunden." }, { status: 404 });

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireApiAuth } from "@/lib/auth";
+import { requireApiAuth, requireWriteAccess } from "@/lib/auth";
 import { createExpense, listExpenses } from "@/lib/serverDb";
 import type { Expense } from "@/lib/types";
 
@@ -10,11 +10,11 @@ export async function GET(request: NextRequest) {
     return auth.error;
   }
 
-  return NextResponse.json({ expenses: await listExpenses() });
+  return NextResponse.json({ expenses: await listExpenses(auth.payload.ownerId) });
 }
 
 export async function POST(request: NextRequest) {
-  const auth = requireApiAuth(request);
+  const auth = requireWriteAccess(request);
 
   if (auth.error) {
     return auth.error;
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "Ungultige Ausgabendaten." }, { status: 400 });
   }
 
-  const expense = await createExpense({
+  const expense = await createExpense(auth.payload.ownerId, {
     ...body,
     id: `exp-${Date.now()}`
   });

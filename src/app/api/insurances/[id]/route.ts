@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireApiAuth } from "@/lib/auth";
+import { requireWriteAccess } from "@/lib/auth";
 import { deleteInsurance, updateInsurance } from "@/lib/serverDb";
 import type { Insurance } from "@/lib/types";
 
@@ -8,7 +8,7 @@ type RouteContext = {
 };
 
 export async function PUT(request: NextRequest, context: RouteContext) {
-  const auth = requireApiAuth(request);
+  const auth = requireWriteAccess(request);
 
   if (auth.error) {
     return auth.error;
@@ -16,7 +16,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
   const { id } = await context.params;
   const body = (await request.json()) as Omit<Insurance, "id">;
-  const insurance = await updateInsurance(id, body);
+  const insurance = await updateInsurance(auth.payload.ownerId, id, body);
 
   if (!insurance) {
     return NextResponse.json({ message: "Versicherung nicht gefunden." }, { status: 404 });
@@ -26,14 +26,14 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 }
 
 export async function DELETE(request: NextRequest, context: RouteContext) {
-  const auth = requireApiAuth(request);
+  const auth = requireWriteAccess(request);
 
   if (auth.error) {
     return auth.error;
   }
 
   const { id } = await context.params;
-  const deleted = await deleteInsurance(id);
+  const deleted = await deleteInsurance(auth.payload.ownerId, id);
 
   if (!deleted) {
     return NextResponse.json({ message: "Versicherung nicht gefunden." }, { status: 404 });

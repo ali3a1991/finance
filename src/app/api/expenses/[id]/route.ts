@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireApiAuth } from "@/lib/auth";
+import { requireWriteAccess } from "@/lib/auth";
 import { deleteExpense, updateExpense } from "@/lib/serverDb";
 import type { Expense } from "@/lib/types";
 
@@ -8,7 +8,7 @@ type RouteContext = {
 };
 
 export async function PUT(request: NextRequest, context: RouteContext) {
-  const auth = requireApiAuth(request);
+  const auth = requireWriteAccess(request);
 
   if (auth.error) {
     return auth.error;
@@ -21,7 +21,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ message: "Ungultige Ausgabendaten." }, { status: 400 });
   }
 
-  const expense = await updateExpense(id, body);
+  const expense = await updateExpense(auth.payload.ownerId, id, body);
 
   if (!expense) {
     return NextResponse.json({ message: "Ausgabe nicht gefunden." }, { status: 404 });
@@ -31,14 +31,14 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 }
 
 export async function DELETE(request: NextRequest, context: RouteContext) {
-  const auth = requireApiAuth(request);
+  const auth = requireWriteAccess(request);
 
   if (auth.error) {
     return auth.error;
   }
 
   const { id } = await context.params;
-  const deleted = await deleteExpense(id);
+  const deleted = await deleteExpense(auth.payload.ownerId, id);
 
   if (!deleted) {
     return NextResponse.json({ message: "Ausgabe nicht gefunden." }, { status: 404 });

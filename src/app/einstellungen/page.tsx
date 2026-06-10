@@ -1,4 +1,5 @@
 import { PageHeader } from "@/components/PageHeader";
+import { AccessSettings } from "@/components/AccessSettings";
 import { ThemeSettings } from "@/components/ThemeSettings";
 
 export default function EinstellungenPage() {
@@ -6,6 +7,7 @@ export default function EinstellungenPage() {
     <div className="page-stack">
       <PageHeader page="settings" />
       <ThemeSettings />
+      <AccessSettings />
     </div>
   );
 }

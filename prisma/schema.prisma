@@ -8,6 +8,7 @@ datasource db {
 
 model Loan {
   id            String @id
+  ownerId       String?
   name          String
   bank          String
   balance       Float
@@ -24,6 +25,7 @@ model Loan {
 
 model Insurance {
   id             String @id
+  ownerId        String?
   name           String
   provider       String
   monthlyPremium Float
@@ -38,6 +40,7 @@ model Insurance {
 
 model GeneralContract {
   id            String   @id
+  ownerId       String?
   title         String
   provider      String
   category      String
@@ -53,6 +56,7 @@ model GeneralContract {
 
 model Income {
   id        String @id
+  ownerId   String?
   title     String
   source    String
   amount    Float
@@ -65,6 +69,7 @@ model Income {
 
 model Expense {
   id        String @id
+  ownerId   String?
   title     String
   category  String
   amount    Float
@@ -76,6 +81,7 @@ model Expense {
 
 model MonthlyBudget {
   id       String @id @default(cuid())
+  ownerId  String?
   category String
   planned  Float
   spent    Float
@@ -83,7 +89,18 @@ model MonthlyBudget {
 
 model PaymentConfirmation {
   id         String @id
+  ownerId    String?
   paidAmount Float
   updatedAt  DateTime @updatedAt
   createdAt  DateTime @default(now())
+}
+
+model AppUser {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  ownerId      String
+  accessLevel  String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }

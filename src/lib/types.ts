@@ -78,6 +78,16 @@ export type MonthlyPayment = {
   paidAmount: number;
 };
 
+export type AccessLevel = "readonly" | "readwrite";
+
+export type SharedUser = {
+  id: string;
+  username: string;
+  accessLevel: AccessLevel;
+  ownerId: string;
+  createdAt: string;
+};
+
 export type FinanceDb = {
   owner: {
     name: string;

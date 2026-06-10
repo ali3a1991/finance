@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireApiAuth } from "@/lib/auth";
+import { requireApiAuth, requireWriteAccess } from "@/lib/auth";
 import { createInsurance, listInsurances } from "@/lib/serverDb";
 import type { Insurance } from "@/lib/types";
 
@@ -10,18 +10,18 @@ export async function GET(request: NextRequest) {
     return auth.error;
   }
 
-  return NextResponse.json({ insurances: await listInsurances() });
+  return NextResponse.json({ insurances: await listInsurances(auth.payload.ownerId) });
 }
 
 export async function POST(request: NextRequest) {
-  const auth = requireApiAuth(request);
+  const auth = requireWriteAccess(request);
 
   if (auth.error) {
     return auth.error;
   }
 
   const body = (await request.json()) as Omit<Insurance, "id">;
-  const insurance = await createInsurance({
+  const insurance = await createInsurance(auth.payload.ownerId, {
     ...body,
     id: `ins-${Date.now()}`
   });

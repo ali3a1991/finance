@@ -8,5 +8,9 @@ export async function GET(request: NextRequest) {
     return auth.error;
   }
 
-  return NextResponse.json({ username: auth.payload.sub });
+  return NextResponse.json({
+    accessLevel: auth.payload.accessLevel,
+    ownerId: auth.payload.ownerId,
+    username: auth.payload.sub
+  });
 }
