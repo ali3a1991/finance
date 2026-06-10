@@ -470,21 +470,22 @@ type YahooChartResponse = {
 };
 
 const investmentQuoteAliases: Record<string, string> = {
-  SPY: "SXR8.DE",
-  SXR8: "SXR8.DE"
+  SPY: "SXR8.SG",
+  SXR8: "SXR8.SG",
+  "SXR8.DE": "SXR8.SG"
 };
 
 const investmentDisplayAliases: Record<string, Pick<Investment, "assetName" | "symbol">> = {
   SPY: {
-    assetName: "iShares Core S&P 500 UCITS ETF USD (Acc)",
+    assetName: "S&P 500",
     symbol: "SXR8"
   },
   SXR8: {
-    assetName: "iShares Core S&P 500 UCITS ETF USD (Acc)",
+    assetName: "S&P 500",
     symbol: "SXR8"
   },
   "SXR8.DE": {
-    assetName: "iShares Core S&P 500 UCITS ETF USD (Acc)",
+    assetName: "S&P 500",
     symbol: "SXR8"
   }
 };

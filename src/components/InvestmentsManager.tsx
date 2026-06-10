@@ -20,7 +20,7 @@ const assetOptions = [
   { name: "Tesla", symbol: "TSLA" },
   { name: "Nvidia", symbol: "NVDA" },
   { name: "Apple", symbol: "AAPL" },
-  { name: "iShares Core S&P 500 UCITS ETF USD (Acc)", symbol: "SXR8" },
+  { name: "S&P 500", symbol: "SXR8" },
   { name: "Bitcoin", symbol: "BTC-USD" }
 ];
 
