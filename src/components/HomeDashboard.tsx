@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent, useEffect, useState } from "react";
-import { Banknote, CalendarDays, Check, ChevronLeft, ChevronRight, PiggyBank, ShieldCheck, WalletCards } from "lucide-react";
+import { Banknote, CalendarDays, Check, ChevronLeft, ChevronRight, PiggyBank, Save, ShieldCheck, WalletCards } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { formatCurrency, formatDate } from "@/lib/formatting";
 import { requestJson } from "@/lib/requestJson";
@@ -46,10 +46,20 @@ function formatMonthLabel(monthKey: string) {
   return new Intl.DateTimeFormat("de-DE", { month: "long", year: "numeric" }).format(new Date(year, month - 1, 1));
 }
 
+function toPaymentInputValue(value: number) {
+  return String(value).replace(".", ",");
+}
+
+function parsePaymentInputValue(value: string) {
+  const paidAmount = Number(value.replace(",", "."));
+  return Number.isNaN(paidAmount) ? 0 : paidAmount;
+}
+
 export function HomeDashboard() {
   const [selectedMonth, setSelectedMonth] = useState(getMonthKey());
   const [isLoading, setIsLoading] = useState(true);
   const [payments, setPayments] = useState<MonthlyPayment[]>([]);
+  const [paymentDrafts, setPaymentDrafts] = useState<Record<string, string>>({});
   const [summary, setSummary] = useState<DashboardSummary>(emptySummary);
   const [updatingPaymentId, setUpdatingPaymentId] = useState<string | null>(null);
 
@@ -58,6 +68,9 @@ export function HomeDashboard() {
       setIsLoading(true);
       const body = await requestJson<DashboardPayload>(`/api/dashboard?month=${selectedMonth}`);
       setPayments(body.monthlyPayments);
+      setPaymentDrafts(
+        Object.fromEntries(body.monthlyPayments.map((payment) => [payment.id, toPaymentInputValue(payment.paidAmount)]))
+      );
       setSummary(body.summary);
       setSelectedMonth(body.month);
       setIsLoading(false);
@@ -76,14 +89,22 @@ export function HomeDashboard() {
       });
 
       setPayments((current) => current.map((payment) => (payment.id === id ? body.payment : payment)));
+      setPaymentDrafts((current) => ({ ...current, [id]: toPaymentInputValue(body.payment.paidAmount) }));
     } finally {
       setUpdatingPaymentId(null);
     }
   }
 
   function handlePartialChange(payment: MonthlyPayment, event: ChangeEvent<HTMLInputElement>) {
-    const paidAmount = Number(event.target.value);
-    updatePayment(payment.id, Number.isNaN(paidAmount) ? 0 : paidAmount);
+    const nextValue = event.target.value;
+
+    if (/^\d*([,.]\d{0,2})?$/.test(nextValue)) {
+      setPaymentDrafts((current) => ({ ...current, [payment.id]: nextValue }));
+    }
+  }
+
+  function submitPartialPayment(payment: MonthlyPayment) {
+    updatePayment(payment.id, parsePaymentInputValue(paymentDrafts[payment.id] ?? String(payment.paidAmount)));
   }
 
   const paidTotal = payments.reduce((sum, payment) => sum + payment.paidAmount, 0);
@@ -200,6 +221,9 @@ export function HomeDashboard() {
             const isPaid = payment.paidAmount >= payment.amount;
             const isPartial = payment.paidAmount > 0 && !isPaid;
             const isUpdating = updatingPaymentId === payment.id;
+            const draftValue = paymentDrafts[payment.id] ?? toPaymentInputValue(payment.paidAmount);
+            const draftAmount = parsePaymentInputValue(draftValue);
+            const hasDraftChange = Math.abs(draftAmount - payment.paidAmount) > 0.009;
 
             return (
               <article
@@ -225,18 +249,32 @@ export function HomeDashboard() {
                   <strong>{formatCurrency(payment.amount)}</strong>
                   <span>{isUpdating ? "Aktualisiert..." : isPaid ? "Bezahlt" : isPartial ? "Teilweise bezahlt" : "Offen"}</span>
                 </div>
-                <label className="partial-input">
-                  <span>Bezahlt</span>
-                  <input
-                    min="0"
-                    max={payment.amount}
-                    step="0.01"
-                    type="number"
-                    value={payment.paidAmount}
-                    onChange={(event) => handlePartialChange(payment, event)}
-                    disabled={isUpdating}
-                  />
-                </label>
+                <div className="partial-input">
+                  <label>
+                    <span>Bezahlt</span>
+                    <input
+                      inputMode="decimal"
+                      min="0"
+                      max={payment.amount}
+                      step="0.01"
+                      type="text"
+                      value={draftValue}
+                      onChange={(event) => handlePartialChange(payment, event)}
+                      disabled={isUpdating}
+                    />
+                  </label>
+                  {hasDraftChange ? (
+                    <button
+                      className="icon-button partial-submit"
+                      type="button"
+                      onClick={() => submitPartialPayment(payment)}
+                      disabled={isUpdating}
+                      aria-label={`${payment.title} bezahlten Betrag speichern`}
+                    >
+                      <Save size={18} aria-hidden="true" />
+                    </button>
+                  ) : null}
+                </div>
               </article>
             );
           })}

@@ -708,8 +708,19 @@ th {
 }
 
 .payment-main,
-.payment-amount,
+.payment-amount {
+  display: grid;
+  gap: 4px;
+}
+
 .partial-input {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px;
+  align-items: end;
+  gap: 8px;
+}
+
+.partial-input label {
   display: grid;
   gap: 4px;
 }
@@ -729,6 +740,17 @@ th {
   padding: 0 10px;
   background: var(--input-bg);
   color: var(--text);
+}
+
+.partial-submit {
+  animation: partial-submit-in 140ms ease;
+}
+
+@keyframes partial-submit-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
 }
 
 .button {
@@ -1460,10 +1482,16 @@ th {
 
   .partial-input {
     grid-column: 2 / -1;
+    grid-template-columns: minmax(0, 1fr) 38px;
   }
 
   .partial-input input {
     min-height: 34px;
+  }
+
+  .partial-submit {
+    width: 38px;
+    height: 34px;
   }
 
   .payment-check {
