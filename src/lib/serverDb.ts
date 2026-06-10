@@ -470,12 +470,32 @@ type YahooChartResponse = {
 };
 
 const investmentQuoteAliases: Record<string, string> = {
-  SPY: "SXR8.DE"
+  SPY: "SXR8.DE",
+  SXR8: "SXR8.DE"
+};
+
+const investmentDisplayAliases: Record<string, Pick<Investment, "assetName" | "symbol">> = {
+  SPY: {
+    assetName: "iShares Core S&P 500 UCITS ETF USD (Acc)",
+    symbol: "SXR8"
+  },
+  SXR8: {
+    assetName: "iShares Core S&P 500 UCITS ETF USD (Acc)",
+    symbol: "SXR8"
+  },
+  "SXR8.DE": {
+    assetName: "iShares Core S&P 500 UCITS ETF USD (Acc)",
+    symbol: "SXR8"
+  }
 };
 
 function getInvestmentQuoteSymbol(symbol: string) {
   const normalizedSymbol = symbol.toUpperCase();
   return investmentQuoteAliases[normalizedSymbol] ?? normalizedSymbol;
+}
+
+function getInvestmentDisplay(symbol: string) {
+  return investmentDisplayAliases[symbol.toUpperCase()] ?? null;
 }
 
 async function fetchYahooChartMeta(symbol: string) {
@@ -555,13 +575,14 @@ export async function listInvestmentsWithQuotes(ownerId: string): Promise<Invest
   return investments.map((investment) => {
     const quoteSymbol = getInvestmentQuoteSymbol(investment.symbol);
     const quote = quotes[quoteSymbol];
+    const display = getInvestmentDisplay(investment.symbol);
 
     return {
       ...investment,
-      assetName: investment.symbol.toUpperCase() === "SPY" ? "Core S&P 500 USD (Acc)" : investment.assetName,
+      assetName: display?.assetName ?? investment.assetName,
       currency: quote?.currency ?? "EUR",
       currentPrice: quote?.currentPrice ?? null,
-      symbol: quoteSymbol
+      symbol: display?.symbol ?? investment.symbol
     };
   });
 }
