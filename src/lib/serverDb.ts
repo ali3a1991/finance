@@ -469,6 +469,15 @@ type YahooChartResponse = {
   };
 };
 
+const investmentQuoteAliases: Record<string, string> = {
+  SPY: "SXR8.DE"
+};
+
+function getInvestmentQuoteSymbol(symbol: string) {
+  const normalizedSymbol = symbol.toUpperCase();
+  return investmentQuoteAliases[normalizedSymbol] ?? normalizedSymbol;
+}
+
 async function fetchYahooChartMeta(symbol: string) {
   const response = await fetch(
     `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=1d&interval=1m`,
@@ -499,7 +508,7 @@ async function fetchUsdToEurRate() {
 }
 
 export async function fetchInvestmentQuotes(symbols: string[]): Promise<Record<string, InvestmentQuote>> {
-  const uniqueSymbols = Array.from(new Set(symbols.map((symbol) => symbol.toUpperCase()).filter(Boolean)));
+  const uniqueSymbols = Array.from(new Set(symbols.map(getInvestmentQuoteSymbol).filter(Boolean)));
 
   if (uniqueSymbols.length === 0) {
     return {};
@@ -544,12 +553,15 @@ export async function listInvestmentsWithQuotes(ownerId: string): Promise<Invest
   const quotes = await fetchInvestmentQuotes(investments.map((investment) => investment.symbol));
 
   return investments.map((investment) => {
-    const quote = quotes[investment.symbol.toUpperCase()];
+    const quoteSymbol = getInvestmentQuoteSymbol(investment.symbol);
+    const quote = quotes[quoteSymbol];
 
     return {
       ...investment,
+      assetName: investment.symbol.toUpperCase() === "SPY" ? "Core S&P 500 USD (Acc)" : investment.assetName,
       currency: quote?.currency ?? "EUR",
-      currentPrice: quote?.currentPrice ?? null
+      currentPrice: quote?.currentPrice ?? null,
+      symbol: quoteSymbol
     };
   });
 }
@@ -686,7 +698,7 @@ export async function getDashboardData(ownerId: string, monthKey?: string | null
   const investmentSummary = (db.investments ?? []).reduce(
     (summary, investment) => {
       const investedValue = investment.quantity * investment.purchasePrice;
-      const quote = investmentQuotes[investment.symbol.toUpperCase()];
+      const quote = investmentQuotes[getInvestmentQuoteSymbol(investment.symbol)];
       const currentUnitPrice = quote?.currentPrice ?? investment.purchasePrice;
       const currentValue = investment.quantity * currentUnitPrice;
 
