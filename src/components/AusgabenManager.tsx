@@ -125,14 +125,14 @@ export function AusgabenManager({ initialType }: { initialType: "einmalig" | "wi
       <nav className="tab-row" aria-label="Ausgabenarten">
         <Link className={`tab-link ${activeType === "einmalig" ? "active" : ""}`} href="/ausgaben?typ=einmalig">
           <ReceiptText size={18} aria-hidden="true" />
-          Einmalige Ausgaben
+          Einmalig
         </Link>
         <Link
           className={`tab-link ${activeType === "wiederkehrend" ? "active" : ""}`}
           href="/ausgaben?typ=wiederkehrend"
         >
           <Repeat size={18} aria-hidden="true" />
-          Wiederkehrende Ausgaben
+          Wiederkehrend
         </Link>
       </nav>
 
