@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const protectedPagePattern = /^\/(?!(login|register|forgot-password)(\/)?$|api|_next|favicon\.ico).*/;
+const protectedPagePattern = /^\/(?!(login|register|forgot-password)(\/)?$|api|_next|favicon\.ico|manifest\.webmanifest|manifest\.json|sw\.js|icon-192\.png|icon-512\.png).*/;
 
 function hasUsableToken(request: NextRequest) {
   const token = request.cookies.get("finance_token")?.value;
@@ -48,5 +48,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"]
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|manifest.json|sw.js|icon-192.png|icon-512.png).*)"]
 };
