@@ -23,11 +23,25 @@ jobs:
             exit 0
           fi
 
-          MESSAGE="یه آپدیت جدید برای Finanzmanager منتشر شد:
+          node --input-type=module <<'NODE'
+          const appUrl = process.env.APP_URL.replace(/\/$/, "");
+          const message = `یه آپدیت جدید برای Finanzmanager منتشر شد:
 
-${COMMIT_MESSAGE}"
+          ${process.env.COMMIT_MESSAGE || "Update"}`;
 
-          curl -sS -X POST "$APP_URL/api/telegram/broadcast" \
-            -H "Content-Type: application/json" \
-            -H "x-broadcast-secret: $UPDATE_BROADCAST_SECRET" \
-            --data "$(jq -nc --arg message "$MESSAGE" '{title:"Finanzmanager Update", message:$message}')"
+          const response = await fetch(`${appUrl}/api/telegram/broadcast`, {
+            body: JSON.stringify({ title: "Finanzmanager Update", message }),
+            headers: {
+              "Content-Type": "application/json",
+              "x-broadcast-secret": process.env.UPDATE_BROADCAST_SECRET
+            },
+            method: "POST"
+          });
+
+          const body = await response.text();
+          console.log(body);
+
+          if (!response.ok) {
+            process.exit(1);
+          }
+          NODE
