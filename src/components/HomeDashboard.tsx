@@ -225,6 +225,15 @@ export function HomeDashboard() {
         </div>
         <div className="gauge-wrap">
           <div className="gauge-arc">
+            <div className="gauge-marker gauge-marker-0">
+              <span>0</span>
+            </div>
+            <div className="gauge-marker gauge-marker-50">
+              <span>50</span>
+            </div>
+            <div className="gauge-marker gauge-marker-100">
+              <span>100</span>
+            </div>
             <div className="gauge-needle" style={{ transform: `rotate(${needleRotation}deg)` }} />
             <div className="gauge-center" />
           </div>

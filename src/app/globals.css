@@ -666,6 +666,54 @@ th {
   background: var(--surface);
 }
 
+.gauge-marker {
+  position: absolute;
+  z-index: 4;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.gauge-marker::before {
+  width: 2px;
+  height: 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 58%, transparent);
+  content: "";
+}
+
+.gauge-marker-0 {
+  bottom: 2px;
+  left: 7%;
+  transform: translateX(-50%) rotate(-72deg);
+  transform-origin: 50% 100%;
+}
+
+.gauge-marker-0 span {
+  transform: rotate(72deg);
+}
+
+.gauge-marker-50 {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.gauge-marker-100 {
+  right: 7%;
+  bottom: 2px;
+  transform: translateX(50%) rotate(72deg);
+  transform-origin: 50% 100%;
+}
+
+.gauge-marker-100 span {
+  transform: rotate(-72deg);
+}
+
 .gauge-needle {
   position: absolute;
   bottom: 0;
