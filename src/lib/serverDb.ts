@@ -743,16 +743,41 @@ function getPaymentStatus(db: FinanceDb, id: string) {
   return db.paymentConfirmations?.find((payment) => payment.id === id)?.paidAmount ?? 0;
 }
 
+function getLoanPaymentAmountForMonth(loan: Loan, date = new Date()) {
+  const firstPaymentDate = new Date(`${loan.nextPayment}T00:00:00`);
+  const monthlyRate = Math.max(loan.monthlyRate, 0);
+  const totalRepayment = Math.max(loan.balance + loan.totalInterest, 0);
+
+  if (monthlyRate <= 0 || totalRepayment <= 0 || Number.isNaN(firstPaymentDate.getTime())) {
+    return null;
+  }
+
+  const monthOffset = getMonthIndex(date) - getMonthIndex(firstPaymentDate);
+  const installmentCount = Math.ceil(totalRepayment / monthlyRate);
+
+  if (monthOffset < 0 || monthOffset >= installmentCount) {
+    return null;
+  }
+
+  const remainingBeforePayment = Math.max(totalRepayment - monthlyRate * monthOffset, 0);
+  return Math.min(monthlyRate, remainingBeforePayment);
+}
+
 export function buildMonthlyPayments(db: FinanceDb, date = new Date()): MonthlyPayment[] {
   const monthKey = getMonthKey(date);
   const loanPayments: MonthlyPayment[] = db.loans
-    .filter((loan) => isSameOrBeforeCurrentMonth(new Date(`${loan.nextPayment}T00:00:00`), date))
     .map((loan) => {
+      const amount = getLoanPaymentAmountForMonth(loan, date);
+
+      if (amount === null) {
+        return null;
+      }
+
       const dueDay = new Date(`${loan.nextPayment}T00:00:00`).getDate();
       const id = `loan:${loan.id}:${monthKey}`;
 
       return {
-        amount: loan.monthlyRate,
+        amount,
         category: loan.bank,
         dueDate: getCurrentMonthDate(dueDay, date),
         id,
@@ -760,7 +785,8 @@ export function buildMonthlyPayments(db: FinanceDb, date = new Date()): MonthlyP
         sourceType: "loan",
         title: loan.name
       };
-    });
+    })
+    .filter((payment): payment is MonthlyPayment => payment !== null);
 
   const insurancePayments: MonthlyPayment[] = db.insurances
     .filter((insurance) => isActiveInMonth(insurance.startDate, insurance.endDate ?? insurance.renewalDate, date))
