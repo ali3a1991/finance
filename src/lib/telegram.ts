@@ -1,4 +1,4 @@
-export async function sendTelegramCode(contact: string, code: string) {
+export async function sendTelegramMessage(contact: string, text: string) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
 
   if (!token) {
@@ -8,7 +8,7 @@ export async function sendTelegramCode(contact: string, code: string) {
   const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     body: JSON.stringify({
       chat_id: contact,
-      text: `Finanzmanager registration code: ${code}`
+      text
     }),
     headers: { "Content-Type": "application/json" },
     method: "POST"
@@ -18,4 +18,8 @@ export async function sendTelegramCode(contact: string, code: string) {
     const body = await response.text();
     throw new Error(body || "Telegram message could not be sent.");
   }
+}
+
+export async function sendTelegramCode(contact: string, code: string) {
+  await sendTelegramMessage(contact, `Finanzmanager registration code: ${code}`);
 }

@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
-import { Send, ShieldCheck } from "lucide-react";
+import { ExternalLink, Send, ShieldCheck } from "lucide-react";
 import { requestJson } from "@/lib/requestJson";
 
 type StartResponse = {
+  botLink?: string | null;
   challengeId?: string;
   message?: string;
   requiresTransferConfirmation?: boolean;
@@ -13,6 +14,7 @@ type StartResponse = {
 
 export default function RegisterPage() {
   const [challengeId, setChallengeId] = useState("");
+  const [botLink, setBotLink] = useState("");
   const [code, setCode] = useState("");
   const [confirmTransfer, setConfirmTransfer] = useState(false);
   const [error, setError] = useState("");
@@ -42,6 +44,7 @@ export default function RegisterPage() {
 
       if (body.challengeId) {
         setChallengeId(body.challengeId);
+        setBotLink(body.botLink ?? "");
       }
     } catch (error) {
       setError(error instanceof Error ? error.message : "Registrierung fehlgeschlagen.");
@@ -79,7 +82,7 @@ export default function RegisterPage() {
         <div className="login-copy">
           <span>Finanzmanager</span>
           <h1>Registrieren</h1>
-          <p>Erstelle dein eigenes Konto und bestatige es mit einem Telegram-Code.</p>
+          <p>Erstelle dein eigenes Konto, offne den Telegram-Bot und bestatige den Code.</p>
         </div>
 
         {!challengeId ? (
@@ -101,20 +104,34 @@ export default function RegisterPage() {
             {error ? <p className="form-error">{error}</p> : null}
             <button className="button primary" disabled={isLoading} type="submit">
               <Send size={18} aria-hidden="true" />
-              {isLoading ? "Code senden..." : warning ? "Bestatigen und Code senden" : "Code senden"}
+              {isLoading ? "Vorbereiten..." : warning ? "Bestatigen und fortfahren" : "Registrierung starten"}
             </button>
           </form>
         ) : (
-          <form className="login-form" onSubmit={verifyCode}>
-            <label>
-              <span>Telegram-Code</span>
-              <input required inputMode="numeric" value={code} onChange={(event) => setCode(event.target.value)} />
-            </label>
-            {error ? <p className="form-error">{error}</p> : null}
-            <button className="button primary" disabled={isLoading} type="submit">
-              {isLoading ? "Prufen..." : "Registrierung abschliessen"}
-            </button>
-          </form>
+          <div className="login-form">
+            <div className="form-warning">
+              <strong>Telegram offnen</strong>
+              <p>Offne den Bot, tippe auf Start und gib danach den Code hier ein.</p>
+            </div>
+            {botLink ? (
+              <a className="button primary" href={botLink} rel="noreferrer" target="_blank">
+                <ExternalLink size={18} aria-hidden="true" />
+                Telegram Bot offnen
+              </a>
+            ) : (
+              <p className="form-error">TELEGRAM_BOT_USERNAME fehlt in den Environment Variables.</p>
+            )}
+            <form className="login-form" onSubmit={verifyCode}>
+              <label>
+                <span>Telegram-Code</span>
+                <input required inputMode="numeric" value={code} onChange={(event) => setCode(event.target.value)} />
+              </label>
+              {error ? <p className="form-error">{error}</p> : null}
+              <button className="button primary" disabled={isLoading} type="submit">
+                {isLoading ? "Prufen..." : "Registrierung abschliessen"}
+              </button>
+            </form>
+          </div>
         )}
 
         <p className="auth-switch">

@@ -931,7 +931,10 @@ export async function findRegistrationAccount(username: string) {
 
 async function ensureRegistrationTables() {
   await prisma.$executeRawUnsafe(
-    'CREATE TABLE IF NOT EXISTS "RegistrationChallenge" ("id" TEXT PRIMARY KEY, "username" TEXT NOT NULL, "passwordHash" TEXT NOT NULL, "telegramContact" TEXT NOT NULL, "codeHash" TEXT NOT NULL, "transferSharedUserId" TEXT, "expiresAt" TIMESTAMP(3) NOT NULL, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP)'
+    'CREATE TABLE IF NOT EXISTS "RegistrationChallenge" ("id" TEXT PRIMARY KEY, "username" TEXT NOT NULL, "passwordHash" TEXT NOT NULL, "telegramContact" TEXT NOT NULL, "code" TEXT NOT NULL DEFAULT \'\', "codeHash" TEXT NOT NULL, "transferSharedUserId" TEXT, "expiresAt" TIMESTAMP(3) NOT NULL, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP)'
+  );
+  await prisma.$executeRawUnsafe(
+    'ALTER TABLE "RegistrationChallenge" ADD COLUMN IF NOT EXISTS "code" TEXT NOT NULL DEFAULT \'\''
   );
   await prisma.$executeRawUnsafe(
     'CREATE TABLE IF NOT EXISTS "TelegramContact" ("id" TEXT PRIMARY KEY, "username" TEXT NOT NULL UNIQUE, "contact" TEXT NOT NULL, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP)'
@@ -956,14 +959,35 @@ export async function createRegistrationChallenge({
 
   return prisma.registrationChallenge.create({
     data: {
+      code,
       codeHash: getPasswordHash(code),
       expiresAt: new Date(Date.now() + 1000 * 60 * 10),
+      id: `reg_${randomUUID().replace(/-/g, "").slice(0, 24)}`,
       passwordHash: getPasswordHash(password),
       telegramContact,
       transferSharedUserId,
       username
     }
   });
+}
+
+export async function activateRegistrationChallenge(challengeId: string, telegramContact: string) {
+  await ensureRegistrationTables();
+  const challenge = await prisma.registrationChallenge.findUnique({ where: { id: challengeId } });
+
+  if (!challenge || challenge.expiresAt.getTime() < Date.now()) {
+    return null;
+  }
+
+  await prisma.registrationChallenge.update({
+    data: { telegramContact },
+    where: { id: challengeId }
+  });
+
+  return {
+    code: challenge.code,
+    username: challenge.username
+  };
 }
 
 export async function completeRegistration(challengeId: string, code: string) {

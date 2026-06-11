@@ -122,6 +122,7 @@ model RegistrationChallenge {
   username             String
   passwordHash         String
   telegramContact      String
+  code                 String
   codeHash             String
   transferSharedUserId String?
   expiresAt            DateTime
