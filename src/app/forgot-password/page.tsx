@@ -70,10 +70,15 @@ export default function ForgotPasswordPage() {
         </div>
 
         {!challengeId ? (
-          <form className="login-form" onSubmit={requestReset}>
+          <form autoComplete="off" className="login-form" onSubmit={requestReset}>
             <label>
               <span>Benutzername</span>
-              <input required value={username} onChange={(event) => setUsername(event.target.value)} />
+              <input
+                autoComplete="off"
+                required
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+              />
             </label>
             {info ? <p className="form-info">{info}</p> : null}
             {error ? <p className="form-error">{error}</p> : null}
@@ -82,15 +87,28 @@ export default function ForgotPasswordPage() {
             </button>
           </form>
         ) : (
-          <form className="login-form" onSubmit={resetPassword}>
+          <form autoComplete="off" className="login-form" onSubmit={resetPassword}>
             {info ? <p className="form-info">{info}</p> : null}
             <label>
               <span>Telegram-Code</span>
-              <input required inputMode="numeric" value={code} onChange={(event) => setCode(event.target.value)} />
+              <input
+                autoComplete="off"
+                required
+                inputMode="numeric"
+                value={code}
+                onChange={(event) => setCode(event.target.value)}
+              />
             </label>
             <label>
               <span>Neues Passwort</span>
-              <input required minLength={6} type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
+              <input
+                autoComplete="off"
+                required
+                minLength={6}
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+              />
             </label>
             {error ? <p className="form-error">{error}</p> : null}
             <button className="button primary" disabled={isLoading} type="submit">

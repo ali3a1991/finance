@@ -86,14 +86,26 @@ export default function RegisterPage() {
         </div>
 
         {!challengeId ? (
-          <form className="login-form" onSubmit={startRegistration}>
+          <form autoComplete="off" className="login-form" onSubmit={startRegistration}>
             <label>
               <span>Benutzername oder Telegram-Nummer</span>
-              <input required value={username} onChange={(event) => setUsername(event.target.value)} />
+              <input
+                autoComplete="off"
+                required
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+              />
             </label>
             <label>
               <span>Passwort</span>
-              <input required minLength={6} type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
+              <input
+                autoComplete="off"
+                required
+                minLength={6}
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+              />
             </label>
             {warning ? (
               <div className="form-warning">
@@ -121,10 +133,16 @@ export default function RegisterPage() {
             ) : (
               <p className="form-error">TELEGRAM_BOT_USERNAME fehlt in den Environment Variables.</p>
             )}
-            <form className="login-form" onSubmit={verifyCode}>
+            <form autoComplete="off" className="login-form" onSubmit={verifyCode}>
               <label>
                 <span>Telegram-Code</span>
-                <input required inputMode="numeric" value={code} onChange={(event) => setCode(event.target.value)} />
+                <input
+                  autoComplete="off"
+                  required
+                  inputMode="numeric"
+                  value={code}
+                  onChange={(event) => setCode(event.target.value)}
+                />
               </label>
               {error ? <p className="form-error">{error}</p> : null}
               <button className="button primary" disabled={isLoading} type="submit">
