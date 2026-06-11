@@ -18,6 +18,7 @@ export type Insurance = {
   provider: string;
   monthlyPremium: number;
   debitDay: number;
+  paymentIntervalMonths: number;
   startDate: string | null;
   endDate: string | null;
   renewalDate: string | null;
@@ -31,6 +32,7 @@ export type GeneralContract = {
   category: string;
   monthlyAmount: number;
   debitDay: number;
+  paymentIntervalMonths: number;
   startDate: string;
   endDate: string | null;
   note: string | null;

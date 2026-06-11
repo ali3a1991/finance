@@ -8,12 +8,15 @@ type RouteContext = {
 };
 
 function isValidContract(body: Omit<GeneralContract, "id">) {
+  const validIntervals = [1, 3, 6];
+
   return (
     Boolean(body.title?.trim()) &&
     Boolean(body.provider?.trim()) &&
     Boolean(body.category?.trim()) &&
     Number.isFinite(body.monthlyAmount) &&
     Number.isFinite(body.debitDay) &&
+    validIntervals.includes(body.paymentIntervalMonths) &&
     body.debitDay >= 1 &&
     body.debitDay <= 31 &&
     Boolean(body.startDate) &&

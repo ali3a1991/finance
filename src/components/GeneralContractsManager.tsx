@@ -14,6 +14,7 @@ type ContractForm = {
   category: string;
   monthlyAmount: string;
   debitDay: string;
+  paymentIntervalMonths: string;
   startDate: string;
   endDate: string;
   note: string;
@@ -26,6 +27,7 @@ const emptyForm: ContractForm = {
   category: "",
   monthlyAmount: "",
   debitDay: "",
+  paymentIntervalMonths: "1",
   startDate: new Date().toISOString().slice(0, 10),
   endDate: "",
   note: "",
@@ -34,12 +36,18 @@ const emptyForm: ContractForm = {
 
 const categoryOptions = ["Mobilfunk", "Streaming", "Mitgliedschaft", "Software", "Wohnen", "Sonstiges"];
 const statusOptions = ["Aktiv", "Pausiert", "Gekündigt"];
+const paymentIntervalOptions = [
+  { value: "1", labelPath: "common.everyMonth" },
+  { value: "3", labelPath: "common.everyThreeMonths" },
+  { value: "6", labelPath: "common.everySixMonths" }
+];
 
 function toPayload(form: ContractForm): Omit<GeneralContract, "id"> {
   return {
     category: form.category.trim(),
     debitDay: Number(form.debitDay),
     monthlyAmount: Number(form.monthlyAmount),
+    paymentIntervalMonths: Number(form.paymentIntervalMonths),
     note: form.note.trim() || null,
     provider: form.provider.trim(),
     endDate: form.endDate,
@@ -54,6 +62,7 @@ function toForm(contract: GeneralContract): ContractForm {
     category: contract.category,
     debitDay: String(contract.debitDay),
     monthlyAmount: String(contract.monthlyAmount),
+    paymentIntervalMonths: String(contract.paymentIntervalMonths),
     note: contract.note ?? "",
     provider: contract.provider,
     endDate: contract.endDate ?? "",
@@ -193,7 +202,8 @@ export function GeneralContractsManager() {
                 <th>{t("contracts.title")}</th>
                 <th>{t("contracts.provider")}</th>
                 <th>{t("contracts.category")}</th>
-                <th>{t("contracts.monthlyAmount")}</th>
+                <th>{t("contracts.amount")}</th>
+                <th>{t("common.paymentInterval")}</th>
                 <th>{t("contracts.debitDay")}</th>
                 <th>{t("contracts.startDate")}</th>
                 <th>{t("contracts.endDate")}</th>
@@ -213,6 +223,7 @@ export function GeneralContractsManager() {
                   <td>{contract.provider}</td>
                   <td>{contract.category}</td>
                   <td>{formatCurrency(contract.monthlyAmount)}</td>
+                  <td>{t(`common.paymentInterval${contract.paymentIntervalMonths}`)}</td>
                   <td>{contract.debitDay}. {t("common.day")}</td>
                   <td>{formatDate(contract.startDate)}</td>
                   <td>{contract.endDate ? formatDate(contract.endDate) : "-"}</td>
@@ -364,7 +375,7 @@ function ContractModal({
             </select>
           </label>
           <label>
-            <span>{t("contracts.monthlyAmount")}</span>
+            <span>{t("contracts.amount")}</span>
             <input
               required
               min="0"
@@ -374,6 +385,20 @@ function ContractModal({
               onChange={(event) => onUpdate("monthlyAmount", event.target.value)}
               placeholder="19.99"
             />
+          </label>
+          <label>
+            <span>{t("common.paymentInterval")}</span>
+            <select
+              required
+              value={form.paymentIntervalMonths}
+              onChange={(event) => onUpdate("paymentIntervalMonths", event.target.value)}
+            >
+              {paymentIntervalOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {t(option.labelPath)}
+                </option>
+              ))}
+            </select>
           </label>
           <label>
             <span>{t("contracts.debitDay")}</span>

@@ -30,6 +30,7 @@ model Insurance {
   provider       String
   monthlyPremium Float
   debitDay       Int
+  paymentIntervalMonths Int @default(1)
   startDate      DateTime?
   endDate        DateTime?
   renewalDate    DateTime?
@@ -46,6 +47,7 @@ model GeneralContract {
   category      String
   monthlyAmount Float
   debitDay      Int
+  paymentIntervalMonths Int @default(1)
   startDate     DateTime
   endDate       DateTime?
   note          String?

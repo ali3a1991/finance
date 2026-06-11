@@ -24,6 +24,10 @@ function toDate(value: string) {
   return new Date(`${value.slice(0, 10)}T00:00:00`);
 }
 
+function normalizePaymentInterval(value: number | null | undefined) {
+  return value === 3 || value === 6 ? value : 1;
+}
+
 function mapLoan(loan: {
   id: string;
   name: string;
@@ -51,6 +55,7 @@ function mapInsurance(insurance: {
   provider: string;
   monthlyPremium: number;
   debitDay: number;
+  paymentIntervalMonths?: number | null;
   startDate: Date | null;
   endDate: Date | null;
   renewalDate: Date | null;
@@ -59,6 +64,7 @@ function mapInsurance(insurance: {
   return {
     ...insurance,
     endDate: insurance.endDate ? toDateInput(insurance.endDate) : null,
+    paymentIntervalMonths: normalizePaymentInterval(insurance.paymentIntervalMonths),
     renewalDate: insurance.renewalDate ? toDateInput(insurance.renewalDate) : null,
     startDate: insurance.startDate ? toDateInput(insurance.startDate) : null
   };
@@ -71,6 +77,7 @@ function mapGeneralContract(contract: {
   category: string;
   monthlyAmount: number;
   debitDay: number;
+  paymentIntervalMonths?: number | null;
   startDate: Date;
   endDate: Date | null;
   note: string | null;
@@ -79,6 +86,7 @@ function mapGeneralContract(contract: {
   return {
     ...contract,
     endDate: contract.endDate ? toDateInput(contract.endDate) : null,
+    paymentIntervalMonths: normalizePaymentInterval(contract.paymentIntervalMonths),
     startDate: toDateInput(contract.startDate)
   };
 }
@@ -127,7 +135,18 @@ function mapInvestment(investment: {
   };
 }
 
+async function ensurePaymentIntervalColumns() {
+  await prisma.$executeRawUnsafe(
+    'ALTER TABLE "Insurance" ADD COLUMN IF NOT EXISTS "paymentIntervalMonths" INTEGER NOT NULL DEFAULT 1'
+  );
+  await prisma.$executeRawUnsafe(
+    'ALTER TABLE "GeneralContract" ADD COLUMN IF NOT EXISTS "paymentIntervalMonths" INTEGER NOT NULL DEFAULT 1'
+  );
+}
+
 export async function readFinanceDb(ownerId: string): Promise<FinanceDb> {
+  await ensurePaymentIntervalColumns();
+
   const [loans, insurances, generalContracts, incomes, expenses, investments, monthlyBudgets, paymentConfirmations] =
     await Promise.all([
     prisma.loan.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } }),
@@ -220,14 +239,17 @@ export async function deleteLoan(ownerId: string, id: string): Promise<boolean> 
 }
 
 export async function listInsurances(ownerId: string): Promise<Insurance[]> {
+  await ensurePaymentIntervalColumns();
   const insurances = await prisma.insurance.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } });
   return insurances.map(mapInsurance);
 }
 
 export async function createInsurance(ownerId: string, insurance: Insurance): Promise<Insurance> {
+  await ensurePaymentIntervalColumns();
   const createdInsurance = await prisma.insurance.create({
     data: {
       ...insurance,
+      paymentIntervalMonths: normalizePaymentInterval(insurance.paymentIntervalMonths),
       endDate: insurance.endDate ? toDate(insurance.endDate) : null,
       ownerId,
       renewalDate: insurance.renewalDate ? toDate(insurance.renewalDate) : null,
@@ -238,10 +260,12 @@ export async function createInsurance(ownerId: string, insurance: Insurance): Pr
 }
 
 export async function updateInsurance(ownerId: string, id: string, patch: Omit<Insurance, "id">): Promise<Insurance | null> {
+  await ensurePaymentIntervalColumns();
   try {
     const result = await prisma.insurance.updateMany({
       data: {
         ...patch,
+        paymentIntervalMonths: normalizePaymentInterval(patch.paymentIntervalMonths),
         endDate: patch.endDate ? toDate(patch.endDate) : null,
         renewalDate: patch.renewalDate ? toDate(patch.renewalDate) : null,
         startDate: patch.startDate ? toDate(patch.startDate) : null
@@ -274,14 +298,17 @@ export async function deleteInsurance(ownerId: string, id: string): Promise<bool
 }
 
 export async function listGeneralContracts(ownerId: string): Promise<GeneralContract[]> {
+  await ensurePaymentIntervalColumns();
   const contracts = await prisma.generalContract.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } });
   return contracts.map(mapGeneralContract);
 }
 
 export async function createGeneralContract(ownerId: string, contract: GeneralContract): Promise<GeneralContract> {
+  await ensurePaymentIntervalColumns();
   const createdContract = await prisma.generalContract.create({
     data: {
       ...contract,
+      paymentIntervalMonths: normalizePaymentInterval(contract.paymentIntervalMonths),
       endDate: contract.endDate ? toDate(contract.endDate) : null,
       note: contract.note || null,
       ownerId,
@@ -296,10 +323,12 @@ export async function updateGeneralContract(
   id: string,
   patch: Omit<GeneralContract, "id">
 ): Promise<GeneralContract | null> {
+  await ensurePaymentIntervalColumns();
   try {
     const result = await prisma.generalContract.updateMany({
       data: {
         ...patch,
+        paymentIntervalMonths: normalizePaymentInterval(patch.paymentIntervalMonths),
         endDate: patch.endDate ? toDate(patch.endDate) : null,
         note: patch.note || null,
         startDate: toDate(patch.startDate)
@@ -674,6 +703,30 @@ function hasDebitDateReachedStart(startValue: string | null | undefined, debitDa
   return safeDebitDay >= start.getDate();
 }
 
+function getMonthIndex(date: Date) {
+  return date.getFullYear() * 12 + date.getMonth();
+}
+
+function isRecurringPaymentDue(
+  startValue: string | null | undefined,
+  debitDay: number,
+  paymentIntervalMonths: number | null | undefined,
+  date = new Date()
+) {
+  if (!startValue) {
+    return true;
+  }
+
+  const start = new Date(`${startValue}T00:00:00`);
+  const interval = normalizePaymentInterval(paymentIntervalMonths);
+  const lastDayOfStartMonth = new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate();
+  const firstDebitDay = Math.min(Math.max(debitDay, 1), lastDayOfStartMonth);
+  const firstPaymentMonth = getMonthIndex(start) + (firstDebitDay >= start.getDate() ? 0 : 1);
+  const currentMonth = getMonthIndex(date);
+
+  return currentMonth >= firstPaymentMonth && (currentMonth - firstPaymentMonth) % interval === 0;
+}
+
 function getPaymentStatus(db: FinanceDb, id: string) {
   return db.paymentConfirmations?.find((payment) => payment.id === id)?.paidAmount ?? 0;
 }
@@ -699,7 +752,9 @@ export function buildMonthlyPayments(db: FinanceDb, date = new Date()): MonthlyP
 
   const insurancePayments: MonthlyPayment[] = db.insurances
     .filter((insurance) => isActiveInMonth(insurance.startDate, insurance.endDate ?? insurance.renewalDate, date))
-    .filter((insurance) => hasDebitDateReachedStart(insurance.startDate, insurance.debitDay, date))
+    .filter((insurance) =>
+      isRecurringPaymentDue(insurance.startDate, insurance.debitDay, insurance.paymentIntervalMonths, date)
+    )
     .map((insurance) => {
       const id = `insurance:${insurance.id}:${monthKey}`;
 
@@ -735,7 +790,9 @@ export function buildMonthlyPayments(db: FinanceDb, date = new Date()): MonthlyP
     .filter((contract) => contract.status === "Aktiv")
     .filter((contract) => isSameOrBeforeCurrentMonth(new Date(`${contract.startDate}T00:00:00`), date))
     .filter((contract) => isActiveInMonth(contract.startDate, contract.endDate, date))
-    .filter((contract) => hasDebitDateReachedStart(contract.startDate, contract.debitDay, date))
+    .filter((contract) =>
+      isRecurringPaymentDue(contract.startDate, contract.debitDay, contract.paymentIntervalMonths, date)
+    )
     .map((contract) => {
       const id = `contract:${contract.id}:${monthKey}`;
 
@@ -799,7 +856,9 @@ export async function getDashboardData(ownerId: string, monthKey?: string | null
     })
     .reduce((sum, expense) => sum + expense.amount, 0);
   const loanTotal = db.loans.reduce((sum, loan) => sum + loan.balance, 0);
-  const insuranceTotal = db.insurances.reduce((sum, insurance) => sum + insurance.monthlyPremium, 0);
+  const insuranceTotal = monthlyPayments
+    .filter((payment) => payment.sourceType === "insurance")
+    .reduce((sum, payment) => sum + payment.amount, 0);
   const committed = monthlyPayments.reduce((sum, payment) => sum + payment.amount, 0);
 
   return {

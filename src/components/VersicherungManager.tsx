@@ -13,6 +13,7 @@ type InsuranceForm = {
   coverage: string;
   monthlyPremium: string;
   debitDay: string;
+  paymentIntervalMonths: string;
   startDate: string;
   endDate: string;
 };
@@ -22,6 +23,7 @@ const emptyForm: InsuranceForm = {
   coverage: "",
   monthlyPremium: "",
   debitDay: "",
+  paymentIntervalMonths: "1",
   startDate: "",
   endDate: ""
 };
@@ -39,6 +41,12 @@ const coverageOptions = [
   "Zahnzusatz",
   "Reise",
   "Tier"
+];
+
+const paymentIntervalOptions = [
+  { value: "1", labelPath: "common.everyMonth" },
+  { value: "3", labelPath: "common.everyThreeMonths" },
+  { value: "6", labelPath: "common.everySixMonths" }
 ];
 
 export function VersicherungManager() {
@@ -83,6 +91,7 @@ export function VersicherungManager() {
       coverage: insurance.coverage,
       monthlyPremium: String(insurance.monthlyPremium),
       debitDay: String(insurance.debitDay),
+      paymentIntervalMonths: String(insurance.paymentIntervalMonths),
       startDate: insurance.startDate ?? "",
       endDate: insurance.endDate ?? insurance.renewalDate ?? ""
     });
@@ -105,6 +114,7 @@ export function VersicherungManager() {
           coverage: form.coverage.trim(),
           monthlyPremium: Number(form.monthlyPremium),
           debitDay: Number(form.debitDay),
+          paymentIntervalMonths: Number(form.paymentIntervalMonths),
           startDate: form.startDate,
           endDate: form.endDate,
           renewalDate: form.endDate
@@ -131,6 +141,7 @@ export function VersicherungManager() {
           coverage: editForm.coverage.trim(),
           monthlyPremium: Number(editForm.monthlyPremium),
           debitDay: Number(editForm.debitDay),
+          paymentIntervalMonths: Number(editForm.paymentIntervalMonths),
           startDate: editForm.startDate,
           endDate: editForm.endDate,
           renewalDate: editForm.endDate
@@ -185,7 +196,8 @@ export function VersicherungManager() {
               <tr>
                 <th>{t("insurances.provider")}</th>
                 <th>{t("insurances.coverage")}</th>
-                <th>{t("insurances.monthly")}</th>
+                <th>{t("insurances.amount")}</th>
+                <th>{t("common.paymentInterval")}</th>
                 <th>{t("insurances.debitDay")}</th>
                 <th>{t("insurances.startDate")}</th>
                 <th>{t("insurances.endDate")}</th>
@@ -203,6 +215,7 @@ export function VersicherungManager() {
                   </td>
                   <td>{insurance.coverage}</td>
                   <td>{formatCurrency(insurance.monthlyPremium)}</td>
+                  <td>{t(`common.paymentInterval${insurance.paymentIntervalMonths}`)}</td>
                   <td>{insurance.debitDay}. {t("common.day")}</td>
                   <td>{insurance.startDate ? formatDate(insurance.startDate) : "-"}</td>
                   <td>{insurance.endDate ? formatDate(insurance.endDate) : "-"}</td>
@@ -274,7 +287,7 @@ export function VersicherungManager() {
                 </select>
               </label>
               <label>
-                <span>{t("insurances.monthly")}</span>
+                <span>{t("insurances.amount")}</span>
                 <input
                   required
                   min="0"
@@ -284,6 +297,20 @@ export function VersicherungManager() {
                   onChange={(event) => updateForm("monthlyPremium", event.target.value)}
                   placeholder="29"
                 />
+              </label>
+              <label>
+                <span>{t("common.paymentInterval")}</span>
+                <select
+                  required
+                  value={form.paymentIntervalMonths}
+                  onChange={(event) => updateForm("paymentIntervalMonths", event.target.value)}
+                >
+                  {paymentIntervalOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {t(option.labelPath)}
+                    </option>
+                  ))}
+                </select>
               </label>
               <label>
                 <span>{t("insurances.debitDay")}</span>
@@ -405,7 +432,7 @@ export function VersicherungManager() {
                 </select>
               </label>
               <label>
-                <span>{t("insurances.monthly")}</span>
+                <span>{t("insurances.amount")}</span>
                 <input
                   required
                   min="0"
@@ -415,6 +442,20 @@ export function VersicherungManager() {
                   onChange={(event) => updateEditForm("monthlyPremium", event.target.value)}
                   placeholder="29"
                 />
+              </label>
+              <label>
+                <span>{t("common.paymentInterval")}</span>
+                <select
+                  required
+                  value={editForm.paymentIntervalMonths}
+                  onChange={(event) => updateEditForm("paymentIntervalMonths", event.target.value)}
+                >
+                  {paymentIntervalOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {t(option.labelPath)}
+                    </option>
+                  ))}
+                </select>
               </label>
               <label>
                 <span>{t("insurances.debitDay")}</span>
