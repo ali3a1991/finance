@@ -157,6 +157,18 @@ export function AccessSettings() {
             </tr>
           </thead>
           <tbody>
+            <tr className="owner-access-row">
+              <td>
+                <span className="table-title">
+                  <UserRound size={16} aria-hidden="true" />
+                  {currentUser.username}
+                </span>
+              </td>
+              <td>{t("nav.owner")}</td>
+              <td>
+                <span className="table-muted">-</span>
+              </td>
+            </tr>
             {users.map((user) => (
               <tr key={user.id}>
                 <td>

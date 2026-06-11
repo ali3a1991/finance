@@ -1289,6 +1289,19 @@ th {
   min-width: 100%;
 }
 
+.owner-access-row {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.owner-access-row .table-title {
+  color: var(--ink);
+}
+
+.table-muted {
+  color: var(--muted);
+  font-weight: 700;
+}
+
 .theme-switcher {
   display: grid;
   grid-template-columns: repeat(2, minmax(112px, 1fr));
