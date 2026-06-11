@@ -40,13 +40,19 @@ function mapLoan(loan: {
   endDate: Date | null;
   nextPayment: Date;
   status: string;
+  note?: string | null;
 }): Loan {
   return {
     ...loan,
     endDate: loan.endDate ? toDateInput(loan.endDate) : null,
     nextPayment: toDateInput(loan.nextPayment),
+    note: loan.note ?? null,
     startDate: loan.startDate ? toDateInput(loan.startDate) : null
   };
+}
+
+async function ensureLoanNoteColumn() {
+  await prisma.$executeRawUnsafe('ALTER TABLE "Loan" ADD COLUMN IF NOT EXISTS "note" TEXT');
 }
 
 function mapInsurance(insurance: {
@@ -145,6 +151,7 @@ async function ensurePaymentIntervalColumns() {
 }
 
 export async function readFinanceDb(ownerId: string): Promise<FinanceDb> {
+  await ensureLoanNoteColumn();
   await ensurePaymentIntervalColumns();
 
   const [loans, insurances, generalContracts, incomes, expenses, investments, monthlyBudgets, paymentConfirmations] =
@@ -185,15 +192,18 @@ export async function writeFinanceDb() {
 }
 
 export async function listLoans(ownerId: string): Promise<Loan[]> {
+  await ensureLoanNoteColumn();
   const loans = await prisma.loan.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } });
   return loans.map(mapLoan);
 }
 
 export async function createLoan(ownerId: string, loan: Loan): Promise<Loan> {
+  await ensureLoanNoteColumn();
   const createdLoan = await prisma.loan.create({
     data: {
       ...loan,
       endDate: loan.endDate ? toDate(loan.endDate) : null,
+      note: loan.note || null,
       nextPayment: toDate(loan.nextPayment),
       ownerId,
       startDate: loan.startDate ? toDate(loan.startDate) : null
@@ -203,11 +213,13 @@ export async function createLoan(ownerId: string, loan: Loan): Promise<Loan> {
 }
 
 export async function updateLoan(ownerId: string, id: string, patch: Omit<Loan, "id" | "status">): Promise<Loan | null> {
+  await ensureLoanNoteColumn();
   try {
     const result = await prisma.loan.updateMany({
       data: {
         ...patch,
         endDate: patch.endDate ? toDate(patch.endDate) : null,
+        note: patch.note || null,
         nextPayment: toDate(patch.nextPayment),
         startDate: patch.startDate ? toDate(patch.startDate) : null
       },

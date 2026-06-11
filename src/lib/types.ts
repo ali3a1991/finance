@@ -10,6 +10,7 @@ export type Loan = {
   endDate: string | null;
   nextPayment: string;
   status: string;
+  note: string | null;
 };
 
 export type Insurance = {

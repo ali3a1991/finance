@@ -1160,7 +1160,8 @@ th {
 }
 
 .modal-form input,
-.modal-form select {
+.modal-form select,
+.modal-form textarea {
   width: 100%;
   min-height: 46px;
   border: 1px solid var(--line);
@@ -1170,10 +1171,21 @@ th {
   color: var(--text);
 }
 
+.modal-form textarea {
+  min-height: 108px;
+  padding: 12px;
+  resize: vertical;
+}
+
 .modal-form input:focus,
-.modal-form select:focus {
+.modal-form select:focus,
+.modal-form textarea:focus {
   border-color: var(--primary);
   outline: 3px solid var(--focus-ring);
+}
+
+.form-field-full {
+  grid-column: 1 / -1;
 }
 
 .modal-actions {

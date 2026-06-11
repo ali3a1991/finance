@@ -14,8 +14,8 @@ type KreditForm = {
   balance: string;
   totalInterest: string;
   monthlyRate: string;
-  interestRate: string;
   nextPayment: string;
+  note: string;
 };
 
 type Installment = {
@@ -31,8 +31,8 @@ const emptyForm: KreditForm = {
   balance: "",
   totalInterest: "",
   monthlyRate: "",
-  interestRate: "",
-  nextPayment: ""
+  nextPayment: "",
+  note: ""
 };
 
 export function KreditManager() {
@@ -79,8 +79,8 @@ export function KreditManager() {
       balance: String(loan.balance),
       totalInterest: String(loan.totalInterest),
       monthlyRate: String(loan.monthlyRate),
-      interestRate: String(loan.interestRate),
-      nextPayment: loan.nextPayment
+      nextPayment: loan.nextPayment,
+      note: loan.note ?? ""
     });
   }
 
@@ -101,10 +101,11 @@ export function KreditManager() {
           balance: Number(form.balance),
           totalInterest: Number(form.totalInterest),
           monthlyRate: Number(form.monthlyRate),
-          interestRate: Number(form.interestRate),
+          interestRate: 0,
           startDate: null,
           endDate: null,
-          nextPayment: form.nextPayment
+          nextPayment: form.nextPayment,
+          note: form.note.trim() || null
         }),
         method: "POST"
       });
@@ -128,10 +129,11 @@ export function KreditManager() {
           balance: Number(editForm.balance),
           totalInterest: Number(editForm.totalInterest),
           monthlyRate: Number(editForm.monthlyRate),
-          interestRate: Number(editForm.interestRate),
+          interestRate: 0,
           startDate: null,
           endDate: null,
-          nextPayment: editForm.nextPayment
+          nextPayment: editForm.nextPayment,
+          note: editForm.note.trim() || null
         }),
         method: "PUT"
       });
@@ -220,7 +222,6 @@ export function KreditManager() {
                 <th>{t("loans.amount")}</th>
                 <th>{t("loans.totalInterest")}</th>
                 <th>{t("loans.rate")}</th>
-                <th>{t("loans.interest")}</th>
                 <th>{t("loans.firstPayment")}</th>
                 <th>{t("loans.status")}</th>
                 <th>{t("common.actions")}</th>
@@ -239,7 +240,6 @@ export function KreditManager() {
                   <td>{formatCurrency(loan.balance)}</td>
                   <td>{formatCurrency(loan.totalInterest)}</td>
                   <td>{formatCurrency(loan.monthlyRate)}</td>
-                  <td>{loan.interestRate}%</td>
                   <td>{formatDate(loan.nextPayment)}</td>
                   <td>{loan.status}</td>
                   <td>
@@ -350,24 +350,20 @@ export function KreditManager() {
                 />
               </label>
               <label>
-                <span>{t("loans.interestRate")}</span>
-                <input
-                  required
-                  min="0"
-                  step="0.01"
-                  type="number"
-                  value={form.interestRate}
-                  onChange={(event) => updateForm("interestRate", event.target.value)}
-                  placeholder="3.8"
-                />
-              </label>
-              <label>
                 <span>{t("loans.firstPayment")}</span>
                 <input
                   required
                   type="date"
                   value={form.nextPayment}
                   onChange={(event) => updateForm("nextPayment", event.target.value)}
+                />
+              </label>
+              <label className="form-field-full">
+                <span>{t("loans.description")}</span>
+                <textarea
+                  value={form.note}
+                  onChange={(event) => updateForm("note", event.target.value)}
+                  placeholder={t("loans.descriptionPlaceholder")}
                 />
               </label>
               <div className="modal-actions">
@@ -552,24 +548,20 @@ export function KreditManager() {
                 />
               </label>
               <label>
-                <span>{t("loans.interestRate")}</span>
-                <input
-                  required
-                  min="0"
-                  step="0.01"
-                  type="number"
-                  value={editForm.interestRate}
-                  onChange={(event) => updateEditForm("interestRate", event.target.value)}
-                  placeholder="3.8"
-                />
-              </label>
-              <label>
                 <span>{t("loans.firstPayment")}</span>
                 <input
                   required
                   type="date"
                   value={editForm.nextPayment}
                   onChange={(event) => updateEditForm("nextPayment", event.target.value)}
+                />
+              </label>
+              <label className="form-field-full">
+                <span>{t("loans.description")}</span>
+                <textarea
+                  value={editForm.note}
+                  onChange={(event) => updateEditForm("note", event.target.value)}
+                  placeholder={t("loans.descriptionPlaceholder")}
                 />
               </label>
               <div className="modal-actions">
