@@ -4,6 +4,7 @@ import { ApiLoadingProvider } from "@/components/ApiLoadingProvider";
 import { AppShell } from "@/components/AppShell";
 import { AuthProvider } from "@/components/AuthProvider";
 import { LanguageProvider } from "@/components/LanguageProvider";
+import RegisterSW from "@/components/RegisterSW";
 
 export const metadata: Metadata = {
   title: "Finanzmanager",
@@ -31,6 +32,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
+        <RegisterSW />
+
         <LanguageProvider>
           <ApiLoadingProvider>
             <AuthProvider>
