@@ -133,7 +133,7 @@ export function AccessSettings() {
   }
 
   return (
-    <section className="settings-panel settings-panel-block" aria-labelledby="access-title">
+    <section className="settings-panel settings-panel-block access-settings-panel" aria-labelledby="access-title">
       <div className="settings-copy">
         <span>{t("settings.accessLabel")}</span>
         <h2 id="access-title">{t("settings.accessTitle")}</h2>
@@ -147,7 +147,7 @@ export function AccessSettings() {
         </button>
       </div>
 
-      <div className="responsive-table">
+      <div className="responsive-table access-table">
         <table>
           <thead>
             <tr>

@@ -1242,6 +1242,23 @@ th {
   line-height: 1.55;
 }
 
+.access-settings-panel {
+  grid-template-columns: 1fr;
+  align-items: stretch;
+}
+
+.access-settings-panel .action-row {
+  justify-content: flex-start;
+}
+
+.access-table {
+  width: 100%;
+}
+
+.access-table table {
+  min-width: 100%;
+}
+
 .theme-switcher {
   display: grid;
   grid-template-columns: repeat(2, minmax(112px, 1fr));
@@ -1619,6 +1636,10 @@ th {
 
   .investment-summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .access-settings-panel {
+    grid-template-columns: 1fr;
   }
 }
 
