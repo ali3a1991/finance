@@ -1411,6 +1411,13 @@ th {
   font-weight: 700;
 }
 
+.form-info {
+  margin: 0;
+  color: var(--primary);
+  font-weight: 800;
+  line-height: 1.5;
+}
+
 .form-warning {
   display: grid;
   gap: 6px;

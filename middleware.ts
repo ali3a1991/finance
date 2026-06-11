@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const protectedPagePattern = /^\/(?!(login|register)(\/)?$|api|_next|favicon\.ico).*/;
+const protectedPagePattern = /^\/(?!(login|register|forgot-password)(\/)?$|api|_next|favicon\.ico).*/;
 
 function hasUsableToken(request: NextRequest) {
   const token = request.cookies.get("finance_token")?.value;

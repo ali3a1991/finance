@@ -65,6 +65,10 @@ export default function LoginPage() {
         </form>
 
         <p className="auth-switch">
+          <Link href="/forgot-password">Passwort vergessen?</Link>
+        </p>
+
+        <p className="auth-switch">
           Noch kein Konto? <Link href="/register">Registrieren</Link>
         </p>
       </section>

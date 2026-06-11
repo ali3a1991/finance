@@ -939,6 +939,9 @@ async function ensureRegistrationTables() {
   await prisma.$executeRawUnsafe(
     'CREATE TABLE IF NOT EXISTS "TelegramContact" ("id" TEXT PRIMARY KEY, "username" TEXT NOT NULL UNIQUE, "contact" TEXT NOT NULL, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP)'
   );
+  await prisma.$executeRawUnsafe(
+    'CREATE TABLE IF NOT EXISTS "PasswordResetChallenge" ("id" TEXT PRIMARY KEY, "username" TEXT NOT NULL, "codeHash" TEXT NOT NULL, "expiresAt" TIMESTAMP(3) NOT NULL, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP)'
+  );
 }
 
 export async function createRegistrationChallenge({
@@ -1060,4 +1063,51 @@ export async function listTelegramContacts() {
       username: true
     }
   });
+}
+
+export async function createPasswordResetChallenge(username: string, code: string) {
+  await ensureRegistrationTables();
+  const [user, contact] = await Promise.all([
+    prisma.appUser.findUnique({ where: { username } }),
+    prisma.telegramContact.findUnique({ where: { username } })
+  ]);
+
+  if (!user || !contact) {
+    return null;
+  }
+
+  await prisma.passwordResetChallenge.deleteMany({ where: { username } });
+
+  const challenge = await prisma.passwordResetChallenge.create({
+    data: {
+      codeHash: getPasswordHash(code),
+      expiresAt: new Date(Date.now() + 1000 * 60 * 10),
+      id: `reset_${randomUUID().replace(/-/g, "").slice(0, 22)}`,
+      username
+    }
+  });
+
+  return {
+    challengeId: challenge.id,
+    contact: contact.contact
+  };
+}
+
+export async function completePasswordReset(challengeId: string, code: string, password: string) {
+  await ensureRegistrationTables();
+  const challenge = await prisma.passwordResetChallenge.findUnique({ where: { id: challengeId } });
+
+  if (!challenge || challenge.expiresAt.getTime() < Date.now() || challenge.codeHash !== getPasswordHash(code)) {
+    return false;
+  }
+
+  await prisma.$transaction([
+    prisma.appUser.update({
+      data: { passwordHash: getPasswordHash(password) },
+      where: { username: challenge.username }
+    }),
+    prisma.passwordResetChallenge.delete({ where: { id: challenge.id } })
+  ]);
+
+  return true;
 }
