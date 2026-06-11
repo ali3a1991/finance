@@ -138,6 +138,9 @@ button:disabled {
 .sidebar {
   position: sticky;
   top: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 12px;
   height: 100vh;
   padding: 24px 18px;
   background: var(--sidebar-bg);
@@ -183,6 +186,7 @@ button:disabled {
 
 .nav-list {
   display: grid;
+  align-content: start;
   gap: 8px;
 }
 
@@ -240,6 +244,32 @@ button:disabled {
   min-height: 38px;
   padding: 9px 12px;
   font-size: 0.92rem;
+}
+
+.sidebar-user {
+  display: grid;
+  gap: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.sidebar-user span,
+.sidebar-user small {
+  color: var(--sidebar-muted);
+  font-size: 0.78rem;
+}
+
+.sidebar-user span {
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.sidebar-user strong {
+  overflow-wrap: anywhere;
+  color: var(--sidebar-text);
+  font-size: 0.98rem;
 }
 
 .empty-contract-panel {

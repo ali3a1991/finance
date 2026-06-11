@@ -26,7 +26,11 @@ const translations = {
       settings: "Einstellungen",
       openMenu: "Menu offnen",
       closeMenu: "Menu schliessen",
-      main: "Hauptnavigation"
+      main: "Hauptnavigation",
+      signedInAs: "Angemeldet als",
+      owner: "Inhaber",
+      readonly: "Nebenbenutzer · Readonly",
+      readwrite: "Nebenbenutzer · Read & Write"
     },
     pages: {
       home: {
@@ -306,7 +310,11 @@ const translations = {
       settings: "Settings",
       openMenu: "Open menu",
       closeMenu: "Close menu",
-      main: "Main navigation"
+      main: "Main navigation",
+      signedInAs: "Signed in as",
+      owner: "Owner",
+      readonly: "Shared user · Readonly",
+      readwrite: "Shared user · Read & Write"
     },
     pages: {
       home: {

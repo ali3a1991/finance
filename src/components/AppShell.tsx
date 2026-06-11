@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Banknote, FileText, Home, Menu, Settings, ShieldCheck, TrendingUp, WalletCards, X } from "lucide-react";
 import { useState } from "react";
 import { useApiLoading } from "@/components/ApiLoadingProvider";
+import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
 
 const navItems = [
@@ -23,6 +24,7 @@ const contractItems = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const isApiLoading = useApiLoading();
   const pathname = usePathname();
+  const { user } = useAuth();
   const { t } = useLanguage();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -39,6 +41,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   const hasActiveContract = contractItems.some((item) => isActivePath(item.href));
+  const accessLabel =
+    user?.accessLevel === "owner"
+      ? t("nav.owner")
+      : user?.accessLevel === "readonly"
+        ? t("nav.readonly")
+        : user?.accessLevel === "readwrite"
+          ? t("nav.readwrite")
+          : "";
 
   return (
     <div className={`app-shell ${isMobileMenuOpen ? "menu-open" : ""} ${isApiLoading ? "api-loading-active" : ""}`}>
@@ -139,6 +149,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <span>{t("nav.settings")}</span>
           </Link>
         </nav>
+        {user ? (
+          <div className="sidebar-user" aria-label={t("nav.signedInAs")}>
+            <span>{t("nav.signedInAs")}</span>
+            <strong>{user.username}</strong>
+            <small>{accessLabel}</small>
+          </div>
+        ) : null}
       </aside>
       <main className="main-content">{children}</main>
     </div>
