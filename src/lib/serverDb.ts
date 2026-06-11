@@ -452,6 +452,29 @@ export async function createInvestment(ownerId: string, investment: Investment):
   return mapInvestment(createdInvestment);
 }
 
+export async function updateInvestment(ownerId: string, id: string, patch: Omit<Investment, "id">): Promise<Investment | null> {
+  try {
+    const result = await prisma.investment.updateMany({
+      data: {
+        ...patch,
+        assetName: patch.assetName.trim(),
+        purchaseDate: toDate(patch.purchaseDate),
+        symbol: patch.symbol.trim().toUpperCase()
+      },
+      where: { id, ownerId }
+    });
+
+    if (result.count === 0) {
+      return null;
+    }
+
+    const updatedInvestment = await prisma.investment.findFirst({ where: { id, ownerId } });
+    return updatedInvestment ? mapInvestment(updatedInvestment) : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function deleteInvestment(ownerId: string, id: string): Promise<boolean> {
   const result = await prisma.investment.deleteMany({ where: { id, ownerId } });
   return result.count > 0;

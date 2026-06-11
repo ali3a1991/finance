@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { Bitcoin, LineChart, PlusCircle, Save, Trash2, X } from "lucide-react";
+import { Bitcoin, LineChart, Pencil, PlusCircle, Save, Trash2, X } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
 import { formatCurrency, formatDate } from "@/lib/formatting";
@@ -42,9 +42,20 @@ function toPayload(form: InvestmentForm) {
   };
 }
 
+function formFromInvestment(investment: InvestmentWithQuote): InvestmentForm {
+  return {
+    assetName: investment.assetName,
+    purchaseDate: investment.purchaseDate,
+    purchasePrice: String(investment.purchasePrice),
+    quantity: String(investment.quantity),
+    symbol: investment.symbol
+  };
+}
+
 export function InvestmentsManager() {
   const { canWrite } = useAuth();
   const { t } = useLanguage();
+  const [editingInvestment, setEditingInvestment] = useState<InvestmentWithQuote | null>(null);
   const [form, setForm] = useState<InvestmentForm>(emptyForm);
   const [investmentToDelete, setInvestmentToDelete] = useState<InvestmentWithQuote | null>(null);
   const [investments, setInvestments] = useState<InvestmentWithQuote[]>([]);
@@ -80,8 +91,21 @@ export function InvestmentsManager() {
     }));
   }
 
+  function openAddModal() {
+    setEditingInvestment(null);
+    setForm(emptyForm);
+    setIsOpen(true);
+  }
+
+  function openEditModal(investment: InvestmentWithQuote) {
+    setEditingInvestment(investment);
+    setForm(formFromInvestment(investment));
+    setIsOpen(true);
+  }
+
   function closeModal() {
     setIsOpen(false);
+    setEditingInvestment(null);
     setForm(emptyForm);
   }
 
@@ -90,10 +114,18 @@ export function InvestmentsManager() {
     setOperationLabel("save-investment");
 
     try {
-      await requestJson<{ investment: InvestmentWithQuote }>("/api/investments", {
-        body: JSON.stringify(toPayload(form)),
-        method: "POST"
-      });
+      if (editingInvestment) {
+        await requestJson<{ investment: InvestmentWithQuote }>(`/api/investments/${editingInvestment.id}`, {
+          body: JSON.stringify(toPayload(form)),
+          method: "PATCH"
+        });
+      } else {
+        await requestJson<{ investment: InvestmentWithQuote }>("/api/investments", {
+          body: JSON.stringify(toPayload(form)),
+          method: "POST"
+        });
+      }
+
       const body = await requestJson<{ investments: InvestmentWithQuote[] }>("/api/investments");
       setInvestments(body.investments);
       closeModal();
@@ -130,7 +162,7 @@ export function InvestmentsManager() {
     <>
       {canWrite ? (
         <div className="action-row">
-          <button className="button primary" type="button" onClick={() => setIsOpen(true)}>
+          <button className="button primary" type="button" onClick={openAddModal}>
             <PlusCircle size={18} aria-hidden="true" />
             {t("investments.add")}
           </button>
@@ -193,6 +225,14 @@ export function InvestmentsManager() {
                       <td>
                         <div className="table-actions">
                           <button
+                            className="icon-button"
+                            type="button"
+                            onClick={() => openEditModal(investment)}
+                            aria-label={`${investment.assetName} ${t("common.edit")}`}
+                          >
+                            <Pencil size={16} aria-hidden="true" />
+                          </button>
+                          <button
                             className="icon-button danger"
                             type="button"
                             onClick={() => setInvestmentToDelete(investment)}
@@ -224,7 +264,9 @@ export function InvestmentsManager() {
             <div className="modal-header">
               <div>
                 <span>{t("investments.investment")}</span>
-                <h2 id="investment-modal-title">{t("investments.addTitle")}</h2>
+                <h2 id="investment-modal-title">
+                  {editingInvestment ? t("investments.editTitle") : t("investments.addTitle")}
+                </h2>
               </div>
               <button className="icon-button" type="button" onClick={closeModal} aria-label={t("common.closeDialog")}>
                 <X size={20} aria-hidden="true" />
