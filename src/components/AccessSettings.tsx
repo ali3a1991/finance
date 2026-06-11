@@ -296,14 +296,20 @@ function UserModal({
           </button>
         </div>
 
-        <form className="modal-form" onSubmit={onSubmit}>
+        <form autoComplete="off" className="modal-form" onSubmit={onSubmit}>
           <label>
             <span>{t("settings.username")}</span>
-            <input required value={form.username} onChange={(event) => onUpdate("username", event.target.value)} />
+            <input
+              autoComplete="off"
+              required
+              value={form.username}
+              onChange={(event) => onUpdate("username", event.target.value)}
+            />
           </label>
           <label>
             <span>{t("settings.password")}</span>
             <input
+              autoComplete="new-password"
               minLength={6}
               required={!isEditing}
               type="password"
@@ -315,6 +321,7 @@ function UserModal({
           <label>
             <span>{t("settings.permission")}</span>
             <select
+              autoComplete="off"
               required
               value={form.accessLevel}
               onChange={(event) => onUpdate("accessLevel", event.target.value as AccessLevel)}
