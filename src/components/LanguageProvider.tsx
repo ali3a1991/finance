@@ -11,7 +11,7 @@ type TranslationTree = {
 const translations = {
   de: {
     app: {
-      brand: "Finanzmanager",
+      brand: "FyNest",
       cockpit: "Privates Cockpit"
     },
     nav: {

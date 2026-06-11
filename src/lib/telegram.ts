@@ -21,5 +21,5 @@ export async function sendTelegramMessage(contact: string, text: string) {
 }
 
 export async function sendTelegramCode(contact: string, code: string) {
-  await sendTelegramMessage(contact, `Finanzmanager registration code: ${code}`);
+  await sendTelegramMessage(contact, `FyNest registration code: ${code}`);
 }

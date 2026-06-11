@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Finanzmanager",
-    short_name: "Finanzmanager",
+    name: "FyNest",
+    short_name: "FyNest",
     description: "Finance Manager App",
     start_url: "/",
     display: "standalone",

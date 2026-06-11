@@ -7,8 +7,8 @@ import { LanguageProvider } from "@/components/LanguageProvider";
 import RegisterSW from "@/components/RegisterSW";
 
 export const metadata: Metadata = {
-  title: "Finanzmanager",
-  description: "Modernes Dashboard fur private Finanzverwaltung"
+  title: "FyNest",
+  description: "Modernes Dashboard für private Finanzverwaltung"
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

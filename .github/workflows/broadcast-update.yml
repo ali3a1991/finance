@@ -25,12 +25,12 @@ jobs:
 
           node --input-type=module <<'NODE'
           const appUrl = process.env.APP_URL.replace(/\/$/, "");
-          const message = `یه آپدیت جدید برای Finanzmanager منتشر شد:
+          const message = `یه آپدیت جدید برای FyNest منتشر شد:
 
           ${process.env.COMMIT_MESSAGE || "Update"}`;
 
           const response = await fetch(`${appUrl}/api/telegram/broadcast`, {
-            body: JSON.stringify({ title: "Finanzmanager Update", message }),
+            body: JSON.stringify({ title: "FyNest Update", message }),
             headers: {
               "Content-Type": "application/json",
               "x-broadcast-secret": process.env.UPDATE_BROADCAST_SECRET

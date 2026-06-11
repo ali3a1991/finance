@@ -88,7 +88,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Link className="brand" href="/">
             <span className="brand-mark">FM</span>
             <span>
-              <strong>Finanzmanager</strong>
+              <strong>FyNest</strong>
               <small>{t("app.cockpit")}</small>
             </span>
           </Link>

@@ -25,7 +25,7 @@ function base64UrlDecode(value: string) {
 }
 
 function getSecret() {
-  return process.env.AUTH_SECRET || "dev-finanzmanager-secret-change-me";
+  return process.env.AUTH_SECRET || "dev-fynest-secret-change-me";
 }
 
 function getPrimaryOwnerId() {

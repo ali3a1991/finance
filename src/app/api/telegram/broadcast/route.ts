@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
   }
 
   const contacts = await listTelegramContacts();
-  const text = `${title?.trim() || "Finanzmanager Update"}\n\n${cleanMessage}`;
+  const text = `${title?.trim() || "FyNest Update"}\n\n${cleanMessage}`;
   const results = await Promise.allSettled(contacts.map((contact) => sendTelegramMessage(contact.contact, text)));
   const sent = results.filter((result) => result.status === "fulfilled").length;
 

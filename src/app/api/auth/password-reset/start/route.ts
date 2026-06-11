@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
   const reset = await createPasswordResetChallenge(cleanUsername, code);
 
   if (reset) {
-    await sendTelegramMessage(reset.contact, `Finanzmanager password reset code: ${code}`);
+    await sendTelegramMessage(reset.contact, `FyNest password reset code: ${code}`);
   }
 
   return NextResponse.json({

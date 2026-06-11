@@ -12,7 +12,7 @@ if (!appUrl || !secret || !message) {
 const response = await fetch(`${appUrl.replace(/\/$/, "")}/api/telegram/broadcast`, {
   body: JSON.stringify({
     message,
-    title: "Finanzmanager Update"
+    title: "FyNest Update"
   }),
   headers: {
     "Content-Type": "application/json",
