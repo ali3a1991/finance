@@ -3,9 +3,12 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { KeyRound } from "lucide-react";
+import { PublicPreferences } from "@/components/PublicPreferences";
+import { useLanguage } from "@/components/LanguageProvider";
 import { requestJson } from "@/lib/requestJson";
 
 export default function ForgotPasswordPage() {
+  const { t } = useLanguage();
   const [challengeId, setChallengeId] = useState<string | null>(null);
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
@@ -27,13 +30,9 @@ export default function ForgotPasswordPage() {
         method: "POST"
       });
       setChallengeId(body.challengeId);
-      setInfo(
-        body.challengeId
-          ? "Ein Code wurde an deinen Telegram-Bot gesendet."
-          : "Wenn kein Code ankommt, ist fur diesen Benutzer noch kein Telegram-Kontakt gespeichert."
-      );
+      setInfo(body.challengeId ? t("auth.resetCodeSent") : t("auth.resetNoContact"));
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Reset konnte nicht gestartet werden.");
+      setError(error instanceof Error ? error.message : t("auth.resetStartFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -52,27 +51,28 @@ export default function ForgotPasswordPage() {
       });
       window.location.href = "/login";
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Passwort konnte nicht geandert werden.");
+      setError(error instanceof Error ? error.message : t("auth.passwordChangeFailed"));
       setIsLoading(false);
     }
   }
 
   return (
     <main className="login-page">
+      <PublicPreferences />
       <section className="login-panel">
         <div className="login-mark" aria-hidden="true">
           <KeyRound size={26} />
         </div>
         <div className="login-copy">
-          <span>Finanzmanager</span>
-          <h1>Passwort vergessen</h1>
-          <p>Fordere einen Telegram-Code an und lege danach ein neues Passwort fest.</p>
+          <span>{t("app.brand")}</span>
+          <h1>{t("auth.forgotTitle")}</h1>
+          <p>{t("auth.forgotDescription")}</p>
         </div>
 
         {!challengeId ? (
           <form autoComplete="off" className="login-form" onSubmit={requestReset}>
             <label>
-              <span>Benutzername</span>
+              <span>{t("settings.username")}</span>
               <input
                 autoComplete="off"
                 required
@@ -83,14 +83,14 @@ export default function ForgotPasswordPage() {
             {info ? <p className="form-info">{info}</p> : null}
             {error ? <p className="form-error">{error}</p> : null}
             <button className="button primary" disabled={isLoading} type="submit">
-              {isLoading ? "Senden..." : "Code senden"}
+              {isLoading ? t("auth.sending") : t("auth.sendCode")}
             </button>
           </form>
         ) : (
           <form autoComplete="off" className="login-form" onSubmit={resetPassword}>
             {info ? <p className="form-info">{info}</p> : null}
             <label>
-              <span>Telegram-Code</span>
+              <span>{t("auth.telegramCode")}</span>
               <input
                 autoComplete="off"
                 required
@@ -100,7 +100,7 @@ export default function ForgotPasswordPage() {
               />
             </label>
             <label>
-              <span>Neues Passwort</span>
+              <span>{t("auth.newPassword")}</span>
               <input
                 autoComplete="off"
                 required
@@ -112,13 +112,13 @@ export default function ForgotPasswordPage() {
             </label>
             {error ? <p className="form-error">{error}</p> : null}
             <button className="button primary" disabled={isLoading} type="submit">
-              {isLoading ? "Speichern..." : "Passwort speichern"}
+              {isLoading ? t("common.saving") : t("auth.savePassword")}
             </button>
           </form>
         )}
 
         <p className="auth-switch">
-          Zuruck zum <Link href="/login">Login</Link>
+          {t("auth.backTo")} <Link href="/login">{t("auth.loginAction")}</Link>
         </p>
       </section>
     </main>

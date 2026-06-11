@@ -1399,6 +1399,7 @@ th {
 }
 
 .login-page {
+  position: relative;
   display: grid;
   min-height: 100vh;
   place-items: center;
@@ -1406,6 +1407,54 @@ th {
   background:
     linear-gradient(135deg, rgba(17, 107, 95, 0.12), transparent 45%),
     var(--bg);
+}
+
+.public-preferences {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.public-preference-group {
+  display: inline-grid;
+  grid-auto-flow: column;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 4px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: var(--shadow);
+}
+
+.public-preference-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  min-width: 44px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 0 10px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.public-preference-button.active {
+  border-color: var(--line);
+  background: var(--surface-soft);
+  color: var(--text);
+}
+
+.public-preference-button.active svg {
+  color: var(--primary);
 }
 
 .login-panel {
@@ -1699,6 +1748,21 @@ th {
 }
 
 @media (max-width: 640px) {
+  .login-page {
+    align-content: start;
+    padding-top: 92px;
+  }
+
+  .public-preferences {
+    top: 14px;
+    right: 14px;
+    left: 14px;
+  }
+
+  .public-preference-group {
+    flex: 1 1 0;
+  }
+
   .main-content {
     padding-inline: 14px;
   }

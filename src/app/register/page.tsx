@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { ExternalLink, Send, ShieldCheck } from "lucide-react";
+import { PublicPreferences } from "@/components/PublicPreferences";
+import { useLanguage } from "@/components/LanguageProvider";
 import { requestJson } from "@/lib/requestJson";
 
 type StartResponse = {
@@ -13,6 +15,7 @@ type StartResponse = {
 };
 
 export default function RegisterPage() {
+  const { t } = useLanguage();
   const [challengeId, setChallengeId] = useState("");
   const [botLink, setBotLink] = useState("");
   const [code, setCode] = useState("");
@@ -37,7 +40,7 @@ export default function RegisterPage() {
       });
 
       if (body.requiresTransferConfirmation) {
-        setWarning(body.message ?? "Dieser Benutzer hat bereits Zugriff auf ein anderes Konto.");
+        setWarning(body.message ?? t("auth.transferWarning"));
         setConfirmTransfer(true);
         return;
       }
@@ -47,7 +50,7 @@ export default function RegisterPage() {
         setBotLink(body.botLink ?? "");
       }
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Registrierung fehlgeschlagen.");
+      setError(error instanceof Error ? error.message : t("auth.registrationFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -68,27 +71,28 @@ export default function RegisterPage() {
       localStorage.setItem("finance_token", body.token);
       window.location.href = "/";
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Code konnte nicht bestatigt werden.");
+      setError(error instanceof Error ? error.message : t("auth.codeFailed"));
       setIsLoading(false);
     }
   }
 
   return (
     <main className="login-page">
+      <PublicPreferences />
       <section className="login-panel">
         <div className="login-mark" aria-hidden="true">
           <ShieldCheck size={26} />
         </div>
         <div className="login-copy">
-          <span>Finanzmanager</span>
-          <h1>Registrieren</h1>
-          <p>Erstelle dein eigenes Konto, offne den Telegram-Bot und bestatige den Code.</p>
+          <span>{t("app.brand")}</span>
+          <h1>{t("auth.registerTitle")}</h1>
+          <p>{t("auth.registerDescription")}</p>
         </div>
 
         {!challengeId ? (
           <form autoComplete="off" className="login-form" onSubmit={startRegistration}>
             <label>
-              <span>Benutzername oder Telegram-Nummer</span>
+              <span>{t("auth.usernameOrTelegram")}</span>
               <input
                 autoComplete="off"
                 required
@@ -97,7 +101,7 @@ export default function RegisterPage() {
               />
             </label>
             <label>
-              <span>Passwort</span>
+              <span>{t("settings.password")}</span>
               <input
                 autoComplete="off"
                 required
@@ -109,33 +113,37 @@ export default function RegisterPage() {
             </label>
             {warning ? (
               <div className="form-warning">
-                <strong>Zugriff wird entfernt</strong>
+                <strong>{t("auth.accessRemovedTitle")}</strong>
                 <p>{warning}</p>
               </div>
             ) : null}
             {error ? <p className="form-error">{error}</p> : null}
             <button className="button primary" disabled={isLoading} type="submit">
               <Send size={18} aria-hidden="true" />
-              {isLoading ? "Vorbereiten..." : warning ? "Bestatigen und fortfahren" : "Registrierung starten"}
+              {isLoading
+                ? t("auth.preparing")
+                : warning
+                  ? t("auth.confirmAndContinue")
+                  : t("auth.startRegistration")}
             </button>
           </form>
         ) : (
           <div className="login-form">
             <div className="form-warning">
-              <strong>Telegram offnen</strong>
-              <p>Offne den Bot, tippe auf Start und gib danach den Code hier ein.</p>
+              <strong>{t("auth.openTelegramTitle")}</strong>
+              <p>{t("auth.openTelegramDescription")}</p>
             </div>
             {botLink ? (
               <a className="button primary" href={botLink} rel="noreferrer" target="_blank">
                 <ExternalLink size={18} aria-hidden="true" />
-                Telegram Bot offnen
+                {t("auth.openTelegram")}
               </a>
             ) : (
-              <p className="form-error">TELEGRAM_BOT_USERNAME fehlt in den Environment Variables.</p>
+              <p className="form-error">{t("auth.telegramUsernameMissing")}</p>
             )}
             <form autoComplete="off" className="login-form" onSubmit={verifyCode}>
               <label>
-                <span>Telegram-Code</span>
+                <span>{t("auth.telegramCode")}</span>
                 <input
                   autoComplete="off"
                   required
@@ -146,14 +154,14 @@ export default function RegisterPage() {
               </label>
               {error ? <p className="form-error">{error}</p> : null}
               <button className="button primary" disabled={isLoading} type="submit">
-                {isLoading ? "Prufen..." : "Registrierung abschliessen"}
+                {isLoading ? t("auth.checking") : t("auth.finishRegistration")}
               </button>
             </form>
           </div>
         )}
 
         <p className="auth-switch">
-          Schon registriert? <Link href="/login">Anmelden</Link>
+          {t("auth.alreadyRegistered")} <Link href="/login">{t("auth.loginAction")}</Link>
         </p>
       </section>
     </main>

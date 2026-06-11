@@ -3,9 +3,12 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { LockKeyhole } from "lucide-react";
+import { PublicPreferences } from "@/components/PublicPreferences";
+import { useLanguage } from "@/components/LanguageProvider";
 import { requestJson } from "@/lib/requestJson";
 
 export default function LoginPage() {
+  const { t } = useLanguage();
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState("");
@@ -26,30 +29,31 @@ export default function LoginPage() {
       localStorage.setItem("finance_token", body.token);
       window.location.href = "/";
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Login fehlgeschlagen.");
+      setError(error instanceof Error ? error.message : t("auth.loginFailed"));
       setIsLoading(false);
     }
   }
 
   return (
     <main className="login-page">
+      <PublicPreferences />
       <section className="login-panel">
         <div className="login-mark" aria-hidden="true">
           <LockKeyhole size={26} />
         </div>
         <div className="login-copy">
-          <span>Finanzmanager</span>
-          <h1>Anmelden</h1>
-          <p>Bitte melden Sie sich an, um Ihre Finanzdaten zu verwalten.</p>
+          <span>{t("app.brand")}</span>
+          <h1>{t("auth.loginTitle")}</h1>
+          <p>{t("auth.loginDescription")}</p>
         </div>
 
         <form className="login-form" onSubmit={handleSubmit}>
           <label>
-            <span>Benutzername</span>
+            <span>{t("settings.username")}</span>
             <input required value={username} onChange={(event) => setUsername(event.target.value)} />
           </label>
           <label>
-            <span>Passwort</span>
+            <span>{t("settings.password")}</span>
             <input
               required
               type="password"
@@ -60,16 +64,16 @@ export default function LoginPage() {
           </label>
           {error ? <p className="form-error">{error}</p> : null}
           <button className="button primary" disabled={isLoading} type="submit">
-            {isLoading ? "Anmelden..." : "Anmelden"}
+            {isLoading ? t("auth.loggingIn") : t("auth.loginAction")}
           </button>
         </form>
 
         <p className="auth-switch">
-          <Link href="/forgot-password">Passwort vergessen?</Link>
+          <Link href="/forgot-password">{t("auth.forgotPassword")}</Link>
         </p>
 
         <p className="auth-switch">
-          Noch kein Konto? <Link href="/register">Registrieren</Link>
+          {t("auth.noAccount")} <Link href="/register">{t("auth.registerAction")}</Link>
         </p>
       </section>
     </main>
