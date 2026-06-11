@@ -1050,3 +1050,14 @@ export async function completeRegistration(challengeId: string, code: string) {
     };
   });
 }
+
+export async function listTelegramContacts() {
+  await ensureRegistrationTables();
+  return prisma.telegramContact.findMany({
+    orderBy: { createdAt: "desc" },
+    select: {
+      contact: true,
+      username: true
+    }
+  });
+}

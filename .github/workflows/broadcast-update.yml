@@ -1,0 +1,30 @@
+name: Broadcast update
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  telegram:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send update summary
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          UPDATE_BROADCAST_SECRET: ${{ secrets.UPDATE_BROADCAST_SECRET }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          if [ -z "$APP_URL" ] || [ -z "$UPDATE_BROADCAST_SECRET" ]; then
+            echo "APP_URL or UPDATE_BROADCAST_SECRET is missing. Skipping broadcast."
+            exit 0
+          fi
+
+          MESSAGE="یه آپدیت جدید برای Finanzmanager منتشر شد:
+
+${COMMIT_MESSAGE}"
+
+          curl -sS -X POST "$APP_URL/api/telegram/broadcast" \
+            -H "Content-Type: application/json" \
+            -H "x-broadcast-secret: $UPDATE_BROADCAST_SECRET" \
+            --data "$(jq -nc --arg message "$MESSAGE" '{title:"Finanzmanager Update", message:$message}')"

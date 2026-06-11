@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
+    "notify:update": "node scripts/broadcast-update.mjs",
     "start": "next start",
     "lint": "next lint"
   },
