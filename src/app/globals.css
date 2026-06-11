@@ -92,6 +92,10 @@ body:has(.login-page) .main-content {
   padding: 0;
 }
 
+body:has(.login-page) {
+  overflow: hidden;
+}
+
 body:has(.error-page) {
   background: var(--bg);
 }
@@ -1449,7 +1453,7 @@ th {
 .login-page {
   position: relative;
   display: grid;
-  min-height: 100vh;
+  min-height: 100dvh;
   place-items: center;
   padding: 24px;
   background:
@@ -1797,8 +1801,11 @@ th {
 
 @media (max-width: 640px) {
   .login-page {
-    align-content: start;
-    padding-top: 92px;
+    height: 100dvh;
+    min-height: 100dvh;
+    align-content: center;
+    overflow: hidden;
+    padding: 74px 14px 14px;
   }
 
   .public-preferences {
@@ -1809,6 +1816,12 @@ th {
 
   .public-preference-group {
     flex: 1 1 0;
+  }
+
+  .login-panel {
+    max-height: calc(100dvh - 88px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .main-content {
