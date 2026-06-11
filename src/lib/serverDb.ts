@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { randomUUID } from "crypto";
 import { getPasswordHash } from "@/lib/auth";
 import type {
   AccessLevel,
@@ -922,4 +923,106 @@ export async function updateSharedUser(
 export async function deleteSharedUser(ownerId: string, id: string) {
   const result = await prisma.appUser.deleteMany({ where: { id, ownerId } });
   return result.count > 0;
+}
+
+export async function findRegistrationAccount(username: string) {
+  return prisma.appUser.findUnique({ where: { username } });
+}
+
+async function ensureRegistrationTables() {
+  await prisma.$executeRawUnsafe(
+    'CREATE TABLE IF NOT EXISTS "RegistrationChallenge" ("id" TEXT PRIMARY KEY, "username" TEXT NOT NULL, "passwordHash" TEXT NOT NULL, "telegramContact" TEXT NOT NULL, "codeHash" TEXT NOT NULL, "transferSharedUserId" TEXT, "expiresAt" TIMESTAMP(3) NOT NULL, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP)'
+  );
+  await prisma.$executeRawUnsafe(
+    'CREATE TABLE IF NOT EXISTS "TelegramContact" ("id" TEXT PRIMARY KEY, "username" TEXT NOT NULL UNIQUE, "contact" TEXT NOT NULL, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP)'
+  );
+}
+
+export async function createRegistrationChallenge({
+  code,
+  password,
+  telegramContact,
+  transferSharedUserId,
+  username
+}: {
+  code: string;
+  password: string;
+  telegramContact: string;
+  transferSharedUserId?: string;
+  username: string;
+}) {
+  await ensureRegistrationTables();
+  await prisma.registrationChallenge.deleteMany({ where: { username } });
+
+  return prisma.registrationChallenge.create({
+    data: {
+      codeHash: getPasswordHash(code),
+      expiresAt: new Date(Date.now() + 1000 * 60 * 10),
+      passwordHash: getPasswordHash(password),
+      telegramContact,
+      transferSharedUserId,
+      username
+    }
+  });
+}
+
+export async function completeRegistration(challengeId: string, code: string) {
+  await ensureRegistrationTables();
+  const challenge = await prisma.registrationChallenge.findUnique({ where: { id: challengeId } });
+
+  if (!challenge || challenge.expiresAt.getTime() < Date.now() || challenge.codeHash !== getPasswordHash(code)) {
+    return null;
+  }
+
+  const ownerId = `owner-${randomUUID()}`;
+
+  return prisma.$transaction(async (tx) => {
+    if (challenge.transferSharedUserId) {
+      await tx.appUser.deleteMany({
+        where: {
+          accessLevel: { not: "owner" },
+          id: challenge.transferSharedUserId
+        }
+      });
+    }
+
+    const existingOwner = await tx.appUser.findUnique({ where: { username: challenge.username } });
+
+    if (existingOwner?.accessLevel === "owner") {
+      await tx.registrationChallenge.delete({ where: { id: challenge.id } });
+      return null;
+    }
+
+    if (existingOwner) {
+      await tx.appUser.delete({ where: { id: existingOwner.id } });
+    }
+
+    const user = await tx.appUser.create({
+      data: {
+        accessLevel: "owner",
+        ownerId,
+        passwordHash: challenge.passwordHash,
+        username: challenge.username
+      }
+    });
+
+    await tx.telegramContact.upsert({
+      create: {
+        contact: challenge.telegramContact,
+        username: challenge.username
+      },
+      update: {
+        contact: challenge.telegramContact
+      },
+      where: { username: challenge.username }
+    });
+
+    await tx.registrationChallenge.delete({ where: { id: challenge.id } });
+
+    return {
+      accessLevel: "owner" as const,
+      ownerId: user.ownerId,
+      username: user.username
+    };
+  });
 }

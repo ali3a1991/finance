@@ -191,7 +191,8 @@ export async function authenticateUser(username: string, password: string) {
   }
 
   return {
-    accessLevel: user.accessLevel === "readonly" ? ("readonly" as const) : ("readwrite" as const),
+    accessLevel:
+      user.accessLevel === "owner" ? ("owner" as const) : user.accessLevel === "readonly" ? ("readonly" as const) : ("readwrite" as const),
     ownerId: user.ownerId,
     username: user.username
   };

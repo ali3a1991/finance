@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { LockKeyhole } from "lucide-react";
 import { requestJson } from "@/lib/requestJson";
@@ -62,6 +63,10 @@ export default function LoginPage() {
             {isLoading ? "Anmelden..." : "Anmelden"}
           </button>
         </form>
+
+        <p className="auth-switch">
+          Noch kein Konto? <Link href="/register">Registrieren</Link>
+        </p>
       </section>
     </main>
   );

@@ -116,3 +116,22 @@ model AppUser {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
+
+model RegistrationChallenge {
+  id                   String   @id @default(cuid())
+  username             String
+  passwordHash         String
+  telegramContact      String
+  codeHash             String
+  transferSharedUserId String?
+  expiresAt            DateTime
+  createdAt            DateTime @default(now())
+}
+
+model TelegramContact {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  contact   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

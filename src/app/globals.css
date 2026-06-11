@@ -1411,6 +1411,36 @@ th {
   font-weight: 700;
 }
 
+.form-warning {
+  display: grid;
+  gap: 6px;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line));
+  border-radius: 8px;
+  padding: 12px;
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+}
+
+.form-warning strong,
+.form-warning p,
+.auth-switch {
+  margin: 0;
+}
+
+.form-warning strong {
+  color: var(--text);
+}
+
+.form-warning p,
+.auth-switch {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.auth-switch a {
+  color: var(--primary);
+  font-weight: 800;
+}
+
 .error-page {
   display: grid;
   min-height: 100vh;
