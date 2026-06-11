@@ -168,14 +168,8 @@ button:disabled {
   display: none;
 }
 
-.brand-mark {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
+.brand-logo {
   border-radius: 8px;
-  background: var(--primary);
-  font-weight: 800;
 }
 
 .brand strong,
@@ -1688,11 +1682,6 @@ th {
     align-items: center;
     gap: 10px;
     font-weight: 800;
-  }
-
-  .mobile-brand .brand-mark {
-    width: 36px;
-    height: 36px;
   }
 
   .mobile-menu-button,

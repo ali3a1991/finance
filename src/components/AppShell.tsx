@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useApiLoading } from "@/components/ApiLoadingProvider";
 import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
+import Image from "next/image";
 
 const navItems = [
   { href: "/", labelKey: "home", icon: Home },
@@ -54,7 +55,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className={`app-shell ${isMobileMenuOpen ? "menu-open" : ""} ${isApiLoading ? "api-loading-active" : ""}`}>
       <header className="mobile-header">
         <Link className="mobile-brand" href="/" onClick={closeMobileMenu}>
-          <span className="brand-mark">FM</span>
+          <Image src="/logo.svg" width={36} height={36}  alt="FyNest Logo" className="brand-logo" />
           <span>{t("app.brand")}</span>
         </Link>
         <button
@@ -86,7 +87,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       >
         <div className="sidebar-top">
           <Link className="brand" href="/">
-            <span className="brand-mark">FM</span>
+            <Image src="/logo.svg" alt="FyNest Logo" width={44} height={44} className="brand-logo" />
             <span>
               <strong>FyNest</strong>
               <small>{t("app.cockpit")}</small>
