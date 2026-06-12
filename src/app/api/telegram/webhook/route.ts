@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   activateLatestRegistrationChallengeByTelegramUsername,
-  activateRegistrationChallenge
+  activateRegistrationChallenge,
+  saveTelegramContact
 } from "@/lib/serverDb";
 import { sendTelegramCode, sendTelegramMessage } from "@/lib/telegram";
 
@@ -37,6 +38,10 @@ export async function POST(request: NextRequest) {
   }
 
   const telegramUsername = update.message?.from?.username ?? update.message?.chat?.username;
+  if (telegramUsername) {
+    await saveTelegramContact(telegramUsername, String(chatId));
+  }
+
   const challenge = payload
     ? await activateRegistrationChallenge(payload, String(chatId))
     : telegramUsername

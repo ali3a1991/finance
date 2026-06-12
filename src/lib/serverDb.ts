@@ -1178,6 +1178,22 @@ export async function activateRegistrationChallenge(challengeId: string, telegra
   };
 }
 
+export async function saveTelegramContact(username: string, telegramContact: string) {
+  await ensureRegistrationTables();
+  const normalizedUsername = username.replace(/^@/, "");
+
+  return prisma.telegramContact.upsert({
+    create: {
+      contact: telegramContact,
+      username: normalizedUsername
+    },
+    update: {
+      contact: telegramContact
+    },
+    where: { username: normalizedUsername }
+  });
+}
+
 export async function activateLatestRegistrationChallengeByTelegramUsername(username: string, telegramContact: string) {
   await ensureRegistrationTables();
   const normalizedUsername = username.replace(/^@/, "");
@@ -1207,6 +1223,17 @@ export async function activateLatestRegistrationChallengeByTelegramUsername(user
     code: challenge.code,
     username: challenge.username
   };
+}
+
+export async function findTelegramContactByUsername(username: string) {
+  await ensureRegistrationTables();
+  const normalizedUsername = username.replace(/^@/, "");
+
+  return prisma.telegramContact.findFirst({
+    where: {
+      OR: [{ username: normalizedUsername }, { username: `@${normalizedUsername}` }]
+    }
+  });
 }
 
 export async function completeRegistration(challengeId: string, code: string) {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createRegistrationChallenge, findRegistrationAccount } from "@/lib/serverDb";
+import { sendTelegramCode } from "@/lib/telegram";
+import { createRegistrationChallenge, findRegistrationAccount, findTelegramContactByUsername } from "@/lib/serverDb";
 
 function createCode() {
   return String(Math.floor(100000 + Math.random() * 900000));
@@ -43,11 +44,18 @@ export async function POST(request: NextRequest) {
       username
     });
     const payload = challenge.id;
+    const contact = await findTelegramContactByUsername(username);
+    let sent = false;
+
+    if (contact) {
+      await sendTelegramCode(contact.contact, code);
+      sent = true;
+    }
 
     return NextResponse.json({
       botLink: botUsername ? `https://t.me/${botUsername}?start=${encodeURIComponent(payload)}` : null,
       challengeId: challenge.id,
-      sent: false
+      sent
     });
   } catch (error) {
     return NextResponse.json(
