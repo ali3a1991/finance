@@ -1,12 +1,5 @@
-import { GeneralContractsManager } from "@/components/GeneralContractsManager";
-import { PageHeader } from "@/components/PageHeader";
+import { redirect } from "next/navigation";
 
 export default function AllgemeineVertraegePage() {
-  return (
-    <div className="page-stack">
-      <PageHeader page="contractsGeneral" />
-
-      <GeneralContractsManager />
-    </div>
-  );
+  redirect("/contracts/general");
 }

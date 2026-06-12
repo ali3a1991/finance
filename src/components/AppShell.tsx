@@ -11,16 +11,16 @@ import Image from "next/image";
 
 const navItems = [
   { href: "/", labelKey: "home", icon: Home },
-  { href: "/einnahmen", labelKey: "incomes", icon: TrendingUp },
-  { href: "/ausgaben", labelKey: "expenses", icon: WalletCards },
+  { href: "/incomes", labelKey: "incomes", icon: TrendingUp },
+  { href: "/expenses", labelKey: "expenses", icon: WalletCards },
   { href: "/savings", labelKey: "savings", icon: PiggyBank },
-  { href: "/investitionen", labelKey: "investments", icon: TrendingUp }
+  { href: "/investments", labelKey: "investments", icon: TrendingUp }
 ];
 
 const contractItems = [
-  { href: "/versicherungen", labelKey: "insurances", icon: ShieldCheck },
-  { href: "/kredite", labelKey: "loans", icon: Banknote },
-  { href: "/vertraege/allgemein", labelKey: "general", icon: FileText }
+  { href: "/contracts/insurances", labelKey: "insurances", icon: ShieldCheck },
+  { href: "/contracts/credits", labelKey: "loans", icon: Banknote },
+  { href: "/contracts/general", labelKey: "general", icon: FileText }
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -142,10 +142,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           <Link
-            href="/einstellungen"
-            className={`nav-item ${isActivePath("/einstellungen") ? "active" : ""}`}
+            href="/settings"
+            className={`nav-item ${isActivePath("/settings") ? "active" : ""}`}
             onClick={closeMobileMenu}
-            aria-current={isActivePath("/einstellungen") ? "page" : undefined}
+            aria-current={isActivePath("/settings") ? "page" : undefined}
           >
             <Settings size={18} aria-hidden="true" />
             <span>{t("nav.settings")}</span>

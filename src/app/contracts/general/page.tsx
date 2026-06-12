@@ -1,0 +1,12 @@
+import { GeneralContractsManager } from "@/components/GeneralContractsManager";
+import { PageHeader } from "@/components/PageHeader";
+
+export default function GeneralContractsPage() {
+  return (
+    <div className="page-stack">
+      <PageHeader page="contractsGeneral" />
+
+      <GeneralContractsManager />
+    </div>
+  );
+}

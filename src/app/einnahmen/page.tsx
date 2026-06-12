@@ -1,12 +1,5 @@
-import { PageHeader } from "@/components/PageHeader";
-import { EinkommenManager } from "@/components/EinkommenManager";
+import { redirect } from "next/navigation";
 
 export default function EinnahmenPage() {
-  return (
-    <div className="page-stack">
-      <PageHeader page="incomes" />
-
-      <EinkommenManager />
-    </div>
-  );
+  redirect("/incomes");
 }

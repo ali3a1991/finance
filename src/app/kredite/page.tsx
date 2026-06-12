@@ -1,12 +1,5 @@
-import { KreditManager } from "@/components/KreditManager";
-import { PageHeader } from "@/components/PageHeader";
+import { redirect } from "next/navigation";
 
 export default function KreditePage() {
-  return (
-    <div className="page-stack">
-      <PageHeader page="loans" />
-
-      <KreditManager />
-    </div>
-  );
+  redirect("/contracts/credits");
 }

@@ -1,15 +1,5 @@
-import { PageHeader } from "@/components/PageHeader";
-import { AccessSettings } from "@/components/AccessSettings";
-import { LogoutSettings } from "@/components/LogoutSettings";
-import { ThemeSettings } from "@/components/ThemeSettings";
+import { redirect } from "next/navigation";
 
 export default function EinstellungenPage() {
-  return (
-    <div className="page-stack">
-      <PageHeader page="settings" />
-      <ThemeSettings />
-      <AccessSettings />
-      <LogoutSettings />
-    </div>
-  );
+  redirect("/settings");
 }
