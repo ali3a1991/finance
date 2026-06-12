@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { Pencil, PlusCircle, Save, Trash2, X } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Pencil, PlusCircle, Save, Trash2, X } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
 import { formatCurrency, formatDate } from "@/lib/formatting";
@@ -26,6 +26,27 @@ const emptyForm: ExpenseForm = {
   note: ""
 };
 
+function getMonthKey(date = new Date()) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function addMonths(monthKey: string, amount: number) {
+  const [year, month] = monthKey.split("-").map(Number);
+  const date = new Date(year, month - 1 + amount, 1);
+  return getMonthKey(date);
+}
+
+function getMonthKeyFromDateInput(value: string) {
+  return value.slice(0, 7);
+}
+
+function formatMonthLabel(monthKey: string, language: "de" | "en") {
+  const [year, month] = monthKey.split("-").map(Number);
+  return new Intl.DateTimeFormat(language === "de" ? "de-DE" : "en-US", { month: "long", year: "numeric" }).format(
+    new Date(year, month - 1, 1)
+  );
+}
+
 function toPayload(form: ExpenseForm): Omit<Expense, "id"> {
   return {
     amount: Number(form.amount),
@@ -39,7 +60,7 @@ function toPayload(form: ExpenseForm): Omit<Expense, "id"> {
 
 export function AusgabenManager() {
   const { canWrite } = useAuth();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const [editForm, setEditForm] = useState<ExpenseForm>(emptyForm);
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
   const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
@@ -48,6 +69,7 @@ export function AusgabenManager() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [operationLabel, setOperationLabel] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState(getMonthKey());
 
   useEffect(() => {
     async function loadExpenses() {
@@ -83,6 +105,7 @@ export function AusgabenManager() {
       });
 
       setExpenses((current) => [body.expense, ...current]);
+      setSelectedMonth(getMonthKeyFromDateInput(body.expense.date));
       closeAddModal();
     } finally {
       setOperationLabel("");
@@ -116,6 +139,7 @@ export function AusgabenManager() {
       });
 
       setExpenses((current) => current.map((expense) => (expense.id === editingExpenseId ? body.expense : expense)));
+      setSelectedMonth(getMonthKeyFromDateInput(body.expense.date));
       closeEditModal();
     } finally {
       setOperationLabel("");
@@ -140,10 +164,43 @@ export function AusgabenManager() {
     }
   }
 
-  const visibleExpenses = expenses;
+  const visibleExpenses = expenses.filter((expense) => getMonthKeyFromDateInput(expense.date) === selectedMonth);
+  const visibleExpenseTotal = visibleExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+  const isCurrentMonth = selectedMonth === getMonthKey();
 
   return (
     <>
+      <section className="month-switcher" aria-label={t("dashboard.monthPicker")}>
+        <button
+          className="icon-button"
+          type="button"
+          onClick={() => setSelectedMonth((current) => addMonths(current, -1))}
+          aria-label={t("dashboard.previousMonth")}
+        >
+          <ChevronLeft size={20} aria-hidden="true" />
+        </button>
+        <div className="month-switcher-current">
+          <CalendarDays size={20} aria-hidden="true" />
+          <div>
+            <span>{isCurrentMonth ? t("dashboard.currentMonth") : t("dashboard.selectedMonth")}</span>
+            <strong>{formatMonthLabel(selectedMonth, language)}</strong>
+          </div>
+        </div>
+        <button
+          className="icon-button"
+          type="button"
+          onClick={() => setSelectedMonth((current) => addMonths(current, 1))}
+          aria-label={t("dashboard.nextMonth")}
+        >
+          <ChevronRight size={20} aria-hidden="true" />
+        </button>
+        {!isCurrentMonth ? (
+          <button className="button secondary month-today-button" type="button" onClick={() => setSelectedMonth(getMonthKey())}>
+            {t("dashboard.today")}
+          </button>
+        ) : null}
+      </section>
+
       {canWrite ? (
         <div className="action-row">
           <button className="button primary" type="button" onClick={() => setIsOpen(true)}>
@@ -202,6 +259,10 @@ export function AusgabenManager() {
         {!isLoading && visibleExpenses.length === 0 ? (
           <p className="empty-table-text">{t("expenses.empty")}</p>
         ) : null}
+        <div className="table-total-row">
+          <span>{t("common.total")}</span>
+          <strong>{formatCurrency(visibleExpenseTotal)}</strong>
+        </div>
       </section>
 
       {isOpen ? (
