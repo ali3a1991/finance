@@ -15,6 +15,7 @@ type IncomeForm = {
   date: string;
   recurring: boolean;
   entryDay: string;
+  note: string;
 };
 
 const emptyForm: IncomeForm = {
@@ -23,7 +24,8 @@ const emptyForm: IncomeForm = {
   amount: "",
   date: "",
   recurring: true,
-  entryDay: ""
+  entryDay: "",
+  note: ""
 };
 
 function toPayload(form: IncomeForm): Omit<Income, "id"> {
@@ -31,6 +33,7 @@ function toPayload(form: IncomeForm): Omit<Income, "id"> {
     amount: Number(form.amount),
     date: form.date || new Date().toISOString().slice(0, 10),
     entryDay: form.recurring ? Number(form.entryDay) : undefined,
+    note: form.note.trim() || null,
     recurring: form.recurring,
     source: form.source.trim(),
     title: form.title.trim()
@@ -79,6 +82,7 @@ export function EinkommenManager() {
       amount: String(income.amount),
       date: income.date,
       entryDay: income.entryDay ? String(income.entryDay) : "",
+      note: income.note ?? "",
       recurring: income.recurring,
       source: income.source,
       title: income.title
@@ -382,6 +386,14 @@ function IncomeModal({
               <input required type="date" value={form.date} onChange={(event) => onUpdate("date", event.target.value)} />
             </label>
           )}
+          <label className="form-field-full">
+            <span>{t("common.description")}</span>
+            <textarea
+              value={form.note}
+              onChange={(event) => onUpdate("note", event.target.value)}
+              placeholder={t("common.descriptionPlaceholder")}
+            />
+          </label>
           <div className="modal-actions">
             <button className="button secondary" type="button" onClick={onClose}>
               {t("common.cancel")}

@@ -25,6 +25,7 @@ export type Insurance = {
   endDate: string | null;
   renewalDate: string | null;
   coverage: string;
+  note: string | null;
 };
 
 export type GeneralContract = {
@@ -48,6 +49,7 @@ export type Expense = {
   amount: number;
   date: string;
   recurring: boolean;
+  note: string | null;
 };
 
 export type Income = {
@@ -58,6 +60,7 @@ export type Income = {
   date: string;
   recurring: boolean;
   entryDay?: number;
+  note: string | null;
 };
 
 export type Investment = {
@@ -67,6 +70,7 @@ export type Investment = {
   quantity: number;
   purchasePrice: number;
   purchaseDate: string;
+  note: string | null;
 };
 
 export type InvestmentQuote = {

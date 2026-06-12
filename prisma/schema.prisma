@@ -37,6 +37,7 @@ model Insurance {
   endDate        DateTime?
   renewalDate    DateTime?
   coverage       String
+  note           String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
@@ -67,6 +68,7 @@ model Income {
   date      DateTime
   recurring Boolean
   entryDay  Int?
+  note      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -79,6 +81,7 @@ model Expense {
   amount    Float
   date      DateTime
   recurring Boolean
+  note      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -91,6 +94,7 @@ model Investment {
   quantity      Float
   purchasePrice Float
   purchaseDate  DateTime
+  note          String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }

@@ -13,6 +13,7 @@ type ExpenseForm = {
   category: string;
   amount: string;
   date: string;
+  note: string;
 };
 
 const categories = ["Haushalt", "Wohnen", "Mobilitat", "Versicherungen", "Freizeit"];
@@ -21,7 +22,8 @@ const emptyForm: ExpenseForm = {
   title: "",
   category: categories[0],
   amount: "",
-  date: new Date().toISOString().slice(0, 10)
+  date: new Date().toISOString().slice(0, 10),
+  note: ""
 };
 
 function toPayload(form: ExpenseForm): Omit<Expense, "id"> {
@@ -29,6 +31,7 @@ function toPayload(form: ExpenseForm): Omit<Expense, "id"> {
     amount: Number(form.amount),
     category: form.category,
     date: form.date,
+    note: form.note.trim() || null,
     recurring: false,
     title: form.title.trim()
   };
@@ -92,6 +95,7 @@ export function AusgabenManager() {
       amount: String(expense.amount),
       category: expense.category,
       date: expense.date,
+      note: expense.note ?? "",
       title: expense.title
     });
   }
@@ -321,6 +325,14 @@ function ExpenseModal({
           <label>
             <span>{t("expenses.date")}</span>
             <input required type="date" value={form.date} onChange={(event) => onUpdate("date", event.target.value)} />
+          </label>
+          <label className="form-field-full">
+            <span>{t("common.description")}</span>
+            <textarea
+              value={form.note}
+              onChange={(event) => onUpdate("note", event.target.value)}
+              placeholder={t("common.descriptionPlaceholder")}
+            />
           </label>
           <div className="modal-actions">
             <button className="button secondary" type="button" onClick={onClose}>

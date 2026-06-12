@@ -428,9 +428,13 @@ function ContractModal({
               ))}
             </select>
           </label>
-          <label>
-            <span>{t("contracts.note")}</span>
-            <input value={form.note} onChange={(event) => onUpdate("note", event.target.value)} placeholder="Optional" />
+          <label className="form-field-full">
+            <span>{t("common.description")}</span>
+            <textarea
+              value={form.note}
+              onChange={(event) => onUpdate("note", event.target.value)}
+              placeholder={t("common.descriptionPlaceholder")}
+            />
           </label>
           <div className="modal-actions">
             <button className="button secondary" type="button" onClick={onClose}>

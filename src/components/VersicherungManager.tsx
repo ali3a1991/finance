@@ -17,6 +17,7 @@ type InsuranceForm = {
   firstDebitDate: string;
   startDate: string;
   endDate: string;
+  note: string;
 };
 
 const emptyForm: InsuranceForm = {
@@ -27,7 +28,8 @@ const emptyForm: InsuranceForm = {
   paymentIntervalMonths: "1",
   firstDebitDate: "",
   startDate: "",
-  endDate: ""
+  endDate: "",
+  note: ""
 };
 
 const coverageOptions = [
@@ -107,7 +109,8 @@ export function VersicherungManager() {
       paymentIntervalMonths: String(insurance.paymentIntervalMonths),
       firstDebitDate: insurance.firstDebitDate ?? insurance.startDate ?? "",
       startDate: insurance.startDate ?? "",
-      endDate: insurance.endDate ?? insurance.renewalDate ?? ""
+      endDate: insurance.endDate ?? insurance.renewalDate ?? "",
+      note: insurance.note ?? ""
     });
   }
 
@@ -132,7 +135,8 @@ export function VersicherungManager() {
           firstDebitDate: form.firstDebitDate,
           startDate: form.startDate,
           endDate: form.endDate,
-          renewalDate: form.endDate
+          renewalDate: form.endDate,
+          note: form.note.trim() || null
         }),
         method: "POST"
       });
@@ -160,7 +164,8 @@ export function VersicherungManager() {
           firstDebitDate: editForm.firstDebitDate,
           startDate: editForm.startDate,
           endDate: editForm.endDate,
-          renewalDate: editForm.endDate
+          renewalDate: editForm.endDate,
+          note: editForm.note.trim() || null
         }),
         method: "PUT"
       });
@@ -368,6 +373,14 @@ export function VersicherungManager() {
                   onChange={(event) => updateForm("endDate", event.target.value)}
                 />
               </label>
+              <label className="form-field-full">
+                <span>{t("common.description")}</span>
+                <textarea
+                  value={form.note}
+                  onChange={(event) => updateForm("note", event.target.value)}
+                  placeholder={t("common.descriptionPlaceholder")}
+                />
+              </label>
               <div className="modal-actions">
                 <button className="button secondary" type="button" onClick={closeAddModal}>
                   {t("common.cancel")}
@@ -520,6 +533,14 @@ export function VersicherungManager() {
                   type="date"
                   value={editForm.endDate}
                   onChange={(event) => updateEditForm("endDate", event.target.value)}
+                />
+              </label>
+              <label className="form-field-full">
+                <span>{t("common.description")}</span>
+                <textarea
+                  value={editForm.note}
+                  onChange={(event) => updateEditForm("note", event.target.value)}
+                  placeholder={t("common.descriptionPlaceholder")}
                 />
               </label>
               <div className="modal-actions">

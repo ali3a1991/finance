@@ -14,6 +14,7 @@ type InvestmentForm = {
   quantity: string;
   purchasePrice: string;
   purchaseDate: string;
+  note: string;
 };
 
 const assetOptions = [
@@ -29,12 +30,14 @@ const emptyForm: InvestmentForm = {
   purchaseDate: new Date().toISOString().slice(0, 10),
   purchasePrice: "",
   quantity: "",
-  symbol: assetOptions[0].symbol
+  symbol: assetOptions[0].symbol,
+  note: ""
 };
 
 function toPayload(form: InvestmentForm) {
   return {
     assetName: form.assetName,
+    note: form.note.trim() || null,
     purchaseDate: form.purchaseDate,
     purchasePrice: Number(form.purchasePrice),
     quantity: Number(form.quantity),
@@ -45,6 +48,7 @@ function toPayload(form: InvestmentForm) {
 function formFromInvestment(investment: InvestmentWithQuote): InvestmentForm {
   return {
     assetName: investment.assetName,
+    note: investment.note ?? "",
     purchaseDate: investment.purchaseDate,
     purchasePrice: String(investment.purchasePrice),
     quantity: String(investment.quantity),
@@ -311,6 +315,14 @@ export function InvestmentsManager() {
                   type="date"
                   value={form.purchaseDate}
                   onChange={(event) => updateForm("purchaseDate", event.target.value)}
+                />
+              </label>
+              <label className="form-field-full">
+                <span>{t("common.description")}</span>
+                <textarea
+                  value={form.note}
+                  onChange={(event) => updateForm("note", event.target.value)}
+                  placeholder={t("common.descriptionPlaceholder")}
                 />
               </label>
               <div className="modal-actions">

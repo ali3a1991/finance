@@ -67,11 +67,13 @@ function mapInsurance(insurance: {
   endDate: Date | null;
   renewalDate: Date | null;
   coverage: string;
+  note?: string | null;
 }): Insurance {
   return {
     ...insurance,
     endDate: insurance.endDate ? toDateInput(insurance.endDate) : null,
     firstDebitDate: insurance.firstDebitDate ? toDateInput(insurance.firstDebitDate) : null,
+    note: insurance.note ?? null,
     paymentIntervalMonths: normalizePaymentInterval(insurance.paymentIntervalMonths),
     renewalDate: insurance.renewalDate ? toDateInput(insurance.renewalDate) : null,
     startDate: insurance.startDate ? toDateInput(insurance.startDate) : null
@@ -107,11 +109,13 @@ function mapIncome(income: {
   date: Date;
   recurring: boolean;
   entryDay: number | null;
+  note?: string | null;
 }): Income {
   return {
     ...income,
     date: toDateInput(income.date),
-    entryDay: income.entryDay ?? undefined
+    entryDay: income.entryDay ?? undefined,
+    note: income.note ?? null
   };
 }
 
@@ -122,10 +126,12 @@ function mapExpense(expense: {
   amount: number;
   date: Date;
   recurring: boolean;
+  note?: string | null;
 }): Expense {
   return {
     ...expense,
-    date: toDateInput(expense.date)
+    date: toDateInput(expense.date),
+    note: expense.note ?? null
   };
 }
 
@@ -136,9 +142,11 @@ function mapInvestment(investment: {
   quantity: number;
   purchasePrice: number;
   purchaseDate: Date;
+  note?: string | null;
 }): Investment {
   return {
     ...investment,
+    note: investment.note ?? null,
     purchaseDate: toDateInput(investment.purchaseDate)
   };
 }
@@ -153,9 +161,17 @@ async function ensurePaymentIntervalColumns() {
   );
 }
 
+async function ensureFinanceNoteColumns() {
+  await prisma.$executeRawUnsafe('ALTER TABLE "Insurance" ADD COLUMN IF NOT EXISTS "note" TEXT');
+  await prisma.$executeRawUnsafe('ALTER TABLE "Income" ADD COLUMN IF NOT EXISTS "note" TEXT');
+  await prisma.$executeRawUnsafe('ALTER TABLE "Expense" ADD COLUMN IF NOT EXISTS "note" TEXT');
+  await prisma.$executeRawUnsafe('ALTER TABLE "Investment" ADD COLUMN IF NOT EXISTS "note" TEXT');
+}
+
 export async function readFinanceDb(ownerId: string): Promise<FinanceDb> {
   await ensureLoanNoteColumn();
   await ensurePaymentIntervalColumns();
+  await ensureFinanceNoteColumns();
 
   const [loans, insurances, generalContracts, incomes, expenses, investments, monthlyBudgets, paymentConfirmations] =
     await Promise.all([
@@ -255,18 +271,21 @@ export async function deleteLoan(ownerId: string, id: string): Promise<boolean> 
 
 export async function listInsurances(ownerId: string): Promise<Insurance[]> {
   await ensurePaymentIntervalColumns();
+  await ensureFinanceNoteColumns();
   const insurances = await prisma.insurance.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } });
   return insurances.map(mapInsurance);
 }
 
 export async function createInsurance(ownerId: string, insurance: Insurance): Promise<Insurance> {
   await ensurePaymentIntervalColumns();
+  await ensureFinanceNoteColumns();
   const createdInsurance = await prisma.insurance.create({
     data: {
       ...insurance,
       paymentIntervalMonths: normalizePaymentInterval(insurance.paymentIntervalMonths),
       endDate: insurance.endDate ? toDate(insurance.endDate) : null,
       firstDebitDate: insurance.firstDebitDate ? toDate(insurance.firstDebitDate) : null,
+      note: insurance.note || null,
       ownerId,
       renewalDate: insurance.renewalDate ? toDate(insurance.renewalDate) : null,
       startDate: insurance.startDate ? toDate(insurance.startDate) : null
@@ -277,6 +296,7 @@ export async function createInsurance(ownerId: string, insurance: Insurance): Pr
 
 export async function updateInsurance(ownerId: string, id: string, patch: Omit<Insurance, "id">): Promise<Insurance | null> {
   await ensurePaymentIntervalColumns();
+  await ensureFinanceNoteColumns();
   try {
     const result = await prisma.insurance.updateMany({
       data: {
@@ -284,6 +304,7 @@ export async function updateInsurance(ownerId: string, id: string, patch: Omit<I
         paymentIntervalMonths: normalizePaymentInterval(patch.paymentIntervalMonths),
         endDate: patch.endDate ? toDate(patch.endDate) : null,
         firstDebitDate: patch.firstDebitDate ? toDate(patch.firstDebitDate) : null,
+        note: patch.note || null,
         renewalDate: patch.renewalDate ? toDate(patch.renewalDate) : null,
         startDate: patch.startDate ? toDate(patch.startDate) : null
       },
@@ -378,16 +399,19 @@ export async function deleteGeneralContract(ownerId: string, id: string): Promis
 }
 
 export async function listIncomes(ownerId: string): Promise<Income[]> {
+  await ensureFinanceNoteColumns();
   const incomes = await prisma.income.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } });
   return incomes.map(mapIncome);
 }
 
 export async function createIncome(ownerId: string, income: Income): Promise<Income> {
+  await ensureFinanceNoteColumns();
   const createdIncome = await prisma.income.create({
     data: {
       ...income,
       date: toDate(income.date),
       entryDay: income.entryDay ?? null,
+      note: income.note || null,
       ownerId
     }
   });
@@ -395,12 +419,14 @@ export async function createIncome(ownerId: string, income: Income): Promise<Inc
 }
 
 export async function updateIncome(ownerId: string, id: string, patch: Omit<Income, "id">): Promise<Income | null> {
+  await ensureFinanceNoteColumns();
   try {
     const result = await prisma.income.updateMany({
       data: {
         ...patch,
         date: toDate(patch.date),
-        entryDay: patch.entryDay ?? null
+        entryDay: patch.entryDay ?? null,
+        note: patch.note || null
       },
       where: { id, ownerId }
     });
@@ -430,15 +456,18 @@ export async function deleteIncome(ownerId: string, id: string): Promise<boolean
 }
 
 export async function listExpenses(ownerId: string): Promise<Expense[]> {
+  await ensureFinanceNoteColumns();
   const expenses = await prisma.expense.findMany({ orderBy: { date: "desc" }, where: { ownerId } });
   return expenses.map(mapExpense);
 }
 
 export async function createExpense(ownerId: string, expense: Expense): Promise<Expense> {
+  await ensureFinanceNoteColumns();
   const createdExpense = await prisma.expense.create({
     data: {
       ...expense,
       date: toDate(expense.date),
+      note: expense.note || null,
       ownerId
     }
   });
@@ -446,11 +475,13 @@ export async function createExpense(ownerId: string, expense: Expense): Promise<
 }
 
 export async function updateExpense(ownerId: string, id: string, patch: Omit<Expense, "id">): Promise<Expense | null> {
+  await ensureFinanceNoteColumns();
   try {
     const result = await prisma.expense.updateMany({
       data: {
         ...patch,
-        date: toDate(patch.date)
+        date: toDate(patch.date),
+        note: patch.note || null
       },
       where: { id, ownerId }
     });
@@ -480,6 +511,7 @@ export async function deleteExpense(ownerId: string, id: string): Promise<boolea
 }
 
 export async function listInvestments(ownerId: string): Promise<Investment[]> {
+  await ensureFinanceNoteColumns();
   const investments = await prisma.investment.findMany({
     orderBy: { createdAt: "desc" },
     where: { ownerId }
@@ -488,9 +520,11 @@ export async function listInvestments(ownerId: string): Promise<Investment[]> {
 }
 
 export async function createInvestment(ownerId: string, investment: Investment): Promise<Investment> {
+  await ensureFinanceNoteColumns();
   const createdInvestment = await prisma.investment.create({
     data: {
       ...investment,
+      note: investment.note || null,
       ownerId,
       purchaseDate: toDate(investment.purchaseDate),
       symbol: investment.symbol.toUpperCase()
@@ -500,11 +534,13 @@ export async function createInvestment(ownerId: string, investment: Investment):
 }
 
 export async function updateInvestment(ownerId: string, id: string, patch: Omit<Investment, "id">): Promise<Investment | null> {
+  await ensureFinanceNoteColumns();
   try {
     const result = await prisma.investment.updateMany({
       data: {
         ...patch,
         assetName: patch.assetName.trim(),
+        note: patch.note || null,
         purchaseDate: toDate(patch.purchaseDate),
         symbol: patch.symbol.trim().toUpperCase()
       },
