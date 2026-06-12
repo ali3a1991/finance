@@ -33,7 +33,15 @@ export async function POST(request: NextRequest) {
   }
 
   const code = createCode();
+  const hasTelegramToken = Boolean(process.env.TELEGRAM_BOT_TOKEN?.trim());
   const botUsername = process.env.TELEGRAM_BOT_USERNAME?.replace(/^@/, "");
+
+  if (!hasTelegramToken) {
+    return NextResponse.json(
+      { message: "TELEGRAM_BOT_TOKEN fehlt in den Environment Variables." },
+      { status: 500 }
+    );
+  }
 
   try {
     const challenge = await createRegistrationChallenge({
