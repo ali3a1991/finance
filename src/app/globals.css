@@ -1060,6 +1060,13 @@ th {
   background: #8f1c48;
 }
 
+.compact-action {
+  min-height: 38px;
+  padding: 8px 10px;
+  font-size: 0.86rem;
+  white-space: nowrap;
+}
+
 .icon-button {
   display: grid;
   place-items: center;

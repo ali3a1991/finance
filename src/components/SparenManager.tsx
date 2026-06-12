@@ -253,20 +253,22 @@ export function SparenManager() {
                       <td>
                         <div className="table-actions">
                           <button
-                            className="icon-button"
+                            className="button secondary compact-action"
                             type="button"
                             onClick={() => openTransactionModal(goal, "deposit")}
                             aria-label={`${goal.name} ${t("savings.deposit")}`}
                           >
                             <ArrowDownToLine size={16} aria-hidden="true" />
+                            {t("savings.deposit")}
                           </button>
                           <button
-                            className="icon-button"
+                            className="button secondary compact-action"
                             type="button"
                             onClick={() => openTransactionModal(goal, "withdrawal")}
                             aria-label={`${goal.name} ${t("savings.withdraw")}`}
                           >
                             <ArrowUpFromLine size={16} aria-hidden="true" />
+                            {t("savings.withdraw")}
                           </button>
                           <button
                             className="icon-button"

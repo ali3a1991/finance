@@ -170,6 +170,15 @@ export function AusgabenManager() {
 
   return (
     <>
+      {canWrite ? (
+        <div className="action-row">
+          <button className="button primary" type="button" onClick={() => setIsOpen(true)}>
+            <PlusCircle size={18} aria-hidden="true" />
+            {t("expenses.add")}
+          </button>
+        </div>
+      ) : null}
+
       <section className="month-switcher" aria-label={t("dashboard.monthPicker")}>
         <button
           className="icon-button"
@@ -200,15 +209,6 @@ export function AusgabenManager() {
           </button>
         ) : null}
       </section>
-
-      {canWrite ? (
-        <div className="action-row">
-          <button className="button primary" type="button" onClick={() => setIsOpen(true)}>
-            <PlusCircle size={18} aria-hidden="true" />
-            {t("expenses.add")}
-          </button>
-        </div>
-      ) : null}
 
       {isLoading ? <p className="muted-text">{t("expenses.loading")}</p> : null}
 
