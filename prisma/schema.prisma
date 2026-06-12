@@ -32,6 +32,7 @@ model Insurance {
   monthlyPremium Float
   debitDay       Int
   paymentIntervalMonths Int @default(1)
+  firstDebitDate DateTime?
   startDate      DateTime?
   endDate        DateTime?
   renewalDate    DateTime?

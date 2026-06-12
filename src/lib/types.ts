@@ -20,6 +20,7 @@ export type Insurance = {
   monthlyPremium: number;
   debitDay: number;
   paymentIntervalMonths: number;
+  firstDebitDate: string | null;
   startDate: string | null;
   endDate: string | null;
   renewalDate: string | null;

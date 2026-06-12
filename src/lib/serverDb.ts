@@ -62,6 +62,7 @@ function mapInsurance(insurance: {
   monthlyPremium: number;
   debitDay: number;
   paymentIntervalMonths?: number | null;
+  firstDebitDate?: Date | null;
   startDate: Date | null;
   endDate: Date | null;
   renewalDate: Date | null;
@@ -70,6 +71,7 @@ function mapInsurance(insurance: {
   return {
     ...insurance,
     endDate: insurance.endDate ? toDateInput(insurance.endDate) : null,
+    firstDebitDate: insurance.firstDebitDate ? toDateInput(insurance.firstDebitDate) : null,
     paymentIntervalMonths: normalizePaymentInterval(insurance.paymentIntervalMonths),
     renewalDate: insurance.renewalDate ? toDateInput(insurance.renewalDate) : null,
     startDate: insurance.startDate ? toDateInput(insurance.startDate) : null
@@ -145,6 +147,7 @@ async function ensurePaymentIntervalColumns() {
   await prisma.$executeRawUnsafe(
     'ALTER TABLE "Insurance" ADD COLUMN IF NOT EXISTS "paymentIntervalMonths" INTEGER NOT NULL DEFAULT 1'
   );
+  await prisma.$executeRawUnsafe('ALTER TABLE "Insurance" ADD COLUMN IF NOT EXISTS "firstDebitDate" TIMESTAMP(3)');
   await prisma.$executeRawUnsafe(
     'ALTER TABLE "GeneralContract" ADD COLUMN IF NOT EXISTS "paymentIntervalMonths" INTEGER NOT NULL DEFAULT 1'
   );
@@ -263,6 +266,7 @@ export async function createInsurance(ownerId: string, insurance: Insurance): Pr
       ...insurance,
       paymentIntervalMonths: normalizePaymentInterval(insurance.paymentIntervalMonths),
       endDate: insurance.endDate ? toDate(insurance.endDate) : null,
+      firstDebitDate: insurance.firstDebitDate ? toDate(insurance.firstDebitDate) : null,
       ownerId,
       renewalDate: insurance.renewalDate ? toDate(insurance.renewalDate) : null,
       startDate: insurance.startDate ? toDate(insurance.startDate) : null
@@ -279,6 +283,7 @@ export async function updateInsurance(ownerId: string, id: string, patch: Omit<I
         ...patch,
         paymentIntervalMonths: normalizePaymentInterval(patch.paymentIntervalMonths),
         endDate: patch.endDate ? toDate(patch.endDate) : null,
+        firstDebitDate: patch.firstDebitDate ? toDate(patch.firstDebitDate) : null,
         renewalDate: patch.renewalDate ? toDate(patch.renewalDate) : null,
         startDate: patch.startDate ? toDate(patch.startDate) : null
       },
@@ -739,6 +744,38 @@ function isRecurringPaymentDue(
   return currentMonth >= firstPaymentMonth && (currentMonth - firstPaymentMonth) % interval === 0;
 }
 
+function getFirstInsuranceDebitDate(insurance: Insurance) {
+  if (insurance.firstDebitDate) {
+    return insurance.firstDebitDate;
+  }
+
+  if (!insurance.startDate) {
+    return null;
+  }
+
+  const start = new Date(`${insurance.startDate}T00:00:00`);
+  const lastDayOfStartMonth = new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate();
+  const firstDebitDay = Math.min(Math.max(insurance.debitDay, 1), lastDayOfStartMonth);
+  const monthOffset = firstDebitDay >= start.getDate() ? 0 : 1;
+  const firstDebitDate = new Date(start.getFullYear(), start.getMonth() + monthOffset, firstDebitDay);
+  return toDateInput(firstDebitDate);
+}
+
+function isInsurancePaymentDue(insurance: Insurance, date = new Date()) {
+  const firstDebitDateValue = getFirstInsuranceDebitDate(insurance);
+
+  if (!firstDebitDateValue) {
+    return true;
+  }
+
+  const firstDebitDate = new Date(`${firstDebitDateValue}T00:00:00`);
+  const interval = normalizePaymentInterval(insurance.paymentIntervalMonths);
+  const currentMonth = getMonthIndex(date);
+  const firstPaymentMonth = getMonthIndex(firstDebitDate);
+
+  return currentMonth >= firstPaymentMonth && (currentMonth - firstPaymentMonth) % interval === 0;
+}
+
 function getPaymentStatus(db: FinanceDb, id: string) {
   return db.paymentConfirmations?.find((payment) => payment.id === id)?.paidAmount ?? 0;
 }
@@ -799,16 +836,16 @@ export function buildMonthlyPayments(db: FinanceDb, date = new Date()): MonthlyP
 
   const insurancePayments: MonthlyPayment[] = db.insurances
     .filter((insurance) => isActiveInMonth(insurance.startDate, insurance.endDate ?? insurance.renewalDate, date))
-    .filter((insurance) =>
-      isRecurringPaymentDue(insurance.startDate, insurance.debitDay, insurance.paymentIntervalMonths, date)
-    )
+    .filter((insurance) => isInsurancePaymentDue(insurance, date))
     .map((insurance) => {
+      const firstDebitDate = getFirstInsuranceDebitDate(insurance);
+      const dueDay = firstDebitDate ? new Date(`${firstDebitDate}T00:00:00`).getDate() : insurance.debitDay;
       const id = `insurance:${insurance.id}:${monthKey}`;
 
       return {
         amount: insurance.monthlyPremium,
         category: insurance.provider,
-        dueDate: getCurrentMonthDate(insurance.debitDay, date),
+        dueDate: getCurrentMonthDate(dueDay, date),
         id,
         paidAmount: getPaymentStatus(db, id),
         sourceType: "insurance",

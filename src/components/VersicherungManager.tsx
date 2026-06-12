@@ -14,6 +14,7 @@ type InsuranceForm = {
   monthlyPremium: string;
   debitDay: string;
   paymentIntervalMonths: string;
+  firstDebitDate: string;
   startDate: string;
   endDate: string;
 };
@@ -24,6 +25,7 @@ const emptyForm: InsuranceForm = {
   monthlyPremium: "",
   debitDay: "",
   paymentIntervalMonths: "1",
+  firstDebitDate: "",
   startDate: "",
   endDate: ""
 };
@@ -80,6 +82,16 @@ export function VersicherungManager() {
     setEditForm((current) => ({ ...current, [field]: value }));
   }
 
+  function updateFirstDebitDate(value: string) {
+    const day = value ? String(new Date(`${value}T00:00:00`).getDate()) : "";
+    setForm((current) => ({ ...current, debitDay: day || current.debitDay, firstDebitDate: value }));
+  }
+
+  function updateEditFirstDebitDate(value: string) {
+    const day = value ? String(new Date(`${value}T00:00:00`).getDate()) : "";
+    setEditForm((current) => ({ ...current, debitDay: day || current.debitDay, firstDebitDate: value }));
+  }
+
   function closeAddModal() {
     setIsOpen(false);
     setForm(emptyForm);
@@ -93,6 +105,7 @@ export function VersicherungManager() {
       monthlyPremium: String(insurance.monthlyPremium),
       debitDay: String(insurance.debitDay),
       paymentIntervalMonths: String(insurance.paymentIntervalMonths),
+      firstDebitDate: insurance.firstDebitDate ?? insurance.startDate ?? "",
       startDate: insurance.startDate ?? "",
       endDate: insurance.endDate ?? insurance.renewalDate ?? ""
     });
@@ -116,6 +129,7 @@ export function VersicherungManager() {
           monthlyPremium: Number(form.monthlyPremium),
           debitDay: Number(form.debitDay),
           paymentIntervalMonths: Number(form.paymentIntervalMonths),
+          firstDebitDate: form.firstDebitDate,
           startDate: form.startDate,
           endDate: form.endDate,
           renewalDate: form.endDate
@@ -143,6 +157,7 @@ export function VersicherungManager() {
           monthlyPremium: Number(editForm.monthlyPremium),
           debitDay: Number(editForm.debitDay),
           paymentIntervalMonths: Number(editForm.paymentIntervalMonths),
+          firstDebitDate: editForm.firstDebitDate,
           startDate: editForm.startDate,
           endDate: editForm.endDate,
           renewalDate: editForm.endDate
@@ -327,6 +342,15 @@ export function VersicherungManager() {
                 />
               </label>
               <label>
+                <span>{t("insurances.firstDebitDate")}</span>
+                <input
+                  required
+                  type="date"
+                  value={form.firstDebitDate}
+                  onChange={(event) => updateFirstDebitDate(event.target.value)}
+                />
+              </label>
+              <label>
                 <span>{t("insurances.startDate")}</span>
                 <input
                   required
@@ -469,6 +493,15 @@ export function VersicherungManager() {
                   value={editForm.debitDay}
                   onChange={(event) => updateEditForm("debitDay", event.target.value)}
                   placeholder="15"
+                />
+              </label>
+              <label>
+                <span>{t("insurances.firstDebitDate")}</span>
+                <input
+                  required
+                  type="date"
+                  value={editForm.firstDebitDate}
+                  onChange={(event) => updateEditFirstDebitDate(event.target.value)}
                 />
               </label>
               <label>
