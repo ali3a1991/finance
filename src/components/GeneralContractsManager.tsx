@@ -200,8 +200,6 @@ export function GeneralContractsManager() {
             <thead>
               <tr>
                 <th>{t("contracts.title")}</th>
-                <th>{t("contracts.provider")}</th>
-                <th>{t("contracts.category")}</th>
                 <th>{t("contracts.amount")}</th>
                 <th>{t("common.paymentInterval")}</th>
                 <th>{t("contracts.debitDay")}</th>
@@ -220,8 +218,6 @@ export function GeneralContractsManager() {
                       {contract.title}
                     </span>
                   </td>
-                  <td>{contract.provider}</td>
-                  <td>{contract.category}</td>
                   <td>{formatCurrency(contract.monthlyAmount)}</td>
                   <td>{t(`common.paymentInterval${contract.paymentIntervalMonths}`)}</td>
                   <td>{contract.debitDay}. {t("common.day")}</td>

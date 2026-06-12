@@ -220,7 +220,6 @@ export function KreditManager() {
                 <th>{t("loans.loan")}</th>
                 <th>{t("loans.bank")}</th>
                 <th>{t("loans.amount")}</th>
-                <th>{t("loans.totalInterest")}</th>
                 <th>{t("loans.rate")}</th>
                 <th>{t("loans.firstPayment")}</th>
                 <th>{t("loans.status")}</th>
@@ -238,7 +237,6 @@ export function KreditManager() {
                   </td>
                   <td>{loan.bank}</td>
                   <td>{formatCurrency(loan.balance)}</td>
-                  <td>{formatCurrency(loan.totalInterest)}</td>
                   <td>{formatCurrency(loan.monthlyRate)}</td>
                   <td>{formatDate(loan.nextPayment)}</td>
                   <td>{loan.status}</td>

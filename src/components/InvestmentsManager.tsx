@@ -177,13 +177,11 @@ export function InvestmentsManager() {
             <thead>
               <tr>
                 <th>{t("investments.asset")}</th>
-                <th>{t("investments.symbol")}</th>
                 <th>{t("investments.quantity")}</th>
                 <th>{t("investments.purchasePrice")}</th>
                 <th>{t("investments.currentPrice")}</th>
                 <th>{t("investments.currentValue")}</th>
                 <th>{t("investments.result")}</th>
-                <th>{t("investments.purchaseDate")}</th>
                 {canWrite ? <th>{t("common.actions")}</th> : null}
               </tr>
             </thead>
@@ -206,7 +204,6 @@ export function InvestmentsManager() {
                         {investment.assetName}
                       </span>
                     </td>
-                    <td>{investment.symbol}</td>
                     <td>{investment.quantity}</td>
                     <td>{formatCurrency(investment.purchasePrice, "EUR")}</td>
                     <td>
@@ -220,7 +217,6 @@ export function InvestmentsManager() {
                         {formatCurrency(result, "EUR")}
                       </span>
                     </td>
-                    <td>{formatDate(investment.purchaseDate)}</td>
                     {canWrite ? (
                       <td>
                         <div className="table-actions">

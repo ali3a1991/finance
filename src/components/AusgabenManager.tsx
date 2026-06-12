@@ -157,7 +157,6 @@ export function AusgabenManager() {
             <thead>
               <tr>
                 <th>{t("expenses.title")}</th>
-                <th>{t("expenses.category")}</th>
                 <th>{t("expenses.date")}</th>
                 <th>{t("expenses.amount")}</th>
                 {canWrite ? <th>{t("common.actions")}</th> : null}
@@ -167,7 +166,6 @@ export function AusgabenManager() {
               {visibleExpenses.map((expense) => (
                 <tr key={expense.id}>
                   <td>{expense.title}</td>
-                  <td>{expense.category}</td>
                   <td>{formatDate(expense.date)}</td>
                   <td>{formatCurrency(expense.amount)}</td>
                   {canWrite ? (
