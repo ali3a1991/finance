@@ -911,6 +911,14 @@ th {
   color: var(--rose);
 }
 
+.savings-summary-panel {
+  grid-template-columns: minmax(220px, 0.8fr) minmax(180px, 0.7fr);
+}
+
+.savings-summary-grid {
+  grid-template-columns: 1fr;
+}
+
 .payment-panel {
   display: grid;
   gap: 18px;

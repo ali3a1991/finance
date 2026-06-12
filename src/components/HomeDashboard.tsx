@@ -189,6 +189,24 @@ export function HomeDashboard() {
         </div>
       </section>
 
+      <section className="investment-summary-panel savings-summary-panel" aria-label={t("dashboard.savings")}>
+        <div className="investment-summary-heading">
+          <div className="summary-icon">
+            <PiggyBank size={20} aria-hidden="true" />
+          </div>
+          <div>
+            <span>{t("dashboard.savings")}</span>
+            <strong>{t("dashboard.savingsTotal")}</strong>
+          </div>
+        </div>
+        <div className="investment-summary-grid savings-summary-grid">
+          <div>
+            <span>{t("dashboard.savings")}</span>
+            <strong>{formatCurrency(summary.savingsTotal)}</strong>
+          </div>
+        </div>
+      </section>
+
       <section className="month-switcher" aria-label={t("dashboard.monthPicker")}>
         <button
           className="icon-button"
@@ -276,12 +294,6 @@ export function HomeDashboard() {
           label={t("dashboard.insurances")}
           value={formatCurrency(summary.insuranceTotal)}
           helper={t("dashboard.monthlyPremiums")}
-        />
-        <StatCard
-          icon={PiggyBank}
-          label={t("dashboard.savings")}
-          value={formatCurrency(summary.savingsTotal)}
-          helper={t("dashboard.savingsTotal")}
         />
         <StatCard
           icon={PiggyBank}
