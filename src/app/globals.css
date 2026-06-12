@@ -813,6 +813,31 @@ th {
   color: var(--rose);
 }
 
+.savings-progress {
+  display: grid;
+  gap: 7px;
+  min-width: 180px;
+}
+
+.savings-progress-line {
+  height: 9px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--line) 64%, transparent);
+}
+
+.savings-progress-line span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+}
+
+.savings-progress small {
+  color: var(--muted);
+  font-weight: 800;
+}
+
 .investment-summary-panel {
   display: grid;
   grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.6fr);

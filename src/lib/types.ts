@@ -84,6 +84,16 @@ export type InvestmentWithQuote = Investment & {
   currency: string;
 };
 
+export type SavingsGoal = {
+  id: string;
+  name: string;
+  targetAmount: number;
+  currentAmount: number;
+  monthlyContribution: number;
+  targetDate: string | null;
+  note: string | null;
+};
+
 export type MonthlyBudget = {
   category: string;
   planned: number;
@@ -127,6 +137,7 @@ export type FinanceDb = {
   generalContracts?: GeneralContract[];
   incomes?: Income[];
   investments?: Investment[];
+  savingsGoals?: SavingsGoal[];
   expenses: Expense[];
   monthlyBudgets: MonthlyBudget[];
   paymentConfirmations?: PaymentConfirmation[];

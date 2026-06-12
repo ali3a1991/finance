@@ -20,6 +20,7 @@ const translations = {
       insurances: "Versicherungen",
       incomes: "Einnahmen",
       expenses: "Ausgaben",
+      savings: "Sparen",
       investments: "Investitionen",
       contracts: "Verträge",
       general: "Allgemein",
@@ -62,6 +63,11 @@ const translations = {
         eyebrow: "Investitionen",
         title: "Depot und Krypto verwalten.",
         description: "Erfasse deine Käufe und vergleiche Kaufpreis, Menge und aktuellen Marktpreis."
+      },
+      savings: {
+        eyebrow: "Sparen",
+        title: "Sparziele planen.",
+        description: "Behalte Zielbeträge, Fortschritt und monatliche Sparraten im Blick."
       },
       contractsGeneral: {
         eyebrow: "Verträge",
@@ -289,6 +295,25 @@ const translations = {
       deleteTitle: "Investition wirklich loschen?",
       deleteText: "wird aus deinem Depot entfernt."
     },
+    savings: {
+      add: "Sparziel hinzufugen",
+      loading: "Sparziele werden geladen...",
+      saving: "Sparziel",
+      addTitle: "Neues Sparziel eintragen",
+      editTitle: "Sparziel bearbeiten",
+      goal: "Sparziel",
+      targetAmount: "Zielbetrag",
+      currentAmount: "Aktueller Betrag",
+      monthlyContribution: "Monatlich sparen",
+      targetDate: "Zieldatum",
+      progress: "Fortschritt",
+      savedTotal: "Gespart",
+      targetTotal: "Ziel gesamt",
+      empty: "Noch keine Sparziele vorhanden.",
+      deleteLabel: "Sparziel loschen",
+      deleteTitle: "Sparziel wirklich loschen?",
+      deleteText: "wird aus deiner Sparplanung entfernt."
+    },
     settings: {
       themeLabel: "Theme",
       themeTitle: "Farbmodus",
@@ -360,6 +385,7 @@ const translations = {
       insurances: "Insurance",
       incomes: "Income",
       expenses: "Expenses",
+      savings: "Savings",
       investments: "Investments",
       contracts: "Contracts",
       general: "General",
@@ -402,6 +428,11 @@ const translations = {
         eyebrow: "Investments",
         title: "Manage portfolio and crypto.",
         description: "Track purchases and compare purchase price, quantity and current market price."
+      },
+      savings: {
+        eyebrow: "Savings",
+        title: "Plan savings goals.",
+        description: "Track target amounts, progress and monthly saving rates."
       },
       contractsGeneral: {
         eyebrow: "Contracts",
@@ -628,6 +659,25 @@ const translations = {
       deleteLabel: "Delete investment",
       deleteTitle: "Delete this investment?",
       deleteText: "will be removed from your portfolio."
+    },
+    savings: {
+      add: "Add savings goal",
+      loading: "Loading savings goals...",
+      saving: "Savings goal",
+      addTitle: "Add new savings goal",
+      editTitle: "Edit savings goal",
+      goal: "Savings goal",
+      targetAmount: "Target amount",
+      currentAmount: "Current amount",
+      monthlyContribution: "Monthly saving",
+      targetDate: "Target date",
+      progress: "Progress",
+      savedTotal: "Saved",
+      targetTotal: "Total target",
+      empty: "No savings goals yet.",
+      deleteLabel: "Delete savings goal",
+      deleteTitle: "Delete this savings goal?",
+      deleteText: "will be removed from your savings plan."
     },
     settings: {
       themeLabel: "Theme",

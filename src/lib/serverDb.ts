@@ -13,6 +13,7 @@ import type {
   InvestmentWithQuote,
   Loan,
   MonthlyPayment,
+  SavingsGoal,
   SharedUser
 } from "@/lib/types";
 
@@ -151,6 +152,22 @@ function mapInvestment(investment: {
   };
 }
 
+function mapSavingsGoal(goal: {
+  id: string;
+  name: string;
+  targetAmount: number;
+  currentAmount: number;
+  monthlyContribution: number;
+  targetDate: Date | null;
+  note?: string | null;
+}): SavingsGoal {
+  return {
+    ...goal,
+    note: goal.note ?? null,
+    targetDate: goal.targetDate ? toDateInput(goal.targetDate) : null
+  };
+}
+
 async function ensurePaymentIntervalColumns() {
   await prisma.$executeRawUnsafe(
     'ALTER TABLE "Insurance" ADD COLUMN IF NOT EXISTS "paymentIntervalMonths" INTEGER NOT NULL DEFAULT 1'
@@ -168,12 +185,19 @@ async function ensureFinanceNoteColumns() {
   await prisma.$executeRawUnsafe('ALTER TABLE "Investment" ADD COLUMN IF NOT EXISTS "note" TEXT');
 }
 
+async function ensureSavingsGoalTable() {
+  await prisma.$executeRawUnsafe(
+    'CREATE TABLE IF NOT EXISTS "SavingsGoal" ("id" TEXT PRIMARY KEY, "ownerId" TEXT, "name" TEXT NOT NULL, "targetAmount" DOUBLE PRECISION NOT NULL, "currentAmount" DOUBLE PRECISION NOT NULL, "monthlyContribution" DOUBLE PRECISION NOT NULL, "targetDate" TIMESTAMP(3), "note" TEXT, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP)'
+  );
+}
+
 export async function readFinanceDb(ownerId: string): Promise<FinanceDb> {
   await ensureLoanNoteColumn();
   await ensurePaymentIntervalColumns();
   await ensureFinanceNoteColumns();
+  await ensureSavingsGoalTable();
 
-  const [loans, insurances, generalContracts, incomes, expenses, investments, monthlyBudgets, paymentConfirmations] =
+  const [loans, insurances, generalContracts, incomes, expenses, investments, savingsGoals, monthlyBudgets, paymentConfirmations] =
     await Promise.all([
     prisma.loan.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } }),
     prisma.insurance.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } }),
@@ -181,6 +205,7 @@ export async function readFinanceDb(ownerId: string): Promise<FinanceDb> {
     prisma.income.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } }),
     prisma.expense.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } }),
     prisma.investment.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } }),
+    prisma.savingsGoal.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } }),
     prisma.monthlyBudget.findMany({ orderBy: { category: "asc" }, where: { ownerId } }),
     prisma.paymentConfirmation.findMany({ where: { ownerId } })
   ]);
@@ -202,7 +227,8 @@ export async function readFinanceDb(ownerId: string): Promise<FinanceDb> {
       id: payment.id,
       paidAmount: payment.paidAmount,
       updatedAt: payment.updatedAt.toISOString()
-    }))
+    })),
+    savingsGoals: savingsGoals.map(mapSavingsGoal)
   };
 }
 
@@ -560,6 +586,62 @@ export async function updateInvestment(ownerId: string, id: string, patch: Omit<
 
 export async function deleteInvestment(ownerId: string, id: string): Promise<boolean> {
   const result = await prisma.investment.deleteMany({ where: { id, ownerId } });
+  return result.count > 0;
+}
+
+export async function listSavingsGoals(ownerId: string): Promise<SavingsGoal[]> {
+  await ensureSavingsGoalTable();
+  const goals = await prisma.savingsGoal.findMany({
+    orderBy: { createdAt: "desc" },
+    where: { ownerId }
+  });
+  return goals.map(mapSavingsGoal);
+}
+
+export async function createSavingsGoal(ownerId: string, goal: SavingsGoal): Promise<SavingsGoal> {
+  await ensureSavingsGoalTable();
+  const createdGoal = await prisma.savingsGoal.create({
+    data: {
+      ...goal,
+      note: goal.note || null,
+      ownerId,
+      targetDate: goal.targetDate ? toDate(goal.targetDate) : null
+    }
+  });
+  return mapSavingsGoal(createdGoal);
+}
+
+export async function updateSavingsGoal(
+  ownerId: string,
+  id: string,
+  patch: Omit<SavingsGoal, "id">
+): Promise<SavingsGoal | null> {
+  await ensureSavingsGoalTable();
+  try {
+    const result = await prisma.savingsGoal.updateMany({
+      data: {
+        ...patch,
+        name: patch.name.trim(),
+        note: patch.note || null,
+        targetDate: patch.targetDate ? toDate(patch.targetDate) : null
+      },
+      where: { id, ownerId }
+    });
+
+    if (result.count === 0) {
+      return null;
+    }
+
+    const goal = await prisma.savingsGoal.findFirst({ where: { id, ownerId } });
+    return goal ? mapSavingsGoal(goal) : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function deleteSavingsGoal(ownerId: string, id: string): Promise<boolean> {
+  await ensureSavingsGoalTable();
+  const result = await prisma.savingsGoal.deleteMany({ where: { id, ownerId } });
   return result.count > 0;
 }
 

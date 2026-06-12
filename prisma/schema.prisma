@@ -99,6 +99,19 @@ model Investment {
   updatedAt     DateTime @updatedAt
 }
 
+model SavingsGoal {
+  id                  String   @id
+  ownerId             String?
+  name                String
+  targetAmount        Float
+  currentAmount       Float
+  monthlyContribution Float
+  targetDate          DateTime?
+  note                String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
 model MonthlyBudget {
   id       String @id @default(cuid())
   ownerId  String?

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Banknote, FileText, Home, Menu, Settings, ShieldCheck, TrendingUp, WalletCards, X } from "lucide-react";
+import { Banknote, FileText, Home, Menu, PiggyBank, Settings, ShieldCheck, TrendingUp, WalletCards, X } from "lucide-react";
 import { useState } from "react";
 import { useApiLoading } from "@/components/ApiLoadingProvider";
 import { useAuth } from "@/components/AuthProvider";
@@ -13,6 +13,7 @@ const navItems = [
   { href: "/", labelKey: "home", icon: Home },
   { href: "/einnahmen", labelKey: "incomes", icon: TrendingUp },
   { href: "/ausgaben", labelKey: "expenses", icon: WalletCards },
+  { href: "/sparen", labelKey: "savings", icon: PiggyBank },
   { href: "/investitionen", labelKey: "investments", icon: TrendingUp }
 ];
 
