@@ -1,12 +1,12 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { ArrowDownToLine, ArrowUpFromLine, Pencil, PiggyBank, PlusCircle, Save, Trash2, X } from "lucide-react";
+import { ArrowDownToLine, ArrowUpFromLine, List, Pencil, PiggyBank, PlusCircle, Save, Trash2, X } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
-import { formatCurrency } from "@/lib/formatting";
+import { formatCurrency, formatDate } from "@/lib/formatting";
 import { requestJson } from "@/lib/requestJson";
-import type { SavingsGoal } from "@/lib/types";
+import type { SavingsGoal, SavingsTransaction } from "@/lib/types";
 
 type SavingsForm = {
   name: string;
@@ -82,13 +82,18 @@ function formFromGoal(goal: SavingsGoal): SavingsForm {
 export function SparenManager() {
   const { canWrite } = useAuth();
   const { t } = useLanguage();
+  const [detailGoal, setDetailGoal] = useState<SavingsGoal | null>(null);
+  const [editingTransaction, setEditingTransaction] = useState<SavingsTransaction | null>(null);
   const [editingGoal, setEditingGoal] = useState<SavingsGoal | null>(null);
   const [form, setForm] = useState<SavingsForm>(emptyForm);
   const [goalToDelete, setGoalToDelete] = useState<SavingsGoal | null>(null);
+  const [transactionToDelete, setTransactionToDelete] = useState<SavingsTransaction | null>(null);
   const [transactionGoal, setTransactionGoal] = useState<SavingsGoal | null>(null);
   const [transactionForm, setTransactionForm] = useState<TransactionForm>(emptyTransactionForm);
   const [transactionMode, setTransactionMode] = useState<TransactionMode>("deposit");
+  const [transactions, setTransactions] = useState<SavingsTransaction[]>([]);
   const [goals, setGoals] = useState<SavingsGoal[]>([]);
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [operationLabel, setOperationLabel] = useState("");
@@ -126,14 +131,49 @@ export function SparenManager() {
   }
 
   function openTransactionModal(goal: SavingsGoal, mode: TransactionMode) {
+    setEditingTransaction(null);
     setTransactionGoal(goal);
     setTransactionMode(mode);
     setTransactionForm(emptyTransactionForm);
   }
 
   function closeTransactionModal() {
+    setEditingTransaction(null);
     setTransactionGoal(null);
     setTransactionForm(emptyTransactionForm);
+  }
+
+  async function openDetailsModal(goal: SavingsGoal) {
+    setDetailGoal(goal);
+    setIsDetailLoading(true);
+
+    try {
+      const body = await requestJson<{ transactions: SavingsTransaction[] }>(`/api/savings/${goal.id}/transactions`);
+      setTransactions(body.transactions);
+    } finally {
+      setIsDetailLoading(false);
+    }
+  }
+
+  function closeDetailsModal() {
+    setDetailGoal(null);
+    setTransactions([]);
+    setTransactionToDelete(null);
+  }
+
+  function openEditTransaction(transaction: SavingsTransaction) {
+    if (!detailGoal) {
+      return;
+    }
+
+    setEditingTransaction(transaction);
+    setTransactionGoal(detailGoal);
+    setTransactionMode(transaction.type);
+    setTransactionForm({
+      amount: String(transaction.amount),
+      date: transaction.date,
+      note: transaction.note ?? ""
+    });
   }
 
   function updateTransactionForm(field: keyof TransactionForm, value: string) {
@@ -206,6 +246,63 @@ export function SparenManager() {
 
       setGoals((current) => current.map((goal) => (goal.id === transactionGoal.id ? body.savingsGoal : goal)));
       closeTransactionModal();
+      if (detailGoal?.id === transactionGoal.id) {
+        await openDetailsModal(body.savingsGoal);
+      }
+    } finally {
+      setOperationLabel("");
+    }
+  }
+
+  async function handleEditTransactionSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!transactionGoal || !editingTransaction) {
+      return;
+    }
+
+    setOperationLabel("edit-saving-transaction");
+
+    try {
+      const body = await requestJson<{ savingsGoal: SavingsGoal; transaction: SavingsTransaction }>(
+        `/api/savings/${transactionGoal.id}/transactions/${editingTransaction.id}`,
+        {
+          body: JSON.stringify({
+            amount: Number(transactionForm.amount),
+            date: transactionForm.date,
+            note: transactionForm.note.trim() || null
+          }),
+          method: "PUT"
+        }
+      );
+
+      setGoals((current) => current.map((goal) => (goal.id === transactionGoal.id ? body.savingsGoal : goal)));
+      setDetailGoal(body.savingsGoal);
+      setTransactions((current) =>
+        current.map((transaction) => (transaction.id === editingTransaction.id ? body.transaction : transaction))
+      );
+      closeTransactionModal();
+    } finally {
+      setOperationLabel("");
+    }
+  }
+
+  async function confirmDeleteTransaction() {
+    if (!detailGoal || !transactionToDelete) {
+      return;
+    }
+
+    setOperationLabel("delete-saving-transaction");
+
+    try {
+      const body = await requestJson<{ savingsGoal: SavingsGoal }>(
+        `/api/savings/${detailGoal.id}/transactions/${transactionToDelete.id}`,
+        { method: "DELETE" }
+      );
+      setGoals((current) => current.map((goal) => (goal.id === detailGoal.id ? body.savingsGoal : goal)));
+      setDetailGoal(body.savingsGoal);
+      setTransactions((current) => current.filter((transaction) => transaction.id !== transactionToDelete.id));
+      setTransactionToDelete(null);
     } finally {
       setOperationLabel("");
     }
@@ -233,7 +330,7 @@ export function SparenManager() {
               <tr>
                 <th>{t("savings.goal")}</th>
                 <th>{t("savings.progress")}</th>
-                {canWrite ? <th>{t("common.actions")}</th> : null}
+                <th>{t("common.actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -258,27 +355,40 @@ export function SparenManager() {
                         </small>
                       </div>
                     </td>
-                    {canWrite ? (
-                      <td>
-                        <div className="table-actions">
-                          <button
-                            className="button secondary compact-action"
-                            type="button"
-                            onClick={() => openTransactionModal(goal, "deposit")}
-                            aria-label={`${goal.name} ${t("savings.deposit")}`}
-                          >
-                            <ArrowDownToLine size={16} aria-hidden="true" />
-                            {t("savings.deposit")}
-                          </button>
-                          <button
-                            className="button secondary compact-action"
-                            type="button"
-                            onClick={() => openTransactionModal(goal, "withdrawal")}
-                            aria-label={`${goal.name} ${t("savings.withdraw")}`}
-                          >
-                            <ArrowUpFromLine size={16} aria-hidden="true" />
-                            {t("savings.withdraw")}
-                          </button>
+                    <td>
+                      <div className="table-actions">
+                        {canWrite ? (
+                          <>
+                            <button
+                              className="button secondary compact-action"
+                              type="button"
+                              onClick={() => openTransactionModal(goal, "deposit")}
+                              aria-label={`${goal.name} ${t("savings.deposit")}`}
+                            >
+                              <ArrowDownToLine size={16} aria-hidden="true" />
+                              {t("savings.deposit")}
+                            </button>
+                            <button
+                              className="button secondary compact-action"
+                              type="button"
+                              onClick={() => openTransactionModal(goal, "withdrawal")}
+                              aria-label={`${goal.name} ${t("savings.withdraw")}`}
+                            >
+                              <ArrowUpFromLine size={16} aria-hidden="true" />
+                              {t("savings.withdraw")}
+                            </button>
+                          </>
+                        ) : null}
+                        <button
+                          className="icon-button"
+                          type="button"
+                          onClick={() => openDetailsModal(goal)}
+                          aria-label={`${goal.name} ${t("savings.details")}`}
+                        >
+                          <List size={16} aria-hidden="true" />
+                        </button>
+                        {canWrite ? (
+                          <>
                           <button
                             className="icon-button"
                             type="button"
@@ -295,9 +405,10 @@ export function SparenManager() {
                           >
                             <Trash2 size={16} aria-hidden="true" />
                           </button>
-                        </div>
-                      </td>
-                    ) : null}
+                          </>
+                        ) : null}
+                      </div>
+                    </td>
                   </tr>
                 );
               })}
@@ -324,13 +435,26 @@ export function SparenManager() {
 
       {transactionGoal ? (
         <SavingsTransactionModal
+          editingTransaction={editingTransaction}
           form={transactionForm}
           goal={transactionGoal}
-          isSubmitting={operationLabel === "save-saving-transaction"}
+          isSubmitting={operationLabel === "save-saving-transaction" || operationLabel === "edit-saving-transaction"}
           mode={transactionMode}
           onClose={closeTransactionModal}
-          onSubmit={handleTransactionSubmit}
+          onSubmit={editingTransaction ? handleEditTransactionSubmit : handleTransactionSubmit}
           onUpdate={updateTransactionForm}
+        />
+      ) : null}
+
+      {detailGoal ? (
+        <SavingsDetailsModal
+          canWrite={canWrite}
+          goal={detailGoal}
+          isLoading={isDetailLoading}
+          onClose={closeDetailsModal}
+          onDelete={setTransactionToDelete}
+          onEdit={openEditTransaction}
+          transactions={transactions}
         />
       ) : null}
 
@@ -359,6 +483,37 @@ export function SparenManager() {
               >
                 <Trash2 size={18} aria-hidden="true" />
                 {operationLabel === "delete-saving" ? t("common.deleting") : t("common.delete")}
+              </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
+
+      {transactionToDelete ? (
+        <div className="modal-backdrop" role="presentation">
+          <section className="confirm-panel" role="dialog" aria-modal="true" aria-labelledby="saving-transaction-delete-title">
+            <div className="confirm-icon danger" aria-hidden="true">
+              <Trash2 size={24} />
+            </div>
+            <div className="confirm-content">
+              <span>{t("savings.transactionDeleteLabel")}</span>
+              <h2 id="saving-transaction-delete-title">{t("savings.transactionDeleteTitle")}</h2>
+              <p>
+                <strong>{formatCurrency(transactionToDelete.amount)}</strong> {t("savings.transactionDeleteText")}
+              </p>
+            </div>
+            <div className="modal-actions">
+              <button className="button secondary" type="button" onClick={() => setTransactionToDelete(null)}>
+                {t("common.cancel")}
+              </button>
+              <button
+                className="button danger"
+                type="button"
+                onClick={confirmDeleteTransaction}
+                disabled={operationLabel === "delete-saving-transaction"}
+              >
+                <Trash2 size={18} aria-hidden="true" />
+                {operationLabel === "delete-saving-transaction" ? t("common.deleting") : t("common.delete")}
               </button>
             </div>
           </section>
@@ -444,6 +599,7 @@ function SavingsModal({
 }
 
 function SavingsTransactionModal({
+  editingTransaction,
   form,
   goal,
   isSubmitting,
@@ -452,6 +608,7 @@ function SavingsTransactionModal({
   onSubmit,
   onUpdate
 }: {
+  editingTransaction: SavingsTransaction | null;
   form: TransactionForm;
   goal: SavingsGoal;
   isSubmitting: boolean;
@@ -470,7 +627,11 @@ function SavingsTransactionModal({
           <div>
             <span>{goal.name}</span>
             <h2 id="saving-transaction-modal-title">
-              {isDeposit ? t("savings.depositTitle") : t("savings.withdrawTitle")}
+              {editingTransaction
+                ? t("savings.editTransactionTitle")
+                : isDeposit
+                  ? t("savings.depositTitle")
+                  : t("savings.withdrawTitle")}
             </h2>
           </div>
           <button className="icon-button" type="button" onClick={onClose} aria-label={t("common.closeDialog")}>
@@ -516,6 +677,92 @@ function SavingsTransactionModal({
             </button>
           </div>
         </form>
+      </section>
+    </div>
+  );
+}
+
+function SavingsDetailsModal({
+  canWrite,
+  goal,
+  isLoading,
+  onClose,
+  onDelete,
+  onEdit,
+  transactions
+}: {
+  canWrite: boolean;
+  goal: SavingsGoal;
+  isLoading: boolean;
+  onClose: () => void;
+  onDelete: (transaction: SavingsTransaction) => void;
+  onEdit: (transaction: SavingsTransaction) => void;
+  transactions: SavingsTransaction[];
+}) {
+  const { t } = useLanguage();
+
+  return (
+    <div className="modal-backdrop" role="presentation">
+      <section className="modal-panel detail-panel" role="dialog" aria-modal="true" aria-labelledby="saving-details-title">
+        <div className="modal-header">
+          <div>
+            <span>{goal.name}</span>
+            <h2 id="saving-details-title">{t("savings.detailsTitle")}</h2>
+          </div>
+          <button className="icon-button" type="button" onClick={onClose} aria-label={t("common.closeDialog")}>
+            <X size={20} aria-hidden="true" />
+          </button>
+        </div>
+
+        {isLoading ? <p className="muted-text">{t("savings.loadingTransactions")}</p> : null}
+
+        <div className="responsive-table">
+          <table>
+            <thead>
+              <tr>
+                <th>{t("savings.transactionType")}</th>
+                <th>{t("savings.transactionDate")}</th>
+                <th>{t("savings.transactionAmount")}</th>
+                <th>{t("common.description")}</th>
+                {canWrite ? <th>{t("common.actions")}</th> : null}
+              </tr>
+            </thead>
+            <tbody>
+              {transactions.map((transaction) => (
+                <tr key={transaction.id}>
+                  <td>{transaction.type === "deposit" ? t("savings.deposit") : t("savings.withdraw")}</td>
+                  <td>{formatDate(transaction.date)}</td>
+                  <td>{formatCurrency(transaction.amount)}</td>
+                  <td>{transaction.note || "-"}</td>
+                  {canWrite ? (
+                    <td>
+                      <div className="table-actions">
+                        <button
+                          className="icon-button"
+                          type="button"
+                          onClick={() => onEdit(transaction)}
+                          aria-label={`${formatCurrency(transaction.amount)} ${t("common.edit")}`}
+                        >
+                          <Pencil size={16} aria-hidden="true" />
+                        </button>
+                        <button
+                          className="icon-button danger"
+                          type="button"
+                          onClick={() => onDelete(transaction)}
+                          aria-label={`${formatCurrency(transaction.amount)} ${t("common.delete")}`}
+                        >
+                          <Trash2 size={16} aria-hidden="true" />
+                        </button>
+                      </div>
+                    </td>
+                  ) : null}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {!isLoading && transactions.length === 0 ? <p className="empty-table-text">{t("savings.noTransactions")}</p> : null}
       </section>
     </div>
   );

@@ -58,6 +58,10 @@ function toPayload(form: ExpenseForm): Omit<Expense, "id"> {
   };
 }
 
+function isSavingsGeneratedExpense(expense: Expense) {
+  return expense.id.startsWith("exp-saving-");
+}
+
 export function AusgabenManager() {
   const { canWrite } = useAuth();
   const { language, t } = useLanguage();
@@ -231,24 +235,28 @@ export function AusgabenManager() {
                   <td>{formatCurrency(expense.amount)}</td>
                   {canWrite ? (
                     <td>
-                      <div className="table-actions">
-                        <button
-                          className="icon-button"
-                          type="button"
-                          onClick={() => openEditModal(expense)}
-                          aria-label={`${expense.title} ${t("common.edit")}`}
-                        >
-                          <Pencil size={16} aria-hidden="true" />
-                        </button>
-                        <button
-                          className="icon-button danger"
-                          type="button"
-                          onClick={() => setExpenseToDelete(expense)}
-                          aria-label={`${expense.title} ${t("common.delete")}`}
-                        >
-                          <Trash2 size={16} aria-hidden="true" />
-                        </button>
-                      </div>
+                      {isSavingsGeneratedExpense(expense) ? (
+                        <span className="table-note">{t("savings.manageOnlyInSavings")}</span>
+                      ) : (
+                        <div className="table-actions">
+                          <button
+                            className="icon-button"
+                            type="button"
+                            onClick={() => openEditModal(expense)}
+                            aria-label={`${expense.title} ${t("common.edit")}`}
+                          >
+                            <Pencil size={16} aria-hidden="true" />
+                          </button>
+                          <button
+                            className="icon-button danger"
+                            type="button"
+                            onClick={() => setExpenseToDelete(expense)}
+                            aria-label={`${expense.title} ${t("common.delete")}`}
+                          >
+                            <Trash2 size={16} aria-hidden="true" />
+                          </button>
+                        </div>
+                      )}
                     </td>
                   ) : null}
                 </tr>

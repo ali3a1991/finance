@@ -1666,6 +1666,15 @@ th {
   line-height: 1.5;
 }
 
+.table-note {
+  color: var(--muted);
+  display: inline-flex;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.35;
+  max-width: 12rem;
+}
+
 .auth-switch a {
   color: var(--primary);
   font-weight: 800;

@@ -325,13 +325,14 @@ export function HomeDashboard() {
             const draftValue = paymentDrafts[payment.id] ?? toPaymentInputValue(payment.paidAmount);
             const draftAmount = parsePaymentInputValue(draftValue);
             const hasDraftChange = Math.abs(draftAmount - payment.paidAmount) > 0.009;
+            const canUpdatePayment = canWrite && !payment.lockedBySavings;
 
             return (
               <article
                 className={`payment-row ${!canWrite ? "readonly" : ""} ${isPaid ? "paid" : ""} ${isPartial ? "partial" : ""}`}
                 key={payment.id}
               >
-                {canWrite ? (
+                {canUpdatePayment ? (
                   <button
                     className="payment-check"
                     type="button"
@@ -351,7 +352,9 @@ export function HomeDashboard() {
                 <div className="payment-amount">
                   <strong>{formatCurrency(payment.amount)}</strong>
                   <span>
-                    {isUpdating
+                    {payment.lockedBySavings
+                      ? t("savings.manageOnlyInSavings")
+                      : isUpdating
                       ? t("dashboard.updating")
                       : isPaid
                         ? t("dashboard.paid")
@@ -360,7 +363,7 @@ export function HomeDashboard() {
                           : t("dashboard.open")}
                   </span>
                 </div>
-                {canWrite ? (
+                {canUpdatePayment ? (
                   <div className="partial-input">
                     <label>
                       <span>{t("dashboard.paidAmount")}</span>

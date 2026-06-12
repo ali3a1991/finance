@@ -94,6 +94,17 @@ export type SavingsGoal = {
   note: string | null;
 };
 
+export type SavingsTransaction = {
+  id: string;
+  savingsGoalId: string;
+  type: "deposit" | "withdrawal";
+  amount: number;
+  date: string;
+  note: string | null;
+  expenseId: string | null;
+  incomeId: string | null;
+};
+
 export type MonthlyBudget = {
   category: string;
   planned: number;
@@ -114,6 +125,7 @@ export type MonthlyPayment = {
   amount: number;
   dueDate: string;
   paidAmount: number;
+  lockedBySavings?: boolean;
 };
 
 export type AccessLevel = "readonly" | "readwrite";

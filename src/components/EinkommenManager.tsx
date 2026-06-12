@@ -40,6 +40,10 @@ function toPayload(form: IncomeForm): Omit<Income, "id"> {
   };
 }
 
+function isSavingsGeneratedIncome(income: Income) {
+  return income.id.startsWith("income-saving-");
+}
+
 export function EinkommenManager() {
   const { canWrite } = useAuth();
   const { t } = useLanguage();
@@ -207,24 +211,28 @@ export function EinkommenManager() {
                   <td>{income.recurring ? t("incomes.fixed") : t("common.oneTime")}</td>
                   {canWrite ? (
                     <td>
-                      <div className="table-actions">
-                        <button
-                          className="icon-button"
-                          type="button"
-                          onClick={() => openEditModal(income)}
-                          aria-label={`${income.title} ${t("common.edit")}`}
-                        >
-                          <Pencil size={16} aria-hidden="true" />
-                        </button>
-                        <button
-                          className="icon-button danger"
-                          type="button"
-                          onClick={() => setIncomeToDelete(income)}
-                          aria-label={`${income.title} ${t("common.delete")}`}
-                        >
-                          <Trash2 size={16} aria-hidden="true" />
-                        </button>
-                      </div>
+                      {isSavingsGeneratedIncome(income) ? (
+                        <span className="table-note">{t("savings.manageOnlyInSavings")}</span>
+                      ) : (
+                        <div className="table-actions">
+                          <button
+                            className="icon-button"
+                            type="button"
+                            onClick={() => openEditModal(income)}
+                            aria-label={`${income.title} ${t("common.edit")}`}
+                          >
+                            <Pencil size={16} aria-hidden="true" />
+                          </button>
+                          <button
+                            className="icon-button danger"
+                            type="button"
+                            onClick={() => setIncomeToDelete(income)}
+                            aria-label={`${income.title} ${t("common.delete")}`}
+                          >
+                            <Trash2 size={16} aria-hidden="true" />
+                          </button>
+                        </div>
+                      )}
                     </td>
                   ) : null}
                 </tr>

@@ -1,10 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireWriteAccess } from "@/lib/auth";
-import { applySavingsTransaction } from "@/lib/serverDb";
+import { requireApiAuth, requireWriteAccess } from "@/lib/auth";
+import { applySavingsTransaction, listSavingsTransactions } from "@/lib/serverDb";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
 };
+
+export async function GET(request: NextRequest, context: RouteContext) {
+  const auth = requireApiAuth(request);
+
+  if (auth.error) {
+    return auth.error;
+  }
+
+  const { id } = await context.params;
+  return NextResponse.json({
+    transactions: await listSavingsTransactions(auth.payload.ownerId, id)
+  });
+}
 
 export async function POST(request: NextRequest, context: RouteContext) {
   const auth = requireWriteAccess(request);

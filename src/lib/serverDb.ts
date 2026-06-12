@@ -14,6 +14,7 @@ import type {
   Loan,
   MonthlyPayment,
   SavingsGoal,
+  SavingsTransaction,
   SharedUser
 } from "@/lib/types";
 
@@ -47,6 +48,18 @@ function getNextSavingsMilestone(amount: number) {
   }
 
   return Math.ceil((amount + 1) / 10000) * 10000;
+}
+
+function getSavingsPaymentConfirmationId(expenseId: string, date: Date) {
+  return `expense:${expenseId}:${getMonthKey(date)}`;
+}
+
+function isSavingsExpenseId(id: string) {
+  return id.startsWith("exp-saving-");
+}
+
+function isSavingsIncomeId(id: string) {
+  return id.startsWith("income-saving-");
 }
 
 function mapLoan(loan: {
@@ -188,6 +201,28 @@ function mapSavingsGoal(goal: {
   };
 }
 
+function mapSavingsTransaction(transaction: {
+  id: string;
+  savingsGoalId: string;
+  type: string;
+  amount: number;
+  date: Date;
+  note?: string | null;
+  expenseId?: string | null;
+  incomeId?: string | null;
+}): SavingsTransaction {
+  return {
+    amount: transaction.amount,
+    date: toDateInput(transaction.date),
+    expenseId: transaction.expenseId ?? null,
+    id: transaction.id,
+    incomeId: transaction.incomeId ?? null,
+    note: transaction.note ?? null,
+    savingsGoalId: transaction.savingsGoalId,
+    type: transaction.type === "withdrawal" ? "withdrawal" : "deposit"
+  };
+}
+
 async function ensurePaymentIntervalColumns() {
   await prisma.$executeRawUnsafe(
     'ALTER TABLE "Insurance" ADD COLUMN IF NOT EXISTS "paymentIntervalMonths" INTEGER NOT NULL DEFAULT 1'
@@ -208,6 +243,12 @@ async function ensureFinanceNoteColumns() {
 async function ensureSavingsGoalTable() {
   await prisma.$executeRawUnsafe(
     'CREATE TABLE IF NOT EXISTS "SavingsGoal" ("id" TEXT PRIMARY KEY, "ownerId" TEXT, "name" TEXT NOT NULL, "targetAmount" DOUBLE PRECISION NOT NULL, "currentAmount" DOUBLE PRECISION NOT NULL, "monthlyContribution" DOUBLE PRECISION NOT NULL, "targetDate" TIMESTAMP(3), "note" TEXT, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP)'
+  );
+}
+
+async function ensureSavingsTransactionTable() {
+  await prisma.$executeRawUnsafe(
+    'CREATE TABLE IF NOT EXISTS "SavingsTransaction" ("id" TEXT PRIMARY KEY, "ownerId" TEXT, "savingsGoalId" TEXT NOT NULL, "type" TEXT NOT NULL, "amount" DOUBLE PRECISION NOT NULL, "date" TIMESTAMP(3) NOT NULL, "note" TEXT, "expenseId" TEXT, "incomeId" TEXT, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP)'
   );
 }
 
@@ -466,6 +507,10 @@ export async function createIncome(ownerId: string, income: Income): Promise<Inc
 
 export async function updateIncome(ownerId: string, id: string, patch: Omit<Income, "id">): Promise<Income | null> {
   await ensureFinanceNoteColumns();
+  if (isSavingsIncomeId(id)) {
+    return null;
+  }
+
   try {
     const result = await prisma.income.updateMany({
       data: {
@@ -493,6 +538,10 @@ export async function updateIncome(ownerId: string, id: string, patch: Omit<Inco
 }
 
 export async function deleteIncome(ownerId: string, id: string): Promise<boolean> {
+  if (isSavingsIncomeId(id)) {
+    return false;
+  }
+
   try {
     const result = await prisma.income.deleteMany({ where: { id, ownerId } });
     return result.count > 0;
@@ -522,6 +571,10 @@ export async function createExpense(ownerId: string, expense: Expense): Promise<
 
 export async function updateExpense(ownerId: string, id: string, patch: Omit<Expense, "id">): Promise<Expense | null> {
   await ensureFinanceNoteColumns();
+  if (isSavingsExpenseId(id)) {
+    return null;
+  }
+
   try {
     const result = await prisma.expense.updateMany({
       data: {
@@ -548,6 +601,10 @@ export async function updateExpense(ownerId: string, id: string, patch: Omit<Exp
 }
 
 export async function deleteExpense(ownerId: string, id: string): Promise<boolean> {
+  if (isSavingsExpenseId(id)) {
+    return false;
+  }
+
   try {
     const result = await prisma.expense.deleteMany({ where: { id, ownerId } });
     return result.count > 0;
@@ -661,8 +718,30 @@ export async function updateSavingsGoal(
 
 export async function deleteSavingsGoal(ownerId: string, id: string): Promise<boolean> {
   await ensureSavingsGoalTable();
+  await ensureSavingsTransactionTable();
+  const transactions = await prisma.savingsTransaction.findMany({ where: { ownerId, savingsGoalId: id } });
+  const expenseIds = transactions.flatMap((transaction) => (transaction.expenseId ? [transaction.expenseId] : []));
+  const incomeIds = transactions.flatMap((transaction) => (transaction.incomeId ? [transaction.incomeId] : []));
+  await prisma.paymentConfirmation.deleteMany({
+    where: {
+      id: { in: transactions.flatMap((transaction) => (transaction.expenseId ? [getSavingsPaymentConfirmationId(transaction.expenseId, transaction.date)] : [])) },
+      ownerId
+    }
+  });
+  await prisma.expense.deleteMany({ where: { id: { in: expenseIds }, ownerId } });
+  await prisma.income.deleteMany({ where: { id: { in: incomeIds }, ownerId } });
+  await prisma.savingsTransaction.deleteMany({ where: { ownerId, savingsGoalId: id } });
   const result = await prisma.savingsGoal.deleteMany({ where: { id, ownerId } });
   return result.count > 0;
+}
+
+export async function listSavingsTransactions(ownerId: string, savingsGoalId: string): Promise<SavingsTransaction[]> {
+  await ensureSavingsTransactionTable();
+  const transactions = await prisma.savingsTransaction.findMany({
+    orderBy: { date: "desc" },
+    where: { ownerId, savingsGoalId }
+  });
+  return transactions.map(mapSavingsTransaction);
 }
 
 export async function applySavingsTransaction({
@@ -681,6 +760,7 @@ export async function applySavingsTransaction({
   type: "deposit" | "withdrawal";
 }): Promise<SavingsGoal | null> {
   await ensureSavingsGoalTable();
+  await ensureSavingsTransactionTable();
   await ensureFinanceNoteColumns();
 
   try {
@@ -708,7 +788,7 @@ export async function applySavingsTransaction({
       });
 
       if (type === "deposit") {
-        await tx.expense.create({
+        const expense = await tx.expense.create({
           data: {
             amount: normalizedAmount,
             category: "Sparen",
@@ -720,8 +800,29 @@ export async function applySavingsTransaction({
             title: `Einzahlung: ${goal.name}`
           }
         });
+        await tx.paymentConfirmation.upsert({
+          create: {
+            id: getSavingsPaymentConfirmationId(expense.id, entryDate),
+            ownerId,
+            paidAmount: normalizedAmount
+          },
+          update: { paidAmount: normalizedAmount },
+          where: { id: getSavingsPaymentConfirmationId(expense.id, entryDate) }
+        });
+        await tx.savingsTransaction.create({
+          data: {
+            amount: normalizedAmount,
+            date: entryDate,
+            expenseId: expense.id,
+            id: `saving-transaction-${Date.now()}-${randomUUID().slice(0, 8)}`,
+            note: cleanNote,
+            ownerId,
+            savingsGoalId: goal.id,
+            type
+          }
+        });
       } else {
-        await tx.income.create({
+        const income = await tx.income.create({
           data: {
             amount: normalizedAmount,
             date: entryDate,
@@ -734,7 +835,170 @@ export async function applySavingsTransaction({
             title: `Auszahlung: ${goal.name}`
           }
         });
+        await tx.savingsTransaction.create({
+          data: {
+            amount: normalizedAmount,
+            date: entryDate,
+            id: `saving-transaction-${Date.now()}-${randomUUID().slice(0, 8)}`,
+            incomeId: income.id,
+            note: cleanNote,
+            ownerId,
+            savingsGoalId: goal.id,
+            type
+          }
+        });
       }
+
+      return mapSavingsGoal(updatedGoal);
+    });
+  } catch {
+    return null;
+  }
+}
+
+export async function updateSavingsTransaction({
+  amount,
+  date,
+  note,
+  ownerId,
+  savingsGoalId,
+  transactionId
+}: {
+  amount: number;
+  date: string;
+  note?: string | null;
+  ownerId: string;
+  savingsGoalId: string;
+  transactionId: string;
+}): Promise<{ savingsGoal: SavingsGoal; transaction: SavingsTransaction } | null> {
+  await ensureSavingsGoalTable();
+  await ensureSavingsTransactionTable();
+  await ensureFinanceNoteColumns();
+
+  try {
+    return await prisma.$transaction(async (tx) => {
+      const transaction = await tx.savingsTransaction.findFirst({
+        where: { id: transactionId, ownerId, savingsGoalId }
+      });
+      const goal = await tx.savingsGoal.findFirst({ where: { id: savingsGoalId, ownerId } });
+
+      if (!transaction || !goal) {
+        return null;
+      }
+
+      const normalizedAmount = Math.max(amount, 0);
+      const entryDate = toDate(date);
+      const cleanNote = note?.trim() || null;
+      const previousSignedAmount = transaction.type === "deposit" ? transaction.amount : -transaction.amount;
+      const nextSignedAmount = transaction.type === "deposit" ? normalizedAmount : -normalizedAmount;
+      const nextGoalAmount = Math.max(goal.currentAmount - previousSignedAmount + nextSignedAmount, 0);
+
+      const updatedGoal = await tx.savingsGoal.update({
+        data: {
+          currentAmount: nextGoalAmount,
+          targetAmount: getNextSavingsMilestone(nextGoalAmount)
+        },
+        where: { id: goal.id }
+      });
+
+      if (transaction.type === "deposit" && transaction.expenseId) {
+        await tx.expense.updateMany({
+          data: {
+            amount: normalizedAmount,
+            date: entryDate,
+            note: cleanNote
+          },
+          where: { id: transaction.expenseId, ownerId }
+        });
+        await tx.paymentConfirmation.deleteMany({
+          where: { id: getSavingsPaymentConfirmationId(transaction.expenseId, transaction.date), ownerId }
+        });
+        await tx.paymentConfirmation.upsert({
+          create: {
+            id: getSavingsPaymentConfirmationId(transaction.expenseId, entryDate),
+            ownerId,
+            paidAmount: normalizedAmount
+          },
+          update: { paidAmount: normalizedAmount },
+          where: { id: getSavingsPaymentConfirmationId(transaction.expenseId, entryDate) }
+        });
+      }
+
+      if (transaction.type === "withdrawal" && transaction.incomeId) {
+        await tx.income.updateMany({
+          data: {
+            amount: normalizedAmount,
+            date: entryDate,
+            note: cleanNote
+          },
+          where: { id: transaction.incomeId, ownerId }
+        });
+      }
+
+      const updatedTransaction = await tx.savingsTransaction.update({
+        data: {
+          amount: normalizedAmount,
+          date: entryDate,
+          note: cleanNote
+        },
+        where: { id: transaction.id }
+      });
+
+      return {
+        savingsGoal: mapSavingsGoal(updatedGoal),
+        transaction: mapSavingsTransaction(updatedTransaction)
+      };
+    });
+  } catch {
+    return null;
+  }
+}
+
+export async function deleteSavingsTransaction({
+  ownerId,
+  savingsGoalId,
+  transactionId
+}: {
+  ownerId: string;
+  savingsGoalId: string;
+  transactionId: string;
+}): Promise<SavingsGoal | null> {
+  await ensureSavingsGoalTable();
+  await ensureSavingsTransactionTable();
+
+  try {
+    return await prisma.$transaction(async (tx) => {
+      const transaction = await tx.savingsTransaction.findFirst({
+        where: { id: transactionId, ownerId, savingsGoalId }
+      });
+      const goal = await tx.savingsGoal.findFirst({ where: { id: savingsGoalId, ownerId } });
+
+      if (!transaction || !goal) {
+        return null;
+      }
+
+      const signedAmount = transaction.type === "deposit" ? transaction.amount : -transaction.amount;
+      const nextGoalAmount = Math.max(goal.currentAmount - signedAmount, 0);
+      const updatedGoal = await tx.savingsGoal.update({
+        data: {
+          currentAmount: nextGoalAmount,
+          targetAmount: getNextSavingsMilestone(nextGoalAmount)
+        },
+        where: { id: goal.id }
+      });
+
+      if (transaction.expenseId) {
+        await tx.paymentConfirmation.deleteMany({
+          where: { id: getSavingsPaymentConfirmationId(transaction.expenseId, transaction.date), ownerId }
+        });
+        await tx.expense.deleteMany({ where: { id: transaction.expenseId, ownerId } });
+      }
+
+      if (transaction.incomeId) {
+        await tx.income.deleteMany({ where: { id: transaction.incomeId, ownerId } });
+      }
+
+      await tx.savingsTransaction.delete({ where: { id: transaction.id } });
 
       return mapSavingsGoal(updatedGoal);
     });
@@ -1079,6 +1343,7 @@ export function buildMonthlyPayments(db: FinanceDb, date = new Date()): MonthlyP
         category: expense.category,
         dueDate: getCurrentMonthDate(dueDay, date),
         id,
+        lockedBySavings: isSavingsExpenseId(expense.id),
         paidAmount: getPaymentStatus(db, id),
         sourceType: "expense",
         title: expense.title
