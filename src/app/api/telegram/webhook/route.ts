@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { activateRegistrationChallenge } from "@/lib/serverDb";
+import {
+  activateLatestRegistrationChallengeByTelegramUsername,
+  activateRegistrationChallenge
+} from "@/lib/serverDb";
 import { sendTelegramCode, sendTelegramMessage } from "@/lib/telegram";
 
 type TelegramUpdate = {
   message?: {
     chat?: {
       id?: number | string;
+      username?: string;
+    };
+    from?: {
+      username?: string;
     };
     text?: string;
   };
@@ -16,19 +23,31 @@ function getStartPayload(text?: string) {
   return match?.[1] ?? null;
 }
 
+function isStartCommand(text?: string) {
+  return /^\/start(?:@\w+)?(?:\s|$)/.test(text?.trim() ?? "");
+}
+
 export async function POST(request: NextRequest) {
   const update = (await request.json()) as TelegramUpdate;
   const chatId = update.message?.chat?.id;
   const payload = getStartPayload(update.message?.text);
 
-  if (!chatId || !payload) {
+  if (!chatId || !isStartCommand(update.message?.text)) {
     return NextResponse.json({ ok: true });
   }
 
-  const challenge = await activateRegistrationChallenge(payload, String(chatId));
+  const telegramUsername = update.message?.from?.username ?? update.message?.chat?.username;
+  const challenge = payload
+    ? await activateRegistrationChallenge(payload, String(chatId))
+    : telegramUsername
+      ? await activateLatestRegistrationChallengeByTelegramUsername(telegramUsername, String(chatId))
+      : null;
 
   if (!challenge) {
-    await sendTelegramMessage(String(chatId), "Der Registrierungslink ist abgelaufen. Bitte starte die Registrierung erneut.");
+    await sendTelegramMessage(
+      String(chatId),
+      "Ich finde keine offene Registrierung. Bitte starte die Registrierung in der App erneut und offne dann den Telegram-Link."
+    );
     return NextResponse.json({ ok: true });
   }
 

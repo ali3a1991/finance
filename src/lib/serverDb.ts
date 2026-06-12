@@ -1178,6 +1178,37 @@ export async function activateRegistrationChallenge(challengeId: string, telegra
   };
 }
 
+export async function activateLatestRegistrationChallengeByTelegramUsername(username: string, telegramContact: string) {
+  await ensureRegistrationTables();
+  const normalizedUsername = username.replace(/^@/, "");
+  const challenge = await prisma.registrationChallenge.findFirst({
+    orderBy: { createdAt: "desc" },
+    where: {
+      expiresAt: { gt: new Date() },
+      OR: [
+        { username: normalizedUsername },
+        { username: `@${normalizedUsername}` },
+        { telegramContact: normalizedUsername },
+        { telegramContact: `@${normalizedUsername}` }
+      ]
+    }
+  });
+
+  if (!challenge) {
+    return null;
+  }
+
+  await prisma.registrationChallenge.update({
+    data: { telegramContact },
+    where: { id: challenge.id }
+  });
+
+  return {
+    code: challenge.code,
+    username: challenge.username
+  };
+}
+
 export async function completeRegistration(challengeId: string, code: string) {
   await ensureRegistrationTables();
   const challenge = await prisma.registrationChallenge.findUnique({ where: { id: challengeId } });
