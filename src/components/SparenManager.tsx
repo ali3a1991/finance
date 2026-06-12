@@ -4,16 +4,13 @@ import { FormEvent, useEffect, useState } from "react";
 import { ArrowDownToLine, ArrowUpFromLine, Pencil, PiggyBank, PlusCircle, Save, Trash2, X } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
-import { formatCurrency, formatDate } from "@/lib/formatting";
+import { formatCurrency } from "@/lib/formatting";
 import { requestJson } from "@/lib/requestJson";
 import type { SavingsGoal } from "@/lib/types";
 
 type SavingsForm = {
   name: string;
-  targetAmount: string;
   currentAmount: string;
-  monthlyContribution: string;
-  targetDate: string;
   note: string;
 };
 
@@ -27,11 +24,8 @@ type TransactionMode = "deposit" | "withdrawal";
 
 const emptyForm: SavingsForm = {
   currentAmount: "",
-  monthlyContribution: "",
   name: "",
-  note: "",
-  targetAmount: "",
-  targetDate: ""
+  note: ""
 };
 
 const emptyTransactionForm: TransactionForm = {
@@ -41,28 +35,47 @@ const emptyTransactionForm: TransactionForm = {
 };
 
 function toPayload(form: SavingsForm): Omit<SavingsGoal, "id"> {
+  const currentAmount = Number(form.currentAmount);
+
   return {
-    currentAmount: Number(form.currentAmount),
-    monthlyContribution: Number(form.monthlyContribution),
+    currentAmount,
+    monthlyContribution: 0,
     name: form.name.trim(),
     note: form.note.trim() || null,
-    targetAmount: Number(form.targetAmount),
-    targetDate: form.targetDate || null
+    targetAmount: getNextSavingsMilestone(currentAmount),
+    targetDate: null
   };
 }
 
 function getProgress(goal: SavingsGoal) {
-  return Math.min(Math.max(goal.currentAmount / goal.targetAmount, 0), 1);
+  return Math.min(Math.max(goal.currentAmount / getNextSavingsMilestone(goal.currentAmount), 0), 1);
+}
+
+function getNextSavingsMilestone(amount: number) {
+  if (amount < 500) {
+    return 500;
+  }
+
+  if (amount < 1000) {
+    return 1000;
+  }
+
+  if (amount < 5000) {
+    return 5000;
+  }
+
+  if (amount < 10000) {
+    return 10000;
+  }
+
+  return Math.ceil((amount + 1) / 10000) * 10000;
 }
 
 function formFromGoal(goal: SavingsGoal): SavingsForm {
   return {
     currentAmount: String(goal.currentAmount),
-    monthlyContribution: String(goal.monthlyContribution),
     name: goal.name,
-    note: goal.note ?? "",
-    targetAmount: String(goal.targetAmount),
-    targetDate: goal.targetDate ?? ""
+    note: goal.note ?? ""
   };
 }
 
@@ -199,7 +212,6 @@ export function SparenManager() {
   }
 
   const savedTotal = goals.reduce((sum, goal) => sum + goal.currentAmount, 0);
-  const targetTotal = goals.reduce((sum, goal) => sum + goal.targetAmount, 0);
 
   return (
     <>
@@ -221,14 +233,13 @@ export function SparenManager() {
               <tr>
                 <th>{t("savings.goal")}</th>
                 <th>{t("savings.progress")}</th>
-                <th>{t("savings.monthlyContribution")}</th>
-                <th>{t("savings.targetDate")}</th>
                 {canWrite ? <th>{t("common.actions")}</th> : null}
               </tr>
             </thead>
             <tbody>
               {goals.map((goal) => {
                 const progress = getProgress(goal);
+                const nextMilestone = getNextSavingsMilestone(goal.currentAmount);
                 return (
                   <tr key={goal.id}>
                     <td>
@@ -243,12 +254,10 @@ export function SparenManager() {
                           <span style={{ width: `${progress * 100}%` }} />
                         </div>
                         <small>
-                          {formatCurrency(goal.currentAmount)} / {formatCurrency(goal.targetAmount)}
+                          {formatCurrency(goal.currentAmount)} / {formatCurrency(nextMilestone)}
                         </small>
                       </div>
                     </td>
-                    <td>{formatCurrency(goal.monthlyContribution)}</td>
-                    <td>{goal.targetDate ? formatDate(goal.targetDate) : "-"}</td>
                     {canWrite ? (
                       <td>
                         <div className="table-actions">
@@ -299,8 +308,6 @@ export function SparenManager() {
         <div className="table-total-row">
           <span>{t("savings.savedTotal")}</span>
           <strong>{formatCurrency(savedTotal)}</strong>
-          <span>{t("savings.targetTotal")}</span>
-          <strong>{formatCurrency(targetTotal)}</strong>
         </div>
       </section>
 
@@ -402,18 +409,6 @@ function SavingsModal({
             />
           </label>
           <label>
-            <span>{t("savings.targetAmount")}</span>
-            <input
-              required
-              min="0.01"
-              step="0.01"
-              type="number"
-              value={form.targetAmount}
-              onChange={(event) => onUpdate("targetAmount", event.target.value)}
-              placeholder="10000"
-            />
-          </label>
-          <label>
             <span>{t("savings.currentAmount")}</span>
             <input
               required
@@ -424,22 +419,6 @@ function SavingsModal({
               onChange={(event) => onUpdate("currentAmount", event.target.value)}
               placeholder="2500"
             />
-          </label>
-          <label>
-            <span>{t("savings.monthlyContribution")}</span>
-            <input
-              required
-              min="0"
-              step="0.01"
-              type="number"
-              value={form.monthlyContribution}
-              onChange={(event) => onUpdate("monthlyContribution", event.target.value)}
-              placeholder="300"
-            />
-          </label>
-          <label>
-            <span>{t("savings.targetDate")}</span>
-            <input type="date" value={form.targetDate} onChange={(event) => onUpdate("targetDate", event.target.value)} />
           </label>
           <label className="form-field-full">
             <span>{t("common.description")}</span>

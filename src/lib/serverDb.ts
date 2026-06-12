@@ -29,6 +29,26 @@ function normalizePaymentInterval(value: number | null | undefined) {
   return value === 3 || value === 6 || value === 12 ? value : 1;
 }
 
+function getNextSavingsMilestone(amount: number) {
+  if (amount < 500) {
+    return 500;
+  }
+
+  if (amount < 1000) {
+    return 1000;
+  }
+
+  if (amount < 5000) {
+    return 5000;
+  }
+
+  if (amount < 10000) {
+    return 10000;
+  }
+
+  return Math.ceil((amount + 1) / 10000) * 10000;
+}
+
 function mapLoan(loan: {
   id: string;
   name: string;
@@ -680,7 +700,10 @@ export async function applySavingsTransaction({
       const cleanNote = note?.trim() || null;
 
       const updatedGoal = await tx.savingsGoal.update({
-        data: { currentAmount: nextAmount },
+        data: {
+          currentAmount: nextAmount,
+          targetAmount: getNextSavingsMilestone(nextAmount)
+        },
         where: { id: goal.id }
       });
 
