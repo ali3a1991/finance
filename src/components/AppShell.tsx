@@ -13,7 +13,7 @@ const navItems = [
   { href: "/", labelKey: "home", icon: Home },
   { href: "/einnahmen", labelKey: "incomes", icon: TrendingUp },
   { href: "/ausgaben", labelKey: "expenses", icon: WalletCards },
-  { href: "/sparen", labelKey: "savings", icon: PiggyBank },
+  { href: "/savings", labelKey: "savings", icon: PiggyBank },
   { href: "/investitionen", labelKey: "investments", icon: TrendingUp }
 ];
 

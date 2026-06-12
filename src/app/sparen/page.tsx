@@ -1,12 +1,5 @@
-import { PageHeader } from "@/components/PageHeader";
-import { SparenManager } from "@/components/SparenManager";
+import { redirect } from "next/navigation";
 
 export default function SparenPage() {
-  return (
-    <div className="page-stack">
-      <PageHeader page="savings" />
-
-      <SparenManager />
-    </div>
-  );
+  redirect("/savings");
 }
