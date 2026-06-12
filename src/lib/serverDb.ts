@@ -756,8 +756,7 @@ function getFirstInsuranceDebitDate(insurance: Insurance) {
   const start = new Date(`${insurance.startDate}T00:00:00`);
   const lastDayOfStartMonth = new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate();
   const firstDebitDay = Math.min(Math.max(insurance.debitDay, 1), lastDayOfStartMonth);
-  const monthOffset = firstDebitDay >= start.getDate() ? 0 : 1;
-  const firstDebitDate = new Date(start.getFullYear(), start.getMonth() + monthOffset, firstDebitDay);
+  const firstDebitDate = new Date(start.getFullYear(), start.getMonth(), firstDebitDay);
   return toDateInput(firstDebitDate);
 }
 
