@@ -1670,7 +1670,12 @@ th {
 
 @media (max-width: 980px) {
   .app-shell {
+    --mobile-header-height: 58px;
+  }
+
+  .app-shell {
     display: block;
+    min-height: 100dvh;
   }
 
   .mobile-header {
@@ -1680,7 +1685,7 @@ th {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    min-height: 58px;
+    min-height: var(--mobile-header-height);
     padding: 8px 14px;
     border-bottom: 1px solid var(--line);
     background: var(--header-bg);
@@ -1772,6 +1777,7 @@ th {
   }
 
   .main-content {
+    min-height: calc(100dvh - var(--mobile-header-height));
     padding: 18px 18px 32px;
   }
 
@@ -1824,6 +1830,7 @@ th {
   }
 
   .main-content {
+    min-height: calc(100dvh - var(--mobile-header-height));
     padding-inline: 14px;
   }
 
