@@ -137,7 +137,7 @@ export function HomeDashboard() {
   const paidTotal = payments.reduce((sum, payment) => sum + payment.paidAmount, 0);
   const monthTotal = payments.reduce((sum, payment) => sum + payment.amount, 0);
   const pressureRatio = summary.incomeTotal > 0 ? Math.min(monthTotal / summary.incomeTotal, 1.35) : 0;
-  const needleRotation = -72 + Math.min(pressureRatio, 1) * 144;
+  const needleRotation = -90 + Math.min(pressureRatio, 1) * 180;
   const gaugeStatus =
     pressureRatio <= 0.55
       ? t("dashboard.relaxed")

@@ -670,29 +670,39 @@ th {
   display: grid;
   justify-items: center;
   gap: 4px;
-  color: var(--muted);
+  color: var(--text);
   font-size: 0.76rem;
   font-weight: 900;
   line-height: 1;
+}
+
+.gauge-marker span {
+  min-width: 26px;
+  border: 1px solid color-mix(in srgb, var(--line) 74%, transparent);
+  border-radius: 999px;
+  padding: 3px 6px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: 0 8px 18px rgba(16, 24, 39, 0.12);
+  text-align: center;
 }
 
 .gauge-marker::before {
   width: 2px;
   height: 10px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--text) 58%, transparent);
+  background: color-mix(in srgb, var(--surface) 86%, var(--text));
   content: "";
 }
 
 .gauge-marker-0 {
   bottom: 2px;
   left: 7%;
-  transform: translateX(-50%) rotate(-72deg);
+  transform: translateX(-50%) rotate(-90deg);
   transform-origin: 50% 100%;
 }
 
 .gauge-marker-0 span {
-  transform: rotate(72deg);
+  transform: rotate(90deg);
 }
 
 .gauge-marker-50 {
@@ -704,12 +714,12 @@ th {
 .gauge-marker-100 {
   right: 7%;
   bottom: 2px;
-  transform: translateX(50%) rotate(72deg);
+  transform: translateX(50%) rotate(90deg);
   transform-origin: 50% 100%;
 }
 
 .gauge-marker-100 span {
-  transform: rotate(-72deg);
+  transform: rotate(-90deg);
 }
 
 .gauge-needle {
