@@ -34,6 +34,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "Ungultige Benutzerdaten." }, { status: 400 });
   }
 
+  if (body.username.trim() === auth.payload.sub) {
+    return NextResponse.json({ message: "Der Inhaber kann nicht als freigegebener Benutzer hinzugefugt werden." }, { status: 409 });
+  }
+
   try {
     const user = await createSharedUser({
       accessLevel: body.accessLevel,

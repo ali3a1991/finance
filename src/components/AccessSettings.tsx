@@ -53,6 +53,8 @@ export function AccessSettings() {
     return null;
   }
 
+  const visibleUsers = users.filter((user) => user.username !== currentUser.username);
+
   function updateForm(field: keyof UserForm, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
   }
@@ -169,7 +171,7 @@ export function AccessSettings() {
                 <span className="table-muted">-</span>
               </td>
             </tr>
-            {users.map((user) => (
+            {visibleUsers.map((user) => (
               <tr key={user.id}>
                 <td>
                   <span className="table-title">
@@ -204,7 +206,7 @@ export function AccessSettings() {
         </table>
       </div>
 
-      {users.length === 0 ? <p className="empty-table-text">{t("settings.noUsers")}</p> : null}
+      {visibleUsers.length === 0 ? <p className="empty-table-text">{t("settings.noUsers")}</p> : null}
 
       {isOpen ? (
         <UserModal

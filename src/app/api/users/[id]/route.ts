@@ -29,6 +29,10 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ message: "Ungultige Benutzerdaten." }, { status: 400 });
   }
 
+  if (body.username.trim() === auth.payload.sub) {
+    return NextResponse.json({ message: "Der Inhaber kann nicht als freigegebener Benutzer verwendet werden." }, { status: 409 });
+  }
+
   try {
     const user = await updateSharedUser(auth.payload.ownerId, id, {
       accessLevel: body.accessLevel,

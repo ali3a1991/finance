@@ -962,7 +962,10 @@ function mapSharedUser(user: {
 export async function listSharedUsers(ownerId: string): Promise<SharedUser[]> {
   const users = await prisma.appUser.findMany({
     orderBy: { createdAt: "desc" },
-    where: { ownerId }
+    where: {
+      accessLevel: { not: "owner" },
+      ownerId
+    }
   });
 
   return users.map(mapSharedUser);
@@ -1006,19 +1009,23 @@ export async function updateSharedUser(
       passwordHash: patch.password ? getPasswordHash(patch.password) : undefined,
       username: patch.username
     },
-    where: { id, ownerId }
+    where: {
+      accessLevel: { not: "owner" },
+      id,
+      ownerId
+    }
   });
 
   if (result.count === 0) {
     return null;
   }
 
-  const user = await prisma.appUser.findFirst({ where: { id, ownerId } });
+  const user = await prisma.appUser.findFirst({ where: { accessLevel: { not: "owner" }, id, ownerId } });
   return user ? mapSharedUser(user) : null;
 }
 
 export async function deleteSharedUser(ownerId: string, id: string) {
-  const result = await prisma.appUser.deleteMany({ where: { id, ownerId } });
+  const result = await prisma.appUser.deleteMany({ where: { accessLevel: { not: "owner" }, id, ownerId } });
   return result.count > 0;
 }
 
