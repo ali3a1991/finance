@@ -743,6 +743,15 @@ function getPaymentStatus(db: FinanceDb, id: string) {
   return db.paymentConfirmations?.find((payment) => payment.id === id)?.paidAmount ?? 0;
 }
 
+function isExpenseDueInMonth(expense: Expense, date = new Date()) {
+  if (expense.recurring) {
+    return true;
+  }
+
+  const expenseDate = new Date(`${expense.date}T00:00:00`);
+  return expenseDate.getFullYear() === date.getFullYear() && expenseDate.getMonth() === date.getMonth();
+}
+
 function getLoanPaymentAmountForMonth(loan: Loan, date = new Date()) {
   const firstPaymentDate = new Date(`${loan.nextPayment}T00:00:00`);
   const monthlyRate = Math.max(loan.monthlyRate, 0);
@@ -807,8 +816,8 @@ export function buildMonthlyPayments(db: FinanceDb, date = new Date()): MonthlyP
       };
     });
 
-  const recurringExpensePayments: MonthlyPayment[] = db.expenses
-    .filter((expense) => expense.recurring)
+  const expensePayments: MonthlyPayment[] = db.expenses
+    .filter((expense) => isExpenseDueInMonth(expense, date))
     .map((expense) => {
       const dueDay = new Date(`${expense.date}T00:00:00`).getDate();
       const id = `expense:${expense.id}:${monthKey}`;
@@ -845,7 +854,7 @@ export function buildMonthlyPayments(db: FinanceDb, date = new Date()): MonthlyP
       };
     });
 
-  return [...loanPayments, ...insurancePayments, ...recurringExpensePayments, ...contractPayments].sort(
+  return [...loanPayments, ...insurancePayments, ...expensePayments, ...contractPayments].sort(
     (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
   );
 }
