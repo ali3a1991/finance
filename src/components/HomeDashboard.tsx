@@ -32,6 +32,7 @@ type DashboardSummary = {
   loanCount: number;
   loanTotal: number;
   monthlyExpenseTotal: number;
+  savingsTotal: number;
 };
 
 type DashboardPayload = {
@@ -51,7 +52,8 @@ const emptySummary: DashboardSummary = {
   investmentReturnRate: 0,
   loanCount: 0,
   loanTotal: 0,
-  monthlyExpenseTotal: 0
+  monthlyExpenseTotal: 0,
+  savingsTotal: 0
 };
 
 function getMonthKey(date = new Date()) {
@@ -274,6 +276,12 @@ export function HomeDashboard() {
           label={t("dashboard.insurances")}
           value={formatCurrency(summary.insuranceTotal)}
           helper={t("dashboard.monthlyPremiums")}
+        />
+        <StatCard
+          icon={PiggyBank}
+          label={t("dashboard.savings")}
+          value={formatCurrency(summary.savingsTotal)}
+          helper={t("dashboard.savingsTotal")}
         />
         <StatCard
           icon={PiggyBank}

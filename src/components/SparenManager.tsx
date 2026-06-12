@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { Pencil, PiggyBank, PlusCircle, Save, Trash2, X } from "lucide-react";
+import { ArrowDownToLine, ArrowUpFromLine, Pencil, PiggyBank, PlusCircle, Save, Trash2, X } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
 import { formatCurrency, formatDate } from "@/lib/formatting";
@@ -17,6 +17,14 @@ type SavingsForm = {
   note: string;
 };
 
+type TransactionForm = {
+  amount: string;
+  date: string;
+  note: string;
+};
+
+type TransactionMode = "deposit" | "withdrawal";
+
 const emptyForm: SavingsForm = {
   currentAmount: "",
   monthlyContribution: "",
@@ -24,6 +32,12 @@ const emptyForm: SavingsForm = {
   note: "",
   targetAmount: "",
   targetDate: ""
+};
+
+const emptyTransactionForm: TransactionForm = {
+  amount: "",
+  date: new Date().toISOString().slice(0, 10),
+  note: ""
 };
 
 function toPayload(form: SavingsForm): Omit<SavingsGoal, "id"> {
@@ -58,6 +72,9 @@ export function SparenManager() {
   const [editingGoal, setEditingGoal] = useState<SavingsGoal | null>(null);
   const [form, setForm] = useState<SavingsForm>(emptyForm);
   const [goalToDelete, setGoalToDelete] = useState<SavingsGoal | null>(null);
+  const [transactionGoal, setTransactionGoal] = useState<SavingsGoal | null>(null);
+  const [transactionForm, setTransactionForm] = useState<TransactionForm>(emptyTransactionForm);
+  const [transactionMode, setTransactionMode] = useState<TransactionMode>("deposit");
   const [goals, setGoals] = useState<SavingsGoal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
@@ -93,6 +110,21 @@ export function SparenManager() {
     setEditingGoal(null);
     setForm(emptyForm);
     setIsOpen(false);
+  }
+
+  function openTransactionModal(goal: SavingsGoal, mode: TransactionMode) {
+    setTransactionGoal(goal);
+    setTransactionMode(mode);
+    setTransactionForm(emptyTransactionForm);
+  }
+
+  function closeTransactionModal() {
+    setTransactionGoal(null);
+    setTransactionForm(emptyTransactionForm);
+  }
+
+  function updateTransactionForm(field: keyof TransactionForm, value: string) {
+    setTransactionForm((current) => ({ ...current, [field]: value }));
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -134,6 +166,33 @@ export function SparenManager() {
       });
       setGoals((current) => current.filter((goal) => goal.id !== goalToDelete.id));
       setGoalToDelete(null);
+    } finally {
+      setOperationLabel("");
+    }
+  }
+
+  async function handleTransactionSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!transactionGoal) {
+      return;
+    }
+
+    setOperationLabel("save-saving-transaction");
+
+    try {
+      const body = await requestJson<{ savingsGoal: SavingsGoal }>(`/api/savings/${transactionGoal.id}/transactions`, {
+        body: JSON.stringify({
+          amount: Number(transactionForm.amount),
+          date: transactionForm.date,
+          note: transactionForm.note.trim() || null,
+          type: transactionMode
+        }),
+        method: "POST"
+      });
+
+      setGoals((current) => current.map((goal) => (goal.id === transactionGoal.id ? body.savingsGoal : goal)));
+      closeTransactionModal();
     } finally {
       setOperationLabel("");
     }
@@ -196,6 +255,22 @@ export function SparenManager() {
                           <button
                             className="icon-button"
                             type="button"
+                            onClick={() => openTransactionModal(goal, "deposit")}
+                            aria-label={`${goal.name} ${t("savings.deposit")}`}
+                          >
+                            <ArrowDownToLine size={16} aria-hidden="true" />
+                          </button>
+                          <button
+                            className="icon-button"
+                            type="button"
+                            onClick={() => openTransactionModal(goal, "withdrawal")}
+                            aria-label={`${goal.name} ${t("savings.withdraw")}`}
+                          >
+                            <ArrowUpFromLine size={16} aria-hidden="true" />
+                          </button>
+                          <button
+                            className="icon-button"
+                            type="button"
                             onClick={() => openEditModal(goal)}
                             aria-label={`${goal.name} ${t("common.edit")}`}
                           >
@@ -235,6 +310,18 @@ export function SparenManager() {
           onClose={closeModal}
           onSubmit={handleSubmit}
           onUpdate={updateForm}
+        />
+      ) : null}
+
+      {transactionGoal ? (
+        <SavingsTransactionModal
+          form={transactionForm}
+          goal={transactionGoal}
+          isSubmitting={operationLabel === "save-saving-transaction"}
+          mode={transactionMode}
+          onClose={closeTransactionModal}
+          onSubmit={handleTransactionSubmit}
+          onUpdate={updateTransactionForm}
         />
       ) : null}
 
@@ -367,6 +454,84 @@ function SavingsModal({
             <button className="button primary" type="submit" disabled={isSubmitting}>
               <Save size={18} aria-hidden="true" />
               {isSubmitting ? t("common.saving") : t("common.save")}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  );
+}
+
+function SavingsTransactionModal({
+  form,
+  goal,
+  isSubmitting,
+  mode,
+  onClose,
+  onSubmit,
+  onUpdate
+}: {
+  form: TransactionForm;
+  goal: SavingsGoal;
+  isSubmitting: boolean;
+  mode: TransactionMode;
+  onClose: () => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onUpdate: (field: keyof TransactionForm, value: string) => void;
+}) {
+  const { t } = useLanguage();
+  const isDeposit = mode === "deposit";
+
+  return (
+    <div className="modal-backdrop" role="presentation">
+      <section className="modal-panel" role="dialog" aria-modal="true" aria-labelledby="saving-transaction-modal-title">
+        <div className="modal-header">
+          <div>
+            <span>{goal.name}</span>
+            <h2 id="saving-transaction-modal-title">
+              {isDeposit ? t("savings.depositTitle") : t("savings.withdrawTitle")}
+            </h2>
+          </div>
+          <button className="icon-button" type="button" onClick={onClose} aria-label={t("common.closeDialog")}>
+            <X size={20} aria-hidden="true" />
+          </button>
+        </div>
+
+        <form className="modal-form" onSubmit={onSubmit}>
+          <label>
+            <span>{t("savings.transactionAmount")}</span>
+            <input
+              required
+              min="0.01"
+              step="0.01"
+              type="number"
+              value={form.amount}
+              onChange={(event) => onUpdate("amount", event.target.value)}
+              placeholder="100"
+            />
+          </label>
+          <label>
+            <span>{t("savings.transactionDate")}</span>
+            <input required type="date" value={form.date} onChange={(event) => onUpdate("date", event.target.value)} />
+          </label>
+          <label className="form-field-full">
+            <span>{t("common.description")}</span>
+            <textarea
+              value={form.note}
+              onChange={(event) => onUpdate("note", event.target.value)}
+              placeholder={t("common.descriptionPlaceholder")}
+            />
+          </label>
+          <p className="form-hint">
+            {isDeposit ? t("savings.depositHint") : t("savings.withdrawHint")}
+          </p>
+          <div className="modal-actions">
+            <button className="button secondary" type="button" onClick={onClose}>
+              {t("common.cancel")}
+            </button>
+            <button className="button primary" type="submit" disabled={isSubmitting}>
+              {isDeposit ? <ArrowDownToLine size={18} aria-hidden="true" /> : <ArrowUpFromLine size={18} aria-hidden="true" />}
+              {isSubmitting ? t("common.saving") : isDeposit ? t("savings.deposit") : t("savings.withdraw")}
             </button>
           </div>
         </form>

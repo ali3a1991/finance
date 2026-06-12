@@ -645,6 +645,81 @@ export async function deleteSavingsGoal(ownerId: string, id: string): Promise<bo
   return result.count > 0;
 }
 
+export async function applySavingsTransaction({
+  amount,
+  date,
+  note,
+  ownerId,
+  savingsGoalId,
+  type
+}: {
+  amount: number;
+  date: string;
+  note?: string | null;
+  ownerId: string;
+  savingsGoalId: string;
+  type: "deposit" | "withdrawal";
+}): Promise<SavingsGoal | null> {
+  await ensureSavingsGoalTable();
+  await ensureFinanceNoteColumns();
+
+  try {
+    return await prisma.$transaction(async (tx) => {
+      const goal = await tx.savingsGoal.findFirst({ where: { id: savingsGoalId, ownerId } });
+
+      if (!goal) {
+        return null;
+      }
+
+      const normalizedAmount = Math.max(amount, 0);
+      const nextAmount =
+        type === "deposit"
+          ? goal.currentAmount + normalizedAmount
+          : Math.max(goal.currentAmount - normalizedAmount, 0);
+      const entryDate = toDate(date);
+      const cleanNote = note?.trim() || null;
+
+      const updatedGoal = await tx.savingsGoal.update({
+        data: { currentAmount: nextAmount },
+        where: { id: goal.id }
+      });
+
+      if (type === "deposit") {
+        await tx.expense.create({
+          data: {
+            amount: normalizedAmount,
+            category: "Sparen",
+            date: entryDate,
+            id: `exp-saving-${Date.now()}-${randomUUID().slice(0, 8)}`,
+            note: cleanNote,
+            ownerId,
+            recurring: false,
+            title: `Einzahlung: ${goal.name}`
+          }
+        });
+      } else {
+        await tx.income.create({
+          data: {
+            amount: normalizedAmount,
+            date: entryDate,
+            entryDay: null,
+            id: `income-saving-${Date.now()}-${randomUUID().slice(0, 8)}`,
+            note: cleanNote,
+            ownerId,
+            recurring: false,
+            source: "Sparen",
+            title: `Auszahlung: ${goal.name}`
+          }
+        });
+      }
+
+      return mapSavingsGoal(updatedGoal);
+    });
+  } catch {
+    return null;
+  }
+}
+
 type YahooChartResponse = {
   chart?: {
     result?: Array<{
@@ -1057,6 +1132,7 @@ export async function getDashboardData(ownerId: string, monthKey?: string | null
     })
     .reduce((sum, expense) => sum + expense.amount, 0);
   const loanTotal = db.loans.reduce((sum, loan) => sum + loan.balance, 0);
+  const savingsTotal = (db.savingsGoals ?? []).reduce((sum, goal) => sum + goal.currentAmount, 0);
   const insuranceTotal = monthlyPayments
     .filter((payment) => payment.sourceType === "insurance")
     .reduce((sum, payment) => sum + payment.amount, 0);
@@ -1076,7 +1152,8 @@ export async function getDashboardData(ownerId: string, monthKey?: string | null
       investmentReturnRate,
       loanCount: db.loans.length,
       loanTotal,
-      monthlyExpenseTotal
+      monthlyExpenseTotal,
+      savingsTotal
     }
   };
 }
