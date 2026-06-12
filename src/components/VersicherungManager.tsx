@@ -46,7 +46,8 @@ const coverageOptions = [
 const paymentIntervalOptions = [
   { value: "1", labelPath: "common.everyMonth" },
   { value: "3", labelPath: "common.everyThreeMonths" },
-  { value: "6", labelPath: "common.everySixMonths" }
+  { value: "6", labelPath: "common.everySixMonths" },
+  { value: "12", labelPath: "common.everyYear" }
 ];
 
 export function VersicherungManager() {

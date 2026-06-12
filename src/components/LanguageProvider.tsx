@@ -131,9 +131,11 @@ const translations = {
       everyMonth: "Jeden Monat",
       everyThreeMonths: "Alle 3 Monate",
       everySixMonths: "Alle 6 Monate",
+      everyYear: "Jahrlich",
       paymentInterval1: "Monatlich",
       paymentInterval3: "Alle 3 Monate",
       paymentInterval6: "Alle 6 Monate",
+      paymentInterval12: "Jahrlich",
       oneTime: "Einmalig",
       recurring: "Wiederkehrend"
     },
@@ -466,9 +468,11 @@ const translations = {
       everyMonth: "Every month",
       everyThreeMonths: "Every 3 months",
       everySixMonths: "Every 6 months",
+      everyYear: "Yearly",
       paymentInterval1: "Monthly",
       paymentInterval3: "Every 3 months",
       paymentInterval6: "Every 6 months",
+      paymentInterval12: "Yearly",
       oneTime: "One-time",
       recurring: "Recurring"
     },

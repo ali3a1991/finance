@@ -4,7 +4,7 @@ import { createGeneralContract, listGeneralContracts } from "@/lib/serverDb";
 import type { GeneralContract } from "@/lib/types";
 
 function isValidContract(body: Omit<GeneralContract, "id">) {
-  const validIntervals = [1, 3, 6];
+  const validIntervals = [1, 3, 6, 12];
 
   return (
     Boolean(body.title?.trim()) &&

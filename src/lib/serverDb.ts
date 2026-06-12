@@ -25,7 +25,7 @@ function toDate(value: string) {
 }
 
 function normalizePaymentInterval(value: number | null | undefined) {
-  return value === 3 || value === 6 ? value : 1;
+  return value === 3 || value === 6 || value === 12 ? value : 1;
 }
 
 function mapLoan(loan: {

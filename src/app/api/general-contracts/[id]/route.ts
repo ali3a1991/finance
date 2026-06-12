@@ -8,7 +8,7 @@ type RouteContext = {
 };
 
 function isValidContract(body: Omit<GeneralContract, "id">) {
-  const validIntervals = [1, 3, 6];
+  const validIntervals = [1, 3, 6, 12];
 
   return (
     Boolean(body.title?.trim()) &&
