@@ -329,7 +329,7 @@ export function HomeDashboard() {
 
             return (
               <article
-                className={`payment-row ${!canWrite ? "readonly" : ""} ${isPaid ? "paid" : ""} ${isPartial ? "partial" : ""}`}
+                className={`payment-row ${!canWrite ? "readonly" : ""} ${payment.lockedBySavings ? "locked" : ""} ${isPaid ? "paid" : ""} ${isPartial ? "partial" : ""}`}
                 key={payment.id}
               >
                 {canUpdatePayment ? (
@@ -342,6 +342,10 @@ export function HomeDashboard() {
                   >
                     {isPaid ? <Check size={18} aria-hidden="true" /> : null}
                   </button>
+                ) : payment.lockedBySavings ? (
+                  <span className="payment-check locked-check" aria-hidden="true">
+                    <Check size={18} />
+                  </span>
                 ) : null}
                 <div className="payment-main">
                   <strong>{payment.title}</strong>
@@ -352,9 +356,7 @@ export function HomeDashboard() {
                 <div className="payment-amount">
                   <strong>{formatCurrency(payment.amount)}</strong>
                   <span>
-                    {payment.lockedBySavings
-                      ? t("savings.manageOnlyInSavings")
-                      : isUpdating
+                    {isUpdating
                       ? t("dashboard.updating")
                       : isPaid
                         ? t("dashboard.paid")
@@ -389,6 +391,10 @@ export function HomeDashboard() {
                         <Save size={18} aria-hidden="true" />
                       </button>
                     ) : null}
+                  </div>
+                ) : payment.lockedBySavings ? (
+                  <div className="payment-lock-note">
+                    {t("savings.manageOnlyInSavings")}
                   </div>
                 ) : null}
               </article>

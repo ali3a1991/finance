@@ -949,6 +949,10 @@ th {
   grid-template-columns: minmax(220px, 1fr) minmax(130px, auto);
 }
 
+.payment-row.locked {
+  grid-template-columns: 44px minmax(220px, 1fr) minmax(130px, auto) minmax(160px, 220px);
+}
+
 .payment-row.paid {
   border-color: rgba(17, 107, 95, 0.28);
   background: rgba(17, 107, 95, 0.08);
@@ -977,10 +981,22 @@ th {
   color: var(--on-primary);
 }
 
+.locked-check {
+  cursor: default;
+}
+
 .payment-main,
 .payment-amount {
   display: grid;
   gap: 4px;
+}
+
+.payment-lock-note {
+  align-self: center;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.35;
 }
 
 .partial-input {
@@ -1983,6 +1999,10 @@ th {
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
+  .payment-row.locked {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+  }
+
   .payment-main {
     min-width: 0;
   }
@@ -2013,6 +2033,11 @@ th {
   .partial-input {
     grid-column: 2 / -1;
     grid-template-columns: minmax(0, 1fr) 38px;
+  }
+
+  .payment-lock-note {
+    grid-column: 2 / -1;
+    font-size: 0.76rem;
   }
 
   .partial-input input {
