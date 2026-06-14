@@ -1,11 +1,10 @@
 {
   "name": "fynest",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
-    "notify:update": "node scripts/broadcast-update.mjs",
     "start": "next start",
     "lint": "next lint"
   },

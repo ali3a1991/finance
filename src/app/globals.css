@@ -244,7 +244,13 @@ button:disabled {
   font-size: 0.92rem;
 }
 
-.sidebar-user {
+.sidebar-footer {
+  display: grid;
+  gap: 8px;
+}
+
+.sidebar-user,
+.sidebar-version {
   display: grid;
   gap: 4px;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -254,20 +260,28 @@ button:disabled {
 }
 
 .sidebar-user span,
-.sidebar-user small {
+.sidebar-user small,
+.sidebar-version span,
+.sidebar-version small {
   color: var(--sidebar-muted);
   font-size: 0.78rem;
 }
 
-.sidebar-user span {
+.sidebar-user span,
+.sidebar-version span {
   font-weight: 800;
   text-transform: uppercase;
 }
 
-.sidebar-user strong {
+.sidebar-user strong,
+.sidebar-version strong {
   overflow-wrap: anywhere;
   color: var(--sidebar-text);
   font-size: 0.98rem;
+}
+
+.sidebar-version {
+  background: transparent;
 }
 
 .empty-contract-panel {
