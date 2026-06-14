@@ -754,8 +754,31 @@ th {
 }
 
 .gauge-status span,
-.gauge-value span {
+.gauge-value span,
+.gauge-free-amount span,
+.gauge-free-amount small {
   color: var(--muted);
+}
+
+.gauge-free-amount {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  min-width: min(220px, 100%);
+  margin-top: 12px;
+  border: 1px solid color-mix(in srgb, var(--primary) 28%, var(--line));
+  border-radius: 8px;
+  padding: 12px 16px;
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+  text-align: center;
+}
+
+.gauge-free-amount strong {
+  font-size: 1.25rem;
+}
+
+.gauge-free-amount small {
+  font-size: 0.82rem;
 }
 
 .gauge-values {

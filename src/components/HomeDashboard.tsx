@@ -2,7 +2,6 @@
 
 import { ChangeEvent, useEffect, useState } from "react";
 import {
-  Banknote,
   CalendarDays,
   Check,
   ChevronLeft,
@@ -10,11 +9,8 @@ import {
   LineChart,
   PiggyBank,
   Save,
-  ShieldCheck,
-  WalletCards
 } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
-import { StatCard } from "@/components/StatCard";
 import { useLanguage } from "@/components/LanguageProvider";
 import { formatCurrency, formatDate } from "@/lib/formatting";
 import { requestJson } from "@/lib/requestJson";
@@ -262,6 +258,11 @@ export function HomeDashboard() {
             <span>
               {summary.incomeTotal > 0 ? `${Math.round(pressureRatio * 100)}% ${t("dashboard.used")}` : t("dashboard.noIncome")}
             </span>
+            <div className="gauge-free-amount">
+              <span>{t("dashboard.freeAmount")}</span>
+              <strong>{formatCurrency(summary.freeAmount)}</strong>
+              <small>{t("dashboard.afterFixedPayments")}</small>
+            </div>
           </div>
         </div>
         <div className="gauge-values">
@@ -274,33 +275,6 @@ export function HomeDashboard() {
             <strong>{formatCurrency(monthTotal)}</strong>
           </div>
         </div>
-      </section>
-
-      <section className="stats-grid" aria-label="Finanzubersicht">
-        <StatCard
-          icon={WalletCards}
-          label={t("dashboard.monthlyExpenses")}
-          value={formatCurrency(summary.monthlyExpenseTotal)}
-          helper={t("dashboard.currentBookings")}
-        />
-        <StatCard
-          icon={Banknote}
-          label={t("dashboard.loanAmount")}
-          value={formatCurrency(summary.loanTotal)}
-          helper={`${summary.loanCount} ${t("dashboard.activeLoans")}`}
-        />
-        <StatCard
-          icon={ShieldCheck}
-          label={t("dashboard.insurances")}
-          value={formatCurrency(summary.insuranceTotal)}
-          helper={t("dashboard.monthlyPremiums")}
-        />
-        <StatCard
-          icon={PiggyBank}
-          label={t("dashboard.freeAmount")}
-          value={formatCurrency(summary.freeAmount)}
-          helper={t("dashboard.afterFixedPayments")}
-        />
       </section>
 
       <section className="payment-panel">
