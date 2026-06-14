@@ -17,6 +17,7 @@ type ContractForm = {
   paymentIntervalMonths: string;
   startDate: string;
   endDate: string;
+  noEndDate: boolean;
   note: string;
   status: string;
 };
@@ -30,6 +31,7 @@ const emptyForm: ContractForm = {
   paymentIntervalMonths: "1",
   startDate: new Date().toISOString().slice(0, 10),
   endDate: "",
+  noEndDate: false,
   note: "",
   status: "Aktiv"
 };
@@ -51,7 +53,7 @@ function toPayload(form: ContractForm): Omit<GeneralContract, "id"> {
     paymentIntervalMonths: Number(form.paymentIntervalMonths),
     note: form.note.trim() || null,
     provider: form.provider.trim(),
-    endDate: form.endDate,
+    endDate: form.noEndDate ? null : form.endDate,
     startDate: form.startDate,
     status: form.status,
     title: form.title.trim()
@@ -67,6 +69,7 @@ function toForm(contract: GeneralContract): ContractForm {
     note: contract.note ?? "",
     provider: contract.provider,
     endDate: contract.endDate ?? "",
+    noEndDate: !contract.endDate,
     startDate: contract.startDate,
     status: contract.status,
     title: contract.title
@@ -107,11 +110,11 @@ export function GeneralContractsManager() {
     loadContracts().catch(() => setIsLoading(false));
   }, []);
 
-  function updateForm(field: keyof ContractForm, value: string) {
+  function updateForm(field: keyof ContractForm, value: string | boolean) {
     setForm((current) => ({ ...current, [field]: value }));
   }
 
-  function updateEditForm(field: keyof ContractForm, value: string) {
+  function updateEditForm(field: keyof ContractForm, value: string | boolean) {
     setEditForm((current) => ({ ...current, [field]: value }));
   }
 
@@ -323,7 +326,7 @@ function ContractModal({
   isSubmitting: boolean;
   onClose: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
-  onUpdate: (field: keyof ContractForm, value: string) => void;
+  onUpdate: (field: keyof ContractForm, value: string | boolean) => void;
   title: string;
 }) {
   const { t } = useLanguage();
@@ -414,10 +417,25 @@ function ContractModal({
             <span>{t("contracts.startDate")}</span>
             <input required type="date" value={form.startDate} onChange={(event) => onUpdate("startDate", event.target.value)} />
           </label>
-          <label>
-            <span>{t("contracts.endDate")}</span>
-            <input required type="date" value={form.endDate} onChange={(event) => onUpdate("endDate", event.target.value)} />
+          <label className="checkbox-row">
+            <input
+              checked={form.noEndDate}
+              type="checkbox"
+              onChange={(event) => {
+                onUpdate("noEndDate", event.target.checked);
+                if (event.target.checked) {
+                  onUpdate("endDate", "");
+                }
+              }}
+            />
+            <span>{t("contracts.noEndDate")}</span>
           </label>
+          {!form.noEndDate ? (
+            <label>
+              <span>{t("contracts.endDate")}</span>
+              <input required type="date" value={form.endDate} onChange={(event) => onUpdate("endDate", event.target.value)} />
+            </label>
+          ) : null}
           <label>
             <span>{t("contracts.status")}</span>
             <select required value={form.status} onChange={(event) => onUpdate("status", event.target.value)}>

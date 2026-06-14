@@ -16,7 +16,7 @@ function isValidContract(body: Omit<GeneralContract, "id">) {
     body.debitDay >= 1 &&
     body.debitDay <= 31 &&
     Boolean(body.startDate) &&
-    Boolean(body.endDate) &&
+    (body.endDate === null || Boolean(body.endDate)) &&
     Boolean(body.status?.trim())
   );
 }
