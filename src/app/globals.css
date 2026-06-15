@@ -1034,6 +1034,107 @@ th {
   font-weight: 700;
 }
 
+.tether-calculator {
+  display: grid;
+  gap: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  background: var(--surface-soft);
+}
+
+.tether-calculator-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.tether-mode-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.tether-mode-switch button {
+  border: 0;
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.tether-mode-switch button.active {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.tether-calculator-input {
+  max-width: 520px;
+}
+
+.tether-result-card {
+  display: grid;
+  gap: 8px;
+  border: 1px solid color-mix(in srgb, var(--primary) 34%, var(--line));
+  border-radius: 8px;
+  padding: 16px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--primary) 12%, transparent), transparent 58%),
+    var(--surface);
+}
+
+.tether-result-card span,
+.tether-calculation-steps span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.tether-result-card strong {
+  color: var(--text);
+  font-size: clamp(1.7rem, 4vw, 3rem);
+  line-height: 1;
+}
+
+.tether-result-card small,
+.tether-calculator-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.tether-calculation-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.tether-calculation-steps > div {
+  display: grid;
+  gap: 6px;
+  min-height: 84px;
+  align-content: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--surface);
+}
+
+.tether-calculation-steps strong {
+  color: var(--text);
+  font-size: 1rem;
+}
+
 .savings-summary-panel {
   grid-template-columns: minmax(220px, 0.8fr) minmax(180px, 0.7fr);
 }
@@ -1997,6 +2098,10 @@ th {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .tether-calculation-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .access-settings-panel {
     grid-template-columns: 1fr;
   }
@@ -2116,6 +2221,23 @@ th {
   .tether-grid > div {
     min-height: 82px;
     padding: 10px;
+  }
+
+  .tether-calculator {
+    padding: 14px;
+  }
+
+  .tether-calculator-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .tether-calculator-input {
+    max-width: none;
+  }
+
+  .tether-calculation-steps {
+    grid-template-columns: 1fr;
   }
 
   .data-list {

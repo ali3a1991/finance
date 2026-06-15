@@ -319,7 +319,28 @@ const translations = {
       fetchedAt: "Abgerufen",
       source: "Quelle",
       toman: "Toman",
-      error: "Der Tetherpreis konnte nicht geladen werden."
+      error: "Der Tetherpreis konnte nicht geladen werden.",
+      calculator: {
+        eyebrow: "Rechner",
+        title: "Euro und Toman umrechnen",
+        mode: "Rechenrichtung",
+        eurToToman: "Euro zu Toman",
+        tomanToEur: "Toman zu Euro",
+        euroInput: "Euro, die du an KuCoin sendest",
+        tomanInput: "Toman, die auf deinem Konto ankommen sollen",
+        tomanResult: "Kommt auf deinem Konto an",
+        euroResult: "Du musst an KuCoin senden",
+        feeHint: "Inklusive 1 EUR KuCoin-Gebuehr, 1,5 USDT Transfer und 15.000 Toman Bankgebuehr.",
+        afterKucoinFee: "Nach KuCoin-Gebuehr",
+        boughtUsdt: "Gekaufte USDT",
+        afterTransfer: "Nach Transfergebuehr",
+        beforeBankFee: "Vor Bankgebuehr",
+        withBankFee: "Ziel plus Bankgebuehr",
+        requiredUsdt: "Benotigte USDT",
+        withTransferFee: "Mit Transfergebuehr",
+        beforeKucoinFee: "Vor KuCoin-Gebuehr",
+        rateNote: "Berechnet mit"
+      }
     },
     savings: {
       add: "Spartopf hinzufugen",
@@ -729,7 +750,28 @@ const translations = {
       fetchedAt: "Fetched",
       source: "Source",
       toman: "Toman",
-      error: "The Tether price could not be loaded."
+      error: "The Tether price could not be loaded.",
+      calculator: {
+        eyebrow: "Calculator",
+        title: "Convert Euro and Toman",
+        mode: "Calculation direction",
+        eurToToman: "Euro to Toman",
+        tomanToEur: "Toman to Euro",
+        euroInput: "Euro you send to KuCoin",
+        tomanInput: "Toman you want to receive",
+        tomanResult: "Arrives in your account",
+        euroResult: "You need to send to KuCoin",
+        feeHint: "Includes 1 EUR KuCoin fee, 1.5 USDT transfer fee and 15,000 Toman bank fee.",
+        afterKucoinFee: "After KuCoin fee",
+        boughtUsdt: "Bought USDT",
+        afterTransfer: "After transfer fee",
+        beforeBankFee: "Before bank fee",
+        withBankFee: "Target plus bank fee",
+        requiredUsdt: "Required USDT",
+        withTransferFee: "With transfer fee",
+        beforeKucoinFee: "Before KuCoin fee",
+        rateNote: "Calculated with"
+      }
     },
     savings: {
       add: "Add savings fund",
