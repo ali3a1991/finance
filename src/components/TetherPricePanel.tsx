@@ -55,17 +55,6 @@ function formatEuro(value: number | null | undefined, language: "de" | "en") {
   }).format(value);
 }
 
-function formatUsdt(value: number | null | undefined, language: "de" | "en") {
-  if (value === null || value === undefined) {
-    return "-";
-  }
-
-  return `${new Intl.NumberFormat(getLocale(language), {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 6
-  }).format(value)} USDT`;
-}
-
 function formatDateTime(value: string | null | undefined, language: "de" | "en") {
   if (!value) {
     return "-";
@@ -139,7 +128,7 @@ export function TetherPricePanel() {
     <section className="tether-panel">
       <div className="tether-panel-heading">
         <div className="investment-summary-heading">
-          <span className="summary-icon">
+          <span className="summary-icon exchange-summary-icon">
             <TrendingUp size={22} aria-hidden="true" />
           </span>
           <div>
@@ -170,7 +159,7 @@ export function TetherPricePanel() {
       <div className="tether-calculator">
         <div className="tether-calculator-heading">
           <div className="investment-summary-heading">
-            <span className="summary-icon">
+            <span className="summary-icon exchange-summary-icon">
               <Calculator size={22} aria-hidden="true" />
             </span>
             <div>
@@ -213,48 +202,6 @@ export function TetherPricePanel() {
           <span>{resultLabel}</span>
           <strong>{canCalculate ? resultValue : "-"}</strong>
           <small>{t("exchange.calculator.feeHint")}</small>
-        </div>
-
-        <div className="tether-calculation-steps">
-          {calculatorMode === "eur-to-toman" ? (
-            <>
-              <div>
-                <span>{t("exchange.calculator.afterKucoinFee")}</span>
-                <strong>{formatEuro(euroAfterFee, language)}</strong>
-              </div>
-              <div>
-                <span>{t("exchange.calculator.boughtUsdt")}</span>
-                <strong>{formatUsdt(boughtUsdt, language)}</strong>
-              </div>
-              <div>
-                <span>{t("exchange.calculator.afterTransfer")}</span>
-                <strong>{formatUsdt(receivedUsdt, language)}</strong>
-              </div>
-              <div>
-                <span>{t("exchange.calculator.beforeBankFee")}</span>
-                <strong>{formatToman(grossToman, language, t("exchange.toman"))}</strong>
-              </div>
-            </>
-          ) : (
-            <>
-              <div>
-                <span>{t("exchange.calculator.withBankFee")}</span>
-                <strong>{formatToman(neededGrossToman, language, t("exchange.toman"))}</strong>
-              </div>
-              <div>
-                <span>{t("exchange.calculator.requiredUsdt")}</span>
-                <strong>{formatUsdt(neededReceivedUsdt, language)}</strong>
-              </div>
-              <div>
-                <span>{t("exchange.calculator.withTransferFee")}</span>
-                <strong>{formatUsdt(neededBoughtUsdt, language)}</strong>
-              </div>
-              <div>
-                <span>{t("exchange.calculator.beforeKucoinFee")}</span>
-                <strong>{formatEuro(neededEuroAfterFee, language)}</strong>
-              </div>
-            </>
-          )}
         </div>
 
         <p className="tether-calculator-note">

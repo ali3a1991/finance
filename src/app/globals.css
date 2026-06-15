@@ -971,6 +971,11 @@ th {
   flex: 0 0 auto;
 }
 
+.exchange-summary-icon {
+  background: var(--surface-soft);
+  color: var(--primary);
+}
+
 .spin-icon {
   animation: api-loading-spin 780ms linear infinite;
 }
@@ -1104,8 +1109,7 @@ th {
     var(--surface);
 }
 
-.tether-result-card span,
-.tether-calculation-steps span {
+.tether-result-card span {
   color: var(--muted);
   font-size: 0.82rem;
   font-weight: 800;
@@ -1126,26 +1130,17 @@ th {
   font-weight: 700;
 }
 
-.tether-calculation-steps {
+.tether-calculator-input {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
 }
 
-.tether-calculation-steps > div {
-  display: grid;
-  gap: 6px;
-  min-height: 84px;
-  align-content: center;
-  border: 1px solid var(--line);
+.tether-calculator-input input {
+  min-height: 52px;
   border-radius: 8px;
-  padding: 12px;
-  background: var(--surface);
-}
-
-.tether-calculation-steps strong {
-  color: var(--text);
-  font-size: 1rem;
+  padding: 0 14px;
+  font-size: 1.05rem;
+  font-weight: 800;
 }
 
 .savings-summary-panel {
@@ -2107,10 +2102,6 @@ th {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .tether-calculation-steps {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .access-settings-panel {
     grid-template-columns: 1fr;
   }
@@ -2240,10 +2231,6 @@ th {
 
   .tether-calculator-input {
     max-width: none;
-  }
-
-  .tether-calculation-steps {
-    grid-template-columns: 1fr;
   }
 
   .data-list {
