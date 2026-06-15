@@ -66,8 +66,48 @@ function formatDateTime(value: string | null | undefined, language: "de" | "en")
   }).format(new Date(value));
 }
 
-function parseAmount(value: string) {
-  const normalizedValue = value.replace(/\s/g, "").replace(",", ".");
+function groupDigits(value: string, language: "de" | "en") {
+  const digits = value.replace(/\D/g, "");
+
+  if (!digits) {
+    return "";
+  }
+
+  return new Intl.NumberFormat(getLocale(language), { maximumFractionDigits: 0 }).format(Number(digits));
+}
+
+function formatCalculatorInput(value: string, mode: CalculatorMode, language: "de" | "en") {
+  if (mode === "toman-to-eur") {
+    return groupDigits(value, language);
+  }
+
+  const decimalSeparator = language === "de" ? "," : ".";
+  const sanitizedValue = value.replace(/[^\d.,]/g, "");
+  const lastComma = sanitizedValue.lastIndexOf(",");
+  const lastDot = sanitizedValue.lastIndexOf(".");
+  const decimalIndex = Math.max(lastComma, lastDot);
+
+  if (decimalIndex >= 0) {
+    const integerPart = groupDigits(sanitizedValue.slice(0, decimalIndex), language) || "0";
+    const decimalPart = sanitizedValue.slice(decimalIndex + 1).replace(/\D/g, "").slice(0, 2);
+    return `${integerPart}${decimalSeparator}${decimalPart}`;
+  }
+
+  return groupDigits(sanitizedValue, language);
+}
+
+function parseAmount(value: string, mode: CalculatorMode, language: "de" | "en") {
+  if (mode === "toman-to-eur") {
+    const parsedToman = Number(value.replace(/\D/g, ""));
+    return Number.isFinite(parsedToman) && parsedToman > 0 ? parsedToman : 0;
+  }
+
+  const decimalSeparator = language === "de" ? "," : ".";
+  const groupSeparator = language === "de" ? "." : ",";
+  const normalizedValue = value
+    .replace(/\s/g, "")
+    .replaceAll(groupSeparator, "")
+    .replace(decimalSeparator, ".");
   const parsedValue = Number(normalizedValue);
   return Number.isFinite(parsedValue) && parsedValue > 0 ? parsedValue : 0;
 }
@@ -98,7 +138,20 @@ export function TetherPricePanel() {
     void loadPrice();
   }, []);
 
-  const amount = parseAmount(calculatorAmount);
+  useEffect(() => {
+    setCalculatorAmount((currentAmount) => formatCalculatorInput(currentAmount, calculatorMode, language));
+  }, [calculatorMode, language]);
+
+  function changeCalculatorMode(mode: CalculatorMode) {
+    setCalculatorMode(mode);
+    setCalculatorAmount((currentAmount) => formatCalculatorInput(currentAmount, mode, language));
+  }
+
+  function changeCalculatorAmount(value: string) {
+    setCalculatorAmount(formatCalculatorInput(value, calculatorMode, language));
+  }
+
+  const amount = parseAmount(calculatorAmount, calculatorMode, language);
   const kucoinRate = priceData?.kucoin.bestAsk ?? priceData?.kucoin.eurPerUsdt ?? null;
   const tabdealSellRate = priceData?.bestBid ?? priceData?.lastPrice ?? null;
   const canCalculate = amount > 0 && kucoinRate !== null && kucoinRate > 0 && tabdealSellRate !== null && tabdealSellRate > 0;
@@ -171,14 +224,14 @@ export function TetherPricePanel() {
             <button
               type="button"
               className={calculatorMode === "eur-to-toman" ? "active" : ""}
-              onClick={() => setCalculatorMode("eur-to-toman")}
+              onClick={() => changeCalculatorMode("eur-to-toman")}
             >
               {t("exchange.calculator.eurToToman")}
             </button>
             <button
               type="button"
               className={calculatorMode === "toman-to-eur" ? "active" : ""}
-              onClick={() => setCalculatorMode("toman-to-eur")}
+              onClick={() => changeCalculatorMode("toman-to-eur")}
             >
               {t("exchange.calculator.tomanToEur")}
             </button>
@@ -188,13 +241,11 @@ export function TetherPricePanel() {
         <label className="form-field tether-calculator-input">
           <span>{calculatorMode === "eur-to-toman" ? t("exchange.calculator.euroInput") : t("exchange.calculator.tomanInput")}</span>
           <input
-            type="number"
-            inputMode="decimal"
-            min="0"
-            step="0.01"
+            type="text"
+            inputMode={calculatorMode === "eur-to-toman" ? "decimal" : "numeric"}
             value={calculatorAmount}
-            onChange={(event) => setCalculatorAmount(event.target.value)}
-            placeholder={calculatorMode === "eur-to-toman" ? "100" : "500000"}
+            onChange={(event) => changeCalculatorAmount(event.target.value)}
+            placeholder={calculatorMode === "eur-to-toman" ? "100" : formatCalculatorInput("500000", calculatorMode, language)}
           />
         </label>
 
