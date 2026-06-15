@@ -128,9 +128,9 @@ export function TetherPricePanel() {
     <section className="tether-panel">
       <div className="tether-panel-heading">
         <div className="investment-summary-heading">
-          <span className="summary-icon exchange-summary-icon">
+          <div className="stat-icon" aria-hidden="true">
             <TrendingUp size={22} aria-hidden="true" />
-          </span>
+          </div>
           <div>
             <span>{t("exchange.pair")}</span>
             <strong>{t("exchange.liveTitle")}</strong>
@@ -159,9 +159,9 @@ export function TetherPricePanel() {
       <div className="tether-calculator">
         <div className="tether-calculator-heading">
           <div className="investment-summary-heading">
-            <span className="summary-icon exchange-summary-icon">
+            <div className="stat-icon" aria-hidden="true">
               <Calculator size={22} aria-hidden="true" />
-            </span>
+            </div>
             <div>
               <span>{t("exchange.calculator.eyebrow")}</span>
               <strong>{t("exchange.calculator.title")}</strong>

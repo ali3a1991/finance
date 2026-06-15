@@ -971,11 +971,6 @@ th {
   flex: 0 0 auto;
 }
 
-.exchange-summary-icon {
-  background: var(--surface-soft);
-  color: var(--primary);
-}
-
 .spin-icon {
   animation: api-loading-spin 780ms linear infinite;
 }
