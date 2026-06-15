@@ -23,13 +23,16 @@ export async function POST(request: NextRequest) {
   }
 
   const contacts = await listTelegramContacts();
+  const uniqueContacts = Array.from(
+    new Map(contacts.map((contact) => [contact.contact.trim(), contact])).values()
+  ).filter((contact) => contact.contact);
   const text = `${title?.trim() || "FyNest Update"}\n\n${cleanMessage}`;
-  const results = await Promise.allSettled(contacts.map((contact) => sendTelegramMessage(contact.contact, text)));
+  const results = await Promise.allSettled(uniqueContacts.map((contact) => sendTelegramMessage(contact.contact, text)));
   const sent = results.filter((result) => result.status === "fulfilled").length;
 
   return NextResponse.json({
     failed: results.length - sent,
-    recipients: contacts.length,
+    recipients: uniqueContacts.length,
     sent
   });
 }

@@ -45,9 +45,7 @@ jobs:
             process.exit(1);
           }
 
-          const message = `FyNest v${version}
-
-Deutsch
+          const message = `Deutsch
 ${german}
 
 English
