@@ -16,7 +16,7 @@ type ExpenseForm = {
   note: string;
 };
 
-const categories = ["Haushalt", "Wohnen", "Mobilitat", "Versicherungen", "Freizeit"];
+const categories = ["Haushalt", "Wohnen", "Freizeit", "Kraftstoff", "Urlaub", "Kreditkarte", "Sparen", "Broker"];
 
 const emptyForm: ExpenseForm = {
   title: "",
