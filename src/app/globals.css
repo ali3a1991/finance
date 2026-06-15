@@ -2332,12 +2332,12 @@ th {
 
   .main-content:has(.exchange-page) {
     min-height: calc(100dvh - var(--mobile-header-height));
-    padding-block: 20px;
+    padding-block: 14px;
   }
 
   .exchange-page {
-    min-height: calc(100dvh - var(--mobile-header-height) - 40px);
-    align-content: center;
+    min-height: calc(100dvh - var(--mobile-header-height) - 28px);
+    align-content: start;
   }
 
   .stats-grid,
@@ -2395,16 +2395,17 @@ th {
 
   .main-content:has(.exchange-page) {
     overflow: hidden;
-    padding: 14px;
+    padding: 10px 14px 14px;
   }
 
   .exchange-page {
-    min-height: calc(100dvh - var(--mobile-header-height) - 28px);
+    min-height: calc(100dvh - var(--mobile-header-height) - 24px);
+    align-content: start;
   }
 
   .exchange-converter-panel {
     gap: 16px;
-    align-content: center;
+    align-content: start;
   }
 
   .exchange-title {
