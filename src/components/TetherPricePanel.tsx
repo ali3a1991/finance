@@ -83,9 +83,7 @@ function formatCalculatorInput(value: string, mode: CalculatorMode, language: "d
 
   const decimalSeparator = language === "de" ? "," : ".";
   const sanitizedValue = value.replace(/[^\d.,]/g, "");
-  const lastComma = sanitizedValue.lastIndexOf(",");
-  const lastDot = sanitizedValue.lastIndexOf(".");
-  const decimalIndex = Math.max(lastComma, lastDot);
+  const decimalIndex = sanitizedValue.lastIndexOf(decimalSeparator);
 
   if (decimalIndex >= 0) {
     const integerPart = groupDigits(sanitizedValue.slice(0, decimalIndex), language) || "0";
