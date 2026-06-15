@@ -1,6 +1,6 @@
 "use client";
 
-import { Calculator, RefreshCw, ShieldCheck, TrendingUp } from "lucide-react";
+import { ChevronDown, RefreshCw, ShieldCheck, Sparkles, WalletCards } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/components/LanguageProvider";
 import { requestJson } from "@/lib/requestJson";
@@ -40,6 +40,14 @@ function formatToman(value: number | null | undefined, language: "de" | "en", to
   }
 
   return `${new Intl.NumberFormat(getLocale(language), { maximumFractionDigits: 0 }).format(value)} ${tomanLabel}`;
+}
+
+function formatTomanNumber(value: number | null | undefined, language: "de" | "en") {
+  if (value === null || value === undefined) {
+    return "-";
+  }
+
+  return new Intl.NumberFormat(getLocale(language), { maximumFractionDigits: 0 }).format(value);
 }
 
 function formatEuro(value: number | null | undefined, language: "de" | "en") {
@@ -168,102 +176,92 @@ export function TetherPricePanel() {
     canCalculate && calculatorMode === "toman-to-eur" ? neededBoughtUsdt * kucoinRate : 0;
   const neededEuro =
     canCalculate && calculatorMode === "toman-to-eur" ? neededEuroAfterFee + KUCOIN_EURO_FEE : 0;
-  const resultLabel =
-    calculatorMode === "eur-to-toman" ? t("exchange.calculator.tomanResult") : t("exchange.calculator.euroResult");
   const resultValue =
     calculatorMode === "eur-to-toman"
       ? formatToman(finalToman, language, t("exchange.toman"))
       : formatEuro(neededEuro, language);
+  const resultSummaryLabel =
+    calculatorMode === "eur-to-toman" ? t("exchange.calculator.approxReceive") : t("exchange.calculator.approxSend");
+  const inputUnit = calculatorMode === "eur-to-toman" ? "EUR" : t("exchange.toman");
 
   return (
-    <section className="tether-panel">
-      <div className="tether-panel-heading">
-        <div className="investment-summary-heading">
-          <div className="stat-icon main-icon" aria-hidden="true">
-            <TrendingUp size={22} aria-hidden="true" />
-          </div>
-          <div>
-            <span>{t("exchange.pair")}</span>
-            <strong>{t("exchange.liveTitle")}</strong>
-          </div>
-        </div>
-        <button className="button secondary tether-refresh-button" type="button" onClick={loadPrice} disabled={isLoading}>
+    <section className="exchange-converter-panel">
+      <h1 className="exchange-title">
+        FyNest <span>|</span> {t("exchange.calculator.shortTitle")}
+      </h1>
+
+      <div className="exchange-rate-card">
+        <button className="exchange-refresh-button" type="button" onClick={loadPrice} disabled={isLoading} aria-label={t("exchange.refresh")}>
           <RefreshCw size={18} aria-hidden="true" className={isLoading ? "spin-icon" : ""} />
-          {isLoading ? t("exchange.refreshing") : t("exchange.refresh")}
         </button>
+        <span className="exchange-pair">{t("exchange.pair")}</span>
+        <div className="exchange-rate-meta">
+          <span>{t("exchange.lastPrice")}</span>
+          <small>{formatDateTime(priceData?.lastTradeTime ?? priceData?.fetchedAt, language)}</small>
+        </div>
+        <strong>{formatTomanNumber(priceData?.lastPrice, language)}</strong>
+        <small>{t("exchange.toman")} / USDT</small>
       </div>
 
       {isLoading && !priceData ? <p className="muted-text">{t("exchange.loading")}</p> : null}
       {error ? <p className="empty-table-text">{error}</p> : null}
 
-      <div className="tether-price-card">
-        <div className="tether-price-card-header">
-          <span>{t("exchange.lastPrice")}</span>
-          <small>
-            {t("exchange.updatedAt")}: {formatDateTime(priceData?.lastTradeTime ?? priceData?.fetchedAt, language)}
-          </small>
-        </div>
-        <strong>{formatToman(priceData?.lastPrice, language, t("exchange.toman"))}</strong>
-        <small>{priceData?.symbol ?? "USDTIRT"}</small>
-      </div>
-
-      <div className="tether-calculator">
-        <div className="tether-calculator-heading">
-          <div className="investment-summary-heading">
-            <div className="stat-icon main-icon" aria-hidden="true">
-              <Calculator size={22} aria-hidden="true" />
-            </div>
-            <div>
-              <span>{t("exchange.calculator.eyebrow")}</span>
-              <strong>{t("exchange.calculator.title")}</strong>
-            </div>
-          </div>
-          <div className="tether-mode-switch" role="group" aria-label={t("exchange.calculator.mode")}>
-            <button
-              type="button"
-              className={calculatorMode === "eur-to-toman" ? "active" : ""}
-              onClick={() => changeCalculatorMode("eur-to-toman")}
-            >
-              {t("exchange.calculator.eurToToman")}
-            </button>
-            <button
-              type="button"
-              className={calculatorMode === "toman-to-eur" ? "active" : ""}
-              onClick={() => changeCalculatorMode("toman-to-eur")}
-            >
-              {t("exchange.calculator.tomanToEur")}
-            </button>
-          </div>
+      <div className="exchange-calculator">
+        <div className="exchange-mode-switch" role="group" aria-label={t("exchange.calculator.mode")}>
+          <button
+            type="button"
+            className={calculatorMode === "eur-to-toman" ? "active" : ""}
+            onClick={() => changeCalculatorMode("eur-to-toman")}
+          >
+            {"Euro -> Toman"}
+          </button>
+          <button
+            type="button"
+            className={calculatorMode === "toman-to-eur" ? "active" : ""}
+            onClick={() => changeCalculatorMode("toman-to-eur")}
+          >
+            {"Toman -> Euro"}
+          </button>
         </div>
 
-        <label className="form-field tether-calculator-input">
+        <label className="exchange-input-label">
           <span>{calculatorMode === "eur-to-toman" ? t("exchange.calculator.euroInput") : t("exchange.calculator.tomanInput")}</span>
-          <input
-            type="text"
-            inputMode={calculatorMode === "eur-to-toman" ? "decimal" : "numeric"}
-            value={calculatorAmount}
-            onChange={(event) => changeCalculatorAmount(event.target.value)}
-            placeholder={calculatorMode === "eur-to-toman" ? "100" : formatCalculatorInput("500000", calculatorMode, language)}
-          />
+          <div className="exchange-input-wrap">
+            <input
+              type="text"
+              inputMode={calculatorMode === "eur-to-toman" ? "decimal" : "numeric"}
+              value={calculatorAmount}
+              onChange={(event) => changeCalculatorAmount(event.target.value)}
+              placeholder={calculatorMode === "eur-to-toman" ? "100" : formatCalculatorInput("500000", calculatorMode, language)}
+            />
+            <small>{inputUnit}</small>
+          </div>
         </label>
 
-        <div className="tether-result-card">
-          <span>{resultLabel}</span>
+        <div className="exchange-result">
+          <span>{resultSummaryLabel}</span>
           <strong>{canCalculate ? resultValue : "-"}</strong>
-          <small>{t("exchange.calculator.feeHint")}</small>
         </div>
 
-        <p className="tether-calculator-note">
-          {t("exchange.calculator.rateNote")} {formatEuro(kucoinRate, language)} / USDT ·{" "}
-          {formatToman(tabdealSellRate, language, t("exchange.toman"))} / USDT
-        </p>
+        <details className="exchange-fee-details">
+          <summary>
+            {t("exchange.calculator.feeDetails")}
+            <ChevronDown size={16} aria-hidden="true" />
+          </summary>
+          <p>{t("exchange.calculator.feeHint")}</p>
+          <p>
+            {t("exchange.calculator.rateNote")} {formatEuro(kucoinRate, language)} / USDT ·{" "}
+            {formatToman(tabdealSellRate, language, t("exchange.toman"))} / USDT
+          </p>
+        </details>
       </div>
 
-      <div className="tether-source">
+      <div className="exchange-source">
         <ShieldCheck size={16} aria-hidden="true" />
-        <span>
-          {t("exchange.source")}: {priceData?.source ?? "Tabdeal"} · {priceData?.kucoin.source ?? "KuCoin"}
-        </span>
+        <span>{t("exchange.source")}:</span>
+        <WalletCards size={17} aria-hidden="true" />
+        <span>{priceData?.source ?? "Tabdeal"} · {priceData?.kucoin.source ?? "KuCoin"}</span>
+        <Sparkles size={34} aria-hidden="true" className="exchange-source-sparkle" />
       </div>
     </section>
   );

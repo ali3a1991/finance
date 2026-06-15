@@ -1143,6 +1143,257 @@ th {
   font-weight: 800;
 }
 
+.exchange-page {
+  display: grid;
+  justify-items: center;
+}
+
+.exchange-converter-panel {
+  display: grid;
+  gap: 28px;
+  width: min(100%, 560px);
+  margin: 0 auto;
+  text-align: center;
+}
+
+.exchange-title {
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(2rem, 7vw, 3rem);
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.exchange-title span {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.exchange-rate-card {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--line) 70%, var(--primary));
+  border-radius: 8px;
+  padding: 32px 22px 34px;
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--surface-soft) 82%, var(--primary)), transparent 120%),
+    linear-gradient(25deg, color-mix(in srgb, var(--primary) 18%, transparent), transparent 52%),
+    var(--surface);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #ffffff 20%, transparent),
+    0 22px 60px color-mix(in srgb, var(--primary) 16%, transparent);
+}
+
+.exchange-refresh-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.exchange-refresh-button:hover {
+  color: var(--primary);
+}
+
+.exchange-pair {
+  color: var(--text);
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.exchange-rate-meta {
+  display: grid;
+  gap: 2px;
+  color: var(--muted);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.exchange-rate-meta small {
+  color: var(--muted);
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: none;
+}
+
+.exchange-rate-card strong {
+  color: var(--text);
+  font-size: clamp(4rem, 17vw, 6.6rem);
+  font-weight: 900;
+  line-height: 0.95;
+}
+
+.exchange-rate-card > small {
+  color: var(--muted);
+  font-size: 1.25rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.exchange-calculator {
+  display: grid;
+  gap: 18px;
+}
+
+.exchange-mode-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  border: 1px solid color-mix(in srgb, var(--line) 75%, var(--muted));
+  border-radius: 999px;
+  padding: 5px;
+  background: color-mix(in srgb, var(--surface-soft) 82%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #ffffff 10%, transparent);
+}
+
+.exchange-mode-switch button {
+  min-height: 48px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.exchange-mode-switch button.active {
+  background: color-mix(in srgb, var(--primary) 92%, #ffffff 8%);
+  color: var(--on-primary);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--primary) 42%, transparent),
+    0 10px 28px color-mix(in srgb, var(--primary) 28%, transparent);
+}
+
+.exchange-input-label {
+  display: grid;
+  gap: 8px;
+  text-align: left;
+}
+
+.exchange-input-label > span {
+  color: var(--muted);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.exchange-input-wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 14px;
+  background: var(--input-bg);
+}
+
+.exchange-input-wrap:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--focus-ring);
+}
+
+.exchange-input-wrap input {
+  width: 100%;
+  min-height: 62px;
+  border: 0;
+  outline: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.exchange-input-wrap small {
+  color: var(--muted);
+  font-size: 1.35rem;
+  font-weight: 900;
+}
+
+.exchange-result {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  padding-top: 18px;
+}
+
+.exchange-result span {
+  color: var(--muted);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.exchange-result strong {
+  color: var(--primary);
+  font-size: clamp(2.7rem, 9vw, 4.4rem);
+  font-weight: 900;
+  line-height: 1;
+}
+
+.exchange-fee-details {
+  justify-self: center;
+  color: var(--muted);
+}
+
+.exchange-fee-details summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 10px 16px;
+  background: color-mix(in srgb, var(--surface-soft) 76%, transparent);
+  color: var(--muted);
+  font-weight: 800;
+  cursor: pointer;
+  list-style: none;
+}
+
+.exchange-fee-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.exchange-fee-details[open] summary svg {
+  transform: rotate(180deg);
+}
+
+.exchange-fee-details p {
+  max-width: 460px;
+  margin: 10px auto 0;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.exchange-source {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.exchange-source-sparkle {
+  margin-left: 8px;
+  color: color-mix(in srgb, var(--muted) 82%, var(--primary));
+}
+
 .savings-summary-panel {
   grid-template-columns: minmax(220px, 0.8fr) minmax(180px, 0.7fr);
 }
