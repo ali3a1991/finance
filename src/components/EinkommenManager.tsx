@@ -164,16 +164,16 @@ export function EinkommenManager() {
         </div>
       ) : null}
 
-      <nav className="tab-row" aria-label={t("incomes.ariaTabs")}>
+      <nav className="tab-row income-tab-row" aria-label={t("incomes.ariaTabs")}>
         <button
-          className={`tab-link ${activeType === "recurring" ? "active" : ""}`}
+          className={`tab-link income-tab-link ${activeType === "recurring" ? "active" : ""}`}
           type="button"
           onClick={() => setActiveType("recurring")}
         >
           {t("incomes.recurringTab")}
         </button>
         <button
-          className={`tab-link ${activeType === "oneTime" ? "active" : ""}`}
+          className={`tab-link income-tab-link ${activeType === "oneTime" ? "active" : ""}`}
           type="button"
           onClick={() => setActiveType("oneTime")}
         >
