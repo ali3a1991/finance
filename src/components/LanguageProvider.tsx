@@ -22,6 +22,7 @@ const translations = {
       expenses: "Ausgaben",
       savings: "Sparen",
       investments: "Investitionen",
+      tether: "Tether",
       contracts: "Verträge",
       general: "Allgemein",
       settings: "Einstellungen",
@@ -65,6 +66,11 @@ const translations = {
         eyebrow: "Investitionen",
         title: "Depot und Krypto verwalten.",
         description: "Erfasse deine Käufe und vergleiche Kaufpreis, Menge und aktuellen Marktpreis."
+      },
+      tether: {
+        eyebrow: "Tether",
+        title: "Tetherpreis in Toman.",
+        description: "Live-Preis von USDT/IRT aus der offentlichen Tabdeal-API."
       },
       savings: {
         eyebrow: "Sparen",
@@ -299,6 +305,22 @@ const translations = {
       deleteTitle: "Investition wirklich loschen?",
       deleteText: "wird aus deinem Depot entfernt."
     },
+    tether: {
+      liveTitle: "Live-Kurs",
+      pair: "USDT / Toman",
+      loading: "Tetherpreis wird geladen...",
+      refresh: "Aktualisieren",
+      refreshing: "Ladt...",
+      lastPrice: "Letzter Preis",
+      bestBid: "Bester Kauf",
+      bestAsk: "Bester Verkauf",
+      spread: "Spread",
+      lastTrade: "Letzter Trade",
+      fetchedAt: "Abgerufen",
+      source: "Quelle",
+      toman: "Toman",
+      error: "Der Tetherpreis konnte nicht geladen werden."
+    },
     savings: {
       add: "Spartopf hinzufugen",
       loading: "Spartopfe werden geladen...",
@@ -410,6 +432,7 @@ const translations = {
       expenses: "Expenses",
       savings: "Savings",
       investments: "Investments",
+      tether: "Tether",
       contracts: "Contracts",
       general: "General",
       settings: "Settings",
@@ -453,6 +476,11 @@ const translations = {
         eyebrow: "Investments",
         title: "Manage portfolio and crypto.",
         description: "Track purchases and compare purchase price, quantity and current market price."
+      },
+      tether: {
+        eyebrow: "Tether",
+        title: "Tether price in Toman.",
+        description: "Live USDT/IRT price from the public Tabdeal API."
       },
       savings: {
         eyebrow: "Savings",
@@ -686,6 +714,22 @@ const translations = {
       deleteLabel: "Delete investment",
       deleteTitle: "Delete this investment?",
       deleteText: "will be removed from your portfolio."
+    },
+    tether: {
+      liveTitle: "Live rate",
+      pair: "USDT / Toman",
+      loading: "Loading Tether price...",
+      refresh: "Refresh",
+      refreshing: "Loading...",
+      lastPrice: "Last price",
+      bestBid: "Best bid",
+      bestAsk: "Best ask",
+      spread: "Spread",
+      lastTrade: "Last trade",
+      fetchedAt: "Fetched",
+      source: "Source",
+      toman: "Toman",
+      error: "The Tether price could not be loaded."
     },
     savings: {
       add: "Add savings fund",

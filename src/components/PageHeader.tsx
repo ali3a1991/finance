@@ -11,6 +11,7 @@ type PageHeaderProps = {
     | "expenses"
     | "savings"
     | "investments"
+    | "tether"
     | "contractsGeneral"
     | "settings";
 };

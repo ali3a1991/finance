@@ -2,7 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Banknote, FileText, Home, Menu, PiggyBank, Settings, ShieldCheck, TrendingUp, WalletCards, X } from "lucide-react";
+import {
+  Banknote,
+  CircleDollarSign,
+  FileText,
+  Home,
+  Menu,
+  PiggyBank,
+  Settings,
+  ShieldCheck,
+  TrendingUp,
+  WalletCards,
+  X
+} from "lucide-react";
 import { useState } from "react";
 import { useApiLoading } from "@/components/ApiLoadingProvider";
 import { useAuth } from "@/components/AuthProvider";
@@ -15,7 +27,8 @@ const navItems = [
   { href: "/incomes", labelKey: "incomes", icon: TrendingUp },
   { href: "/expenses", labelKey: "expenses", icon: WalletCards },
   { href: "/savings", labelKey: "savings", icon: PiggyBank },
-  { href: "/investments", labelKey: "investments", icon: TrendingUp }
+  { href: "/investments", labelKey: "investments", icon: TrendingUp },
+  { href: "/tether", labelKey: "tether", icon: CircleDollarSign }
 ];
 
 const contractItems = [

@@ -948,6 +948,92 @@ th {
   color: var(--rose);
 }
 
+.tether-panel {
+  display: grid;
+  gap: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 18px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--primary) 10%, transparent), transparent 52%),
+    var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.tether-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.tether-refresh-button {
+  flex: 0 0 auto;
+}
+
+.spin-icon {
+  animation: api-loading-spin 780ms linear infinite;
+}
+
+.tether-price-card {
+  display: grid;
+  gap: 8px;
+  border: 1px solid color-mix(in srgb, var(--primary) 34%, var(--line));
+  border-radius: 8px;
+  padding: 18px;
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface-soft));
+}
+
+.tether-price-card span,
+.tether-grid span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.tether-price-card strong {
+  color: var(--text);
+  font-size: clamp(2rem, 6vw, 4.2rem);
+  line-height: 1;
+}
+
+.tether-price-card small {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.tether-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.tether-grid > div {
+  display: grid;
+  gap: 6px;
+  min-height: 96px;
+  align-content: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--surface-soft);
+}
+
+.tether-grid strong {
+  color: var(--text);
+  font-size: 1.05rem;
+}
+
+.tether-source {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
 .savings-summary-panel {
   grid-template-columns: minmax(220px, 0.8fr) minmax(180px, 0.7fr);
 }
@@ -1907,6 +1993,10 @@ th {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .tether-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .access-settings-panel {
     grid-template-columns: 1fr;
   }
@@ -2007,6 +2097,25 @@ th {
 
   .investment-summary-grid strong {
     font-size: 1.05rem;
+  }
+
+  .tether-panel {
+    gap: 14px;
+    padding: 14px;
+  }
+
+  .tether-panel-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .tether-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tether-grid > div {
+    min-height: 82px;
+    padding: 10px;
   }
 
   .data-list {
