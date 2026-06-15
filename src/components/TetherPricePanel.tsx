@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, RefreshCw, ShieldCheck, Sparkles, WalletCards } from "lucide-react";
+import { ChevronDown, RefreshCw, ShieldCheck, WalletCards } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/components/LanguageProvider";
 import { requestJson } from "@/lib/requestJson";
@@ -261,7 +261,6 @@ export function TetherPricePanel() {
         <span>{t("exchange.source")}:</span>
         <WalletCards size={17} aria-hidden="true" />
         <span>{priceData?.source ?? "Tabdeal"} · {priceData?.kucoin.source ?? "KuCoin"}</span>
-        <Sparkles size={34} aria-hidden="true" className="exchange-source-sparkle" />
       </div>
     </section>
   );

@@ -1389,11 +1389,6 @@ th {
   font-weight: 800;
 }
 
-.exchange-source-sparkle {
-  margin-left: 8px;
-  color: color-mix(in srgb, var(--muted) 82%, var(--primary));
-}
-
 .savings-summary-panel {
   grid-template-columns: minmax(220px, 0.8fr) minmax(180px, 0.7fr);
 }
@@ -2335,6 +2330,16 @@ th {
     padding: 18px 18px 32px;
   }
 
+  .main-content:has(.exchange-page) {
+    min-height: calc(100dvh - var(--mobile-header-height));
+    padding-block: 20px;
+  }
+
+  .exchange-page {
+    min-height: calc(100dvh - var(--mobile-header-height) - 40px);
+    align-content: center;
+  }
+
   .stats-grid,
   .card-grid,
   .cash-gauge-panel,
@@ -2386,6 +2391,89 @@ th {
   .main-content {
     min-height: calc(100dvh - var(--mobile-header-height));
     padding-inline: 14px;
+  }
+
+  .main-content:has(.exchange-page) {
+    overflow: hidden;
+    padding: 14px;
+  }
+
+  .exchange-page {
+    min-height: calc(100dvh - var(--mobile-header-height) - 28px);
+  }
+
+  .exchange-converter-panel {
+    gap: 16px;
+    align-content: center;
+  }
+
+  .exchange-title {
+    font-size: 2.05rem;
+  }
+
+  .exchange-rate-card {
+    gap: 7px;
+    padding: 22px 16px 24px;
+  }
+
+  .exchange-refresh-button {
+    top: 12px;
+    right: 12px;
+  }
+
+  .exchange-pair {
+    font-size: 1.1rem;
+  }
+
+  .exchange-rate-meta small {
+    font-size: 0.9rem;
+  }
+
+  .exchange-rate-card strong {
+    font-size: clamp(3.4rem, 16vw, 4.7rem);
+  }
+
+  .exchange-rate-card > small {
+    font-size: 1rem;
+  }
+
+  .exchange-calculator {
+    gap: 12px;
+  }
+
+  .exchange-mode-switch button {
+    min-height: 44px;
+    font-size: 0.92rem;
+  }
+
+  .exchange-input-label {
+    gap: 6px;
+  }
+
+  .exchange-input-label > span {
+    font-size: 0.92rem;
+  }
+
+  .exchange-input-wrap input {
+    min-height: 54px;
+    font-size: 1.18rem;
+  }
+
+  .exchange-result {
+    gap: 6px;
+    padding-top: 8px;
+  }
+
+  .exchange-result strong {
+    font-size: clamp(2.15rem, 10vw, 3rem);
+  }
+
+  .exchange-fee-details summary {
+    padding: 8px 14px;
+  }
+
+  .exchange-source {
+    font-size: 0.9rem;
   }
 
   .page-header h1 {
