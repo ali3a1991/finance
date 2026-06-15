@@ -905,6 +905,11 @@ th {
   color: var(--on-primary);
 }
 
+.main-icon {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
 .investment-summary-heading span,
 .investment-summary-grid span {
   color: var(--muted);
