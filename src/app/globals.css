@@ -992,6 +992,19 @@ th {
   text-transform: uppercase;
 }
 
+.tether-price-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tether-price-card-header small {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
 .tether-price-card strong {
   color: var(--text);
   font-size: clamp(2rem, 6vw, 4.2rem);
@@ -2094,10 +2107,6 @@ th {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .tether-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .tether-calculation-steps {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -2214,13 +2223,10 @@ th {
     flex-direction: column;
   }
 
-  .tether-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .tether-grid > div {
-    min-height: 82px;
-    padding: 10px;
+  .tether-price-card-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
   }
 
   .tether-calculator {

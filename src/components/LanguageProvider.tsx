@@ -22,7 +22,7 @@ const translations = {
       expenses: "Ausgaben",
       savings: "Sparen",
       investments: "Investitionen",
-      tether: "Tether",
+      exchange: "Wechsel",
       contracts: "Verträge",
       general: "Allgemein",
       settings: "Einstellungen",
@@ -67,10 +67,10 @@ const translations = {
         title: "Depot und Krypto verwalten.",
         description: "Erfasse deine Käufe und vergleiche Kaufpreis, Menge und aktuellen Marktpreis."
       },
-      tether: {
-        eyebrow: "Tether",
-        title: "Tetherpreis in Toman.",
-        description: "Live-Preis von USDT/IRT aus der offentlichen Tabdeal-API."
+      exchange: {
+        eyebrow: "Wechsel",
+        title: "Euro, Tether und Toman umrechnen.",
+        description: "Live-Kurse fur deine Umrechnung zwischen Euro, USDT und Toman."
       },
       savings: {
         eyebrow: "Sparen",
@@ -305,13 +305,14 @@ const translations = {
       deleteTitle: "Investition wirklich loschen?",
       deleteText: "wird aus deinem Depot entfernt."
     },
-    tether: {
+    exchange: {
       liveTitle: "Live-Kurs",
       pair: "USDT / Toman",
       loading: "Tetherpreis wird geladen...",
       refresh: "Aktualisieren",
       refreshing: "Ladt...",
       lastPrice: "Letzter Preis",
+      updatedAt: "Aktualisiert",
       bestBid: "Bester Kauf",
       bestAsk: "Bester Verkauf",
       spread: "Spread",
@@ -453,7 +454,7 @@ const translations = {
       expenses: "Expenses",
       savings: "Savings",
       investments: "Investments",
-      tether: "Tether",
+      exchange: "Exchange",
       contracts: "Contracts",
       general: "General",
       settings: "Settings",
@@ -498,10 +499,10 @@ const translations = {
         title: "Manage portfolio and crypto.",
         description: "Track purchases and compare purchase price, quantity and current market price."
       },
-      tether: {
-        eyebrow: "Tether",
-        title: "Tether price in Toman.",
-        description: "Live USDT/IRT price from the public Tabdeal API."
+      exchange: {
+        eyebrow: "Exchange",
+        title: "Convert Euro, Tether and Toman.",
+        description: "Live rates for converting between Euro, USDT and Toman."
       },
       savings: {
         eyebrow: "Savings",
@@ -736,13 +737,14 @@ const translations = {
       deleteTitle: "Delete this investment?",
       deleteText: "will be removed from your portfolio."
     },
-    tether: {
+    exchange: {
       liveTitle: "Live rate",
       pair: "USDT / Toman",
       loading: "Loading Tether price...",
       refresh: "Refresh",
       refreshing: "Loading...",
       lastPrice: "Last price",
+      updatedAt: "Updated",
       bestBid: "Best bid",
       bestAsk: "Best ask",
       spread: "Spread",

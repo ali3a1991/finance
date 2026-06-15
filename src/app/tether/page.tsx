@@ -1,11 +1,5 @@
-import { PageHeader } from "@/components/PageHeader";
-import { TetherPricePanel } from "@/components/TetherPricePanel";
+import { redirect } from "next/navigation";
 
 export default function TetherPage() {
-  return (
-    <div className="page-stack">
-      <PageHeader page="tether" />
-      <TetherPricePanel />
-    </div>
-  );
+  redirect("/exchange");
 }

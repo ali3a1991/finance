@@ -28,7 +28,7 @@ const navItems = [
   { href: "/expenses", labelKey: "expenses", icon: WalletCards },
   { href: "/savings", labelKey: "savings", icon: PiggyBank },
   { href: "/investments", labelKey: "investments", icon: TrendingUp },
-  { href: "/tether", labelKey: "tether", icon: CircleDollarSign }
+  { href: "/exchange", labelKey: "exchange", icon: CircleDollarSign }
 ];
 
 const contractItems = [

@@ -99,7 +99,7 @@ export function TetherPricePanel() {
       const body = await requestJson<TetherPricePayload>("/api/tether-price");
       setPriceData(body);
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : t("tether.error"));
+      setError(requestError instanceof Error ? requestError.message : t("exchange.error"));
     } finally {
       setIsLoading(false);
     }
@@ -129,10 +129,10 @@ export function TetherPricePanel() {
   const neededEuro =
     canCalculate && calculatorMode === "toman-to-eur" ? neededEuroAfterFee + KUCOIN_EURO_FEE : 0;
   const resultLabel =
-    calculatorMode === "eur-to-toman" ? t("tether.calculator.tomanResult") : t("tether.calculator.euroResult");
+    calculatorMode === "eur-to-toman" ? t("exchange.calculator.tomanResult") : t("exchange.calculator.euroResult");
   const resultValue =
     calculatorMode === "eur-to-toman"
-      ? formatToman(finalToman, language, t("tether.toman"))
+      ? formatToman(finalToman, language, t("exchange.toman"))
       : formatEuro(neededEuro, language);
 
   return (
@@ -143,42 +143,28 @@ export function TetherPricePanel() {
             <TrendingUp size={22} aria-hidden="true" />
           </span>
           <div>
-            <span>{t("tether.pair")}</span>
-            <strong>{t("tether.liveTitle")}</strong>
+            <span>{t("exchange.pair")}</span>
+            <strong>{t("exchange.liveTitle")}</strong>
           </div>
         </div>
         <button className="button secondary tether-refresh-button" type="button" onClick={loadPrice} disabled={isLoading}>
           <RefreshCw size={18} aria-hidden="true" className={isLoading ? "spin-icon" : ""} />
-          {isLoading ? t("tether.refreshing") : t("tether.refresh")}
+          {isLoading ? t("exchange.refreshing") : t("exchange.refresh")}
         </button>
       </div>
 
-      {isLoading && !priceData ? <p className="muted-text">{t("tether.loading")}</p> : null}
+      {isLoading && !priceData ? <p className="muted-text">{t("exchange.loading")}</p> : null}
       {error ? <p className="empty-table-text">{error}</p> : null}
 
       <div className="tether-price-card">
-        <span>{t("tether.lastPrice")}</span>
-        <strong>{formatToman(priceData?.lastPrice, language, t("tether.toman"))}</strong>
+        <div className="tether-price-card-header">
+          <span>{t("exchange.lastPrice")}</span>
+          <small>
+            {t("exchange.updatedAt")}: {formatDateTime(priceData?.lastTradeTime ?? priceData?.fetchedAt, language)}
+          </small>
+        </div>
+        <strong>{formatToman(priceData?.lastPrice, language, t("exchange.toman"))}</strong>
         <small>{priceData?.symbol ?? "USDTIRT"}</small>
-      </div>
-
-      <div className="tether-grid">
-        <div>
-          <span>{t("tether.bestBid")}</span>
-          <strong>{formatToman(priceData?.bestBid, language, t("tether.toman"))}</strong>
-        </div>
-        <div>
-          <span>{t("tether.bestAsk")}</span>
-          <strong>{formatToman(priceData?.bestAsk, language, t("tether.toman"))}</strong>
-        </div>
-        <div>
-          <span>{t("tether.spread")}</span>
-          <strong>{formatToman(priceData?.spread, language, t("tether.toman"))}</strong>
-        </div>
-        <div>
-          <span>{t("tether.lastTrade")}</span>
-          <strong>{formatDateTime(priceData?.lastTradeTime, language)}</strong>
-        </div>
       </div>
 
       <div className="tether-calculator">
@@ -188,30 +174,30 @@ export function TetherPricePanel() {
               <Calculator size={22} aria-hidden="true" />
             </span>
             <div>
-              <span>{t("tether.calculator.eyebrow")}</span>
-              <strong>{t("tether.calculator.title")}</strong>
+              <span>{t("exchange.calculator.eyebrow")}</span>
+              <strong>{t("exchange.calculator.title")}</strong>
             </div>
           </div>
-          <div className="tether-mode-switch" role="group" aria-label={t("tether.calculator.mode")}>
+          <div className="tether-mode-switch" role="group" aria-label={t("exchange.calculator.mode")}>
             <button
               type="button"
               className={calculatorMode === "eur-to-toman" ? "active" : ""}
               onClick={() => setCalculatorMode("eur-to-toman")}
             >
-              {t("tether.calculator.eurToToman")}
+              {t("exchange.calculator.eurToToman")}
             </button>
             <button
               type="button"
               className={calculatorMode === "toman-to-eur" ? "active" : ""}
               onClick={() => setCalculatorMode("toman-to-eur")}
             >
-              {t("tether.calculator.tomanToEur")}
+              {t("exchange.calculator.tomanToEur")}
             </button>
           </div>
         </div>
 
         <label className="form-field tether-calculator-input">
-          <span>{calculatorMode === "eur-to-toman" ? t("tether.calculator.euroInput") : t("tether.calculator.tomanInput")}</span>
+          <span>{calculatorMode === "eur-to-toman" ? t("exchange.calculator.euroInput") : t("exchange.calculator.tomanInput")}</span>
           <input
             type="number"
             inputMode="decimal"
@@ -226,45 +212,45 @@ export function TetherPricePanel() {
         <div className="tether-result-card">
           <span>{resultLabel}</span>
           <strong>{canCalculate ? resultValue : "-"}</strong>
-          <small>{t("tether.calculator.feeHint")}</small>
+          <small>{t("exchange.calculator.feeHint")}</small>
         </div>
 
         <div className="tether-calculation-steps">
           {calculatorMode === "eur-to-toman" ? (
             <>
               <div>
-                <span>{t("tether.calculator.afterKucoinFee")}</span>
+                <span>{t("exchange.calculator.afterKucoinFee")}</span>
                 <strong>{formatEuro(euroAfterFee, language)}</strong>
               </div>
               <div>
-                <span>{t("tether.calculator.boughtUsdt")}</span>
+                <span>{t("exchange.calculator.boughtUsdt")}</span>
                 <strong>{formatUsdt(boughtUsdt, language)}</strong>
               </div>
               <div>
-                <span>{t("tether.calculator.afterTransfer")}</span>
+                <span>{t("exchange.calculator.afterTransfer")}</span>
                 <strong>{formatUsdt(receivedUsdt, language)}</strong>
               </div>
               <div>
-                <span>{t("tether.calculator.beforeBankFee")}</span>
-                <strong>{formatToman(grossToman, language, t("tether.toman"))}</strong>
+                <span>{t("exchange.calculator.beforeBankFee")}</span>
+                <strong>{formatToman(grossToman, language, t("exchange.toman"))}</strong>
               </div>
             </>
           ) : (
             <>
               <div>
-                <span>{t("tether.calculator.withBankFee")}</span>
-                <strong>{formatToman(neededGrossToman, language, t("tether.toman"))}</strong>
+                <span>{t("exchange.calculator.withBankFee")}</span>
+                <strong>{formatToman(neededGrossToman, language, t("exchange.toman"))}</strong>
               </div>
               <div>
-                <span>{t("tether.calculator.requiredUsdt")}</span>
+                <span>{t("exchange.calculator.requiredUsdt")}</span>
                 <strong>{formatUsdt(neededReceivedUsdt, language)}</strong>
               </div>
               <div>
-                <span>{t("tether.calculator.withTransferFee")}</span>
+                <span>{t("exchange.calculator.withTransferFee")}</span>
                 <strong>{formatUsdt(neededBoughtUsdt, language)}</strong>
               </div>
               <div>
-                <span>{t("tether.calculator.beforeKucoinFee")}</span>
+                <span>{t("exchange.calculator.beforeKucoinFee")}</span>
                 <strong>{formatEuro(neededEuroAfterFee, language)}</strong>
               </div>
             </>
@@ -272,16 +258,15 @@ export function TetherPricePanel() {
         </div>
 
         <p className="tether-calculator-note">
-          {t("tether.calculator.rateNote")} {formatEuro(kucoinRate, language)} / USDT ·{" "}
-          {formatToman(tabdealSellRate, language, t("tether.toman"))} / USDT
+          {t("exchange.calculator.rateNote")} {formatEuro(kucoinRate, language)} / USDT ·{" "}
+          {formatToman(tabdealSellRate, language, t("exchange.toman"))} / USDT
         </p>
       </div>
 
       <div className="tether-source">
         <ShieldCheck size={16} aria-hidden="true" />
         <span>
-          {t("tether.source")}: {priceData?.source ?? "Tabdeal"} · {t("tether.fetchedAt")}:{" "}
-          {formatDateTime(priceData?.fetchedAt, language)}
+          {t("exchange.source")}: {priceData?.source ?? "Tabdeal"} · {priceData?.kucoin.source ?? "KuCoin"}
         </span>
       </div>
     </section>
