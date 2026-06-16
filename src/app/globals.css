@@ -1229,9 +1229,9 @@ th {
 .exchange-rate-card {
   position: relative;
   display: grid;
-  justify-items: start;
+  justify-items: center;
   align-content: center;
-  gap: 10px;
+  gap: 25px;
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--line) 70%, var(--primary));
   border-radius: 8px;
@@ -1290,7 +1290,7 @@ th {
 
 .exchange-rate-card strong {
   color: var(--text);
-  font-size: clamp(3.2rem, 6vw, 5rem);
+  font-size: clamp(3rem, 6vw, 3rem);
   font-weight: 900;
   line-height: 0.95;
 }
@@ -1426,7 +1426,7 @@ th {
 
 .exchange-result strong {
   color: var(--primary);
-  font-size: clamp(2.1rem, 4vw, 3.2rem);
+  font-size: clamp(2.1rem, 4vw, 2.1rem);
   font-weight: 900;
   line-height: 1;
 }
@@ -2539,7 +2539,7 @@ th {
   }
 
   .exchange-rate-card strong {
-    font-size: clamp(3.4rem, 16vw, 4.7rem);
+    font-size: clamp(3rem, 16vw, 3rem);
   }
 
   .exchange-rate-card > small {
@@ -2574,7 +2574,7 @@ th {
   }
 
   .exchange-result strong {
-    font-size: clamp(2.15rem, 10vw, 3rem);
+    font-size: clamp(2.1rem, 10vw, 2.1rem);
   }
 
   .exchange-fee-details summary {
