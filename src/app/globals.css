@@ -1177,16 +1177,18 @@ th {
 
 .exchange-page {
   display: grid;
-  justify-items: center;
+  align-items: start;
 }
 
 .exchange-converter-panel {
   display: grid;
-  gap: 28px;
-  width: min(100%, 560px);
-  padding: 18px;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(360px, 1.1fr);
+  align-items: stretch;
+  gap: 18px;
+  width: min(100%, 1040px);
+  padding: 0;
   margin: 0 auto;
-  text-align: center;
+  text-align: left;
 }
 
 .exchange-title {
@@ -1205,12 +1207,14 @@ th {
 .exchange-rate-card {
   position: relative;
   display: grid;
-  justify-items: center;
-  gap: 12px;
+  justify-items: start;
+  align-content: center;
+  gap: 10px;
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--line) 70%, var(--primary));
   border-radius: 8px;
-  padding: 32px 22px 34px;
+  min-height: 318px;
+  padding: 26px;
   background:
     linear-gradient(145deg, color-mix(in srgb, var(--surface-soft) 82%, var(--primary)), transparent 120%),
     linear-gradient(25deg, color-mix(in srgb, var(--primary) 18%, transparent), transparent 52%),
@@ -1222,8 +1226,8 @@ th {
 
 .exchange-refresh-button {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 16px;
+  right: 16px;
   display: grid;
   place-items: center;
   width: 38px;
@@ -1241,7 +1245,7 @@ th {
 
 .exchange-pair {
   color: var(--text);
-  font-size: 1.35rem;
+  font-size: 1.05rem;
   font-weight: 900;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -1257,28 +1261,34 @@ th {
 
 .exchange-rate-meta small {
   color: var(--muted);
-  font-size: 1rem;
+  font-size: 0.92rem;
   font-weight: 700;
   text-transform: none;
 }
 
 .exchange-rate-card strong {
   color: var(--text);
-  font-size: clamp(4rem, 17vw, 6.6rem);
+  font-size: clamp(3.2rem, 6vw, 5rem);
   font-weight: 900;
   line-height: 0.95;
 }
 
 .exchange-rate-card > small {
   color: var(--muted);
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 900;
   text-transform: uppercase;
 }
 
 .exchange-calculator {
   display: grid;
-  gap: 18px;
+  align-content: center;
+  gap: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 22px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
 }
 
 .exchange-mode-switch {
@@ -1293,7 +1303,7 @@ th {
 }
 
 .exchange-mode-switch button {
-  min-height: 48px;
+  min-height: 44px;
   border: 0;
   border-radius: 999px;
   background: transparent;
@@ -1341,28 +1351,28 @@ th {
 
 .exchange-input-wrap input {
   width: 100%;
-  min-height: 62px;
+  min-height: 54px;
   border: 0;
   outline: 0;
   padding: 0;
   background: transparent;
   color: var(--text);
   font: inherit;
-  font-size: 1.35rem;
+  font-size: 1.15rem;
   font-weight: 800;
 }
 
 .exchange-input-wrap small {
   color: var(--muted);
-  font-size: 1.35rem;
+  font-size: 1.12rem;
   font-weight: 900;
 }
 
 .exchange-result {
   display: grid;
   gap: 8px;
-  justify-items: center;
-  padding-top: 18px;
+  justify-items: start;
+  padding-top: 6px;
 }
 
 .exchange-result span {
@@ -1373,13 +1383,13 @@ th {
 
 .exchange-result strong {
   color: var(--primary);
-  font-size: clamp(2.7rem, 9vw, 4.4rem);
+  font-size: clamp(2.1rem, 4vw, 3.2rem);
   font-weight: 900;
   line-height: 1;
 }
 
 .exchange-fee-details {
-  justify-self: center;
+  justify-self: start;
   color: var(--muted);
 }
 
@@ -1406,8 +1416,8 @@ th {
 }
 
 .exchange-fee-details p {
-  max-width: 460px;
-  margin: 10px auto 0;
+  max-width: 520px;
+  margin: 10px 0 0;
   color: var(--muted);
   font-weight: 700;
 }
@@ -1416,6 +1426,7 @@ th {
   display: flex;
   align-items: center;
   justify-content: center;
+  grid-column: 1 / -1;
   flex-wrap: wrap;
   gap: 7px;
   color: var(--muted);
@@ -2371,6 +2382,34 @@ th {
   .exchange-page {
     min-height: calc(100dvh - var(--mobile-header-height) - 28px);
     align-content: start;
+  }
+
+  .exchange-converter-panel {
+    grid-template-columns: 1fr;
+    width: min(100%, 560px);
+    text-align: center;
+  }
+
+  .exchange-rate-card {
+    justify-items: center;
+    min-height: 0;
+  }
+
+  .exchange-calculator {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .exchange-result,
+  .exchange-fee-details {
+    justify-self: center;
+    justify-items: center;
+  }
+
+  .exchange-fee-details p {
+    margin-inline: auto;
   }
 
   .stats-grid,
