@@ -323,7 +323,6 @@ const translations = {
       error: "Der Tetherpreis konnte nicht geladen werden.",
       calculator: {
         eyebrow: "Rechner",
-        shortTitle: "Umrechner",
         title: "Euro und Toman umrechnen",
         mode: "Rechenrichtung",
         eurToToman: "Euro zu Toman",
@@ -759,7 +758,6 @@ const translations = {
       error: "The Tether price could not be loaded.",
       calculator: {
         eyebrow: "Calculator",
-        shortTitle: "Converter",
         title: "Convert Euro and Toman",
         mode: "Calculation direction",
         eurToToman: "Euro to Toman",

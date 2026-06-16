@@ -1184,6 +1184,7 @@ th {
   display: grid;
   gap: 28px;
   width: min(100%, 560px);
+  padding: 18px;
   margin: 0 auto;
   text-align: center;
 }

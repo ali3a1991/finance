@@ -186,10 +186,6 @@ export function TetherPricePanel() {
 
   return (
     <section className="exchange-converter-panel">
-      <h1 className="exchange-title">
-        FyNest <span>|</span> {t("exchange.calculator.shortTitle")}
-      </h1>
-
       <div className="exchange-rate-card">
         <button className="exchange-refresh-button" type="button" onClick={loadPrice} disabled={isLoading} aria-label={t("exchange.refresh")}>
           <RefreshCw size={18} aria-hidden="true" className={isLoading ? "spin-icon" : ""} />
