@@ -172,11 +172,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <strong>{user.username}</strong>
               <small>{accessLabel}</small>
             </div>
-            <div className="sidebar-version" aria-label={t("nav.version")}>
+            {/*<div className="sidebar-version" aria-label={t("nav.version")}>
               <span>{t("nav.version")}</span>
               <strong>v{APP_VERSION}</strong>
               <small>{t("nav.initialVersion")}</small>
-            </div>
+            </div>*/}
           </div>
         ) : null}
       </aside>

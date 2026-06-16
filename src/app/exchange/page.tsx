@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/PageHeader";
 
 export default function ExchangePage() {
   return (
-    <div className="exchange-page">
+    <div className="page-stack">
       <PageHeader page="exchange" />
       
       <TetherPricePanel />

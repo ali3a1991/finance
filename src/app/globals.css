@@ -1175,17 +1175,12 @@ th {
   font-weight: 800;
 }
 
-.exchange-page {
-  display: grid;
-  align-items: start;
-}
-
 .exchange-converter-panel {
   display: grid;
   grid-template-columns: minmax(280px, 0.9fr) minmax(360px, 1.1fr);
   align-items: stretch;
   gap: 18px;
-  width: min(100%, 1040px);
+  width: min(100%, 1120px);
   padding: 0;
   margin: 0 auto;
   text-align: left;
@@ -2380,16 +2375,6 @@ th {
     padding: 18px 18px 32px;
   }
 
-  .main-content:has(.exchange-page) {
-    min-height: calc(100dvh - var(--mobile-header-height));
-    padding-block: 14px;
-  }
-
-  .exchange-page {
-    min-height: calc(100dvh - var(--mobile-header-height) - 28px);
-    align-content: start;
-  }
-
   .exchange-converter-panel {
     grid-template-columns: 1fr;
     width: min(100%, 560px);
@@ -2469,16 +2454,6 @@ th {
   .main-content {
     min-height: calc(100dvh - var(--mobile-header-height));
     padding-inline: 14px;
-  }
-
-  .main-content:has(.exchange-page) {
-    overflow: hidden;
-    padding: 10px 14px 14px;
-  }
-
-  .exchange-page {
-    min-height: calc(100dvh - var(--mobile-header-height) - 24px);
-    align-content: start;
   }
 
   .exchange-converter-panel {
