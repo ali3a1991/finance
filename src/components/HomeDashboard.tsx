@@ -238,6 +238,16 @@ export function HomeDashboard() {
         <div className="gauge-copy">
           <span>{t("dashboard.compass")}</span>
           <h2>{t("dashboard.gaugeTitle")}</h2>
+          <div className="gauge-values">
+            <div className="gauge-value income">
+              <span>{t("dashboard.income")}</span>
+              <strong>{formatCurrency(summary.incomeTotal)}</strong>
+            </div>
+            <div className="gauge-value outgoing">
+              <span>{t("dashboard.payments")}</span>
+              <strong>{formatCurrency(monthTotal)}</strong>
+            </div>
+          </div>
         </div>
         <div className="gauge-wrap">
           <div className="gauge-arc">
@@ -263,16 +273,6 @@ export function HomeDashboard() {
               <strong>{formatCurrency(summary.freeAmount)}</strong>
               <small>{t("dashboard.afterFixedPayments")}</small>
             </div>
-          </div>
-        </div>
-        <div className="gauge-values">
-          <div className="gauge-value income">
-            <span>{t("dashboard.income")}</span>
-            <strong>{formatCurrency(summary.incomeTotal)}</strong>
-          </div>
-          <div className="gauge-value outgoing">
-            <span>{t("dashboard.payments")}</span>
-            <strong>{formatCurrency(monthTotal)}</strong>
           </div>
         </div>
       </section>

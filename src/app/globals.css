@@ -669,7 +669,7 @@ th {
 
 .cash-gauge-panel {
   display: grid;
-  grid-template-columns: minmax(240px, 1fr) minmax(260px, 360px) minmax(180px, 0.7fr);
+  grid-template-columns: minmax(280px, 0.92fr) minmax(320px, 1.08fr);
   align-items: center;
   gap: 24px;
   border: 1px solid var(--line);
@@ -681,7 +681,9 @@ th {
 
 .gauge-copy {
   display: grid;
+  justify-items: start;
   gap: 8px;
+  text-align: left;
 }
 
 .gauge-copy span {
@@ -856,7 +858,10 @@ th {
 
 .gauge-values {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+  width: min(100%, 520px);
+  margin-top: 18px;
 }
 
 .gauge-value {
@@ -2462,12 +2467,19 @@ th {
 
   .stats-grid,
   .card-grid,
-  .cash-gauge-panel,
   .investment-summary-panel,
   .two-column,
   .monthly-list,
   .settings-panel {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cash-gauge-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .gauge-values {
+    width: 100%;
   }
 
   .investment-summary-heading {
@@ -2618,13 +2630,9 @@ th {
     font-size: 1.8rem;
   }
 
-  .gauge-wrap {
-    order: 2;
-  }
-
   .gauge-values {
-    order: 3;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
   }
 
   .gauge-value {
