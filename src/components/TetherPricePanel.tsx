@@ -199,9 +199,6 @@ export function TetherPricePanel() {
         <small>{t("exchange.toman")} / USDT</small>
       </div>
 
-      {isLoading && !priceData ? <p className="muted-text">{t("exchange.loading")}</p> : null}
-      {error ? <p className="empty-table-text">{error}</p> : null}
-
       <div className="exchange-calculator">
         <div className="exchange-mode-switch" role="group" aria-label={t("exchange.calculator.mode")}>
           <button
@@ -251,6 +248,9 @@ export function TetherPricePanel() {
           </p>
         </details>
       </div>
+
+      {isLoading && !priceData ? <p className="muted-text exchange-status">{t("exchange.loading")}</p> : null}
+      {error ? <p className="empty-table-text exchange-status">{error}</p> : null}
 
       <div className="exchange-source">
         <ShieldCheck size={16} aria-hidden="true" />

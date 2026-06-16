@@ -1433,6 +1433,12 @@ th {
   font-weight: 800;
 }
 
+.exchange-status {
+  grid-column: 1 / -1;
+  margin: 0;
+  text-align: center;
+}
+
 .savings-summary-panel {
   grid-template-columns: minmax(220px, 0.8fr) minmax(180px, 0.7fr);
 }
