@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState, useTransition } from "react";
 import { Pencil, PlusCircle, Save, Trash2, TrendingUp, X } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -48,6 +48,7 @@ export function EinkommenManager() {
   const { canWrite } = useAuth();
   const { t } = useLanguage();
   const [activeType, setActiveType] = useState<"recurring" | "oneTime">("recurring");
+  const [visibleType, setVisibleType] = useState<"recurring" | "oneTime">("recurring");
   const [editForm, setEditForm] = useState<IncomeForm>(emptyForm);
   const [editingIncomeId, setEditingIncomeId] = useState<string | null>(null);
   const [form, setForm] = useState<IncomeForm>(emptyForm);
@@ -56,6 +57,7 @@ export function EinkommenManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [operationLabel, setOperationLabel] = useState("");
+  const [, startTabTransition] = useTransition();
 
   useEffect(() => {
     async function loadIncomes() {
@@ -150,7 +152,14 @@ export function EinkommenManager() {
     }
   }
 
-  const visibleIncomes = incomes.filter((income) => (activeType === "recurring" ? income.recurring : !income.recurring));
+  function changeActiveType(type: "recurring" | "oneTime") {
+    setActiveType(type);
+    startTabTransition(() => {
+      setVisibleType(type);
+    });
+  }
+
+  const visibleIncomes = incomes.filter((income) => (visibleType === "recurring" ? income.recurring : !income.recurring));
   const visibleIncomeTotal = visibleIncomes.reduce((sum, income) => sum + income.amount, 0);
 
   return (
@@ -171,14 +180,14 @@ export function EinkommenManager() {
         <button
           className={`tab-link income-tab-link ${activeType === "recurring" ? "active" : ""}`}
           type="button"
-          onClick={() => setActiveType("recurring")}
+          onClick={() => changeActiveType("recurring")}
         >
           {t("incomes.recurringTab")}
         </button>
         <button
           className={`tab-link income-tab-link ${activeType === "oneTime" ? "active" : ""}`}
           type="button"
-          onClick={() => setActiveType("oneTime")}
+          onClick={() => changeActiveType("oneTime")}
         >
           {t("incomes.oneTimeTab")}
         </button>
