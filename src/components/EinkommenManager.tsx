@@ -164,7 +164,10 @@ export function EinkommenManager() {
         </div>
       ) : null}
 
-      <nav className="tab-row income-tab-row" aria-label={t("incomes.ariaTabs")}>
+      <nav
+        className={`tab-row income-tab-row ${activeType === "recurring" ? "is-left" : "is-right"}`}
+        aria-label={t("incomes.ariaTabs")}
+      >
         <button
           className={`tab-link income-tab-link ${activeType === "recurring" ? "active" : ""}`}
           type="button"

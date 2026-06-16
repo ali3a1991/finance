@@ -200,7 +200,11 @@ export function TetherPricePanel() {
       </div>
 
       <div className="exchange-calculator">
-        <div className="exchange-mode-switch" role="group" aria-label={t("exchange.calculator.mode")}>
+        <div
+          className={`exchange-mode-switch ${calculatorMode === "eur-to-toman" ? "is-left" : "is-right"}`}
+          role="group"
+          aria-label={t("exchange.calculator.mode")}
+        >
           <button
             type="button"
             className={calculatorMode === "eur-to-toman" ? "active" : ""}

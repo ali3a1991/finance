@@ -555,9 +555,11 @@ th {
 }
 
 .income-tab-row {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 4px;
+  overflow: hidden;
   width: min(100%, 520px);
   border: 1px solid color-mix(in srgb, var(--line) 75%, var(--muted));
   border-radius: 999px;
@@ -566,7 +568,30 @@ th {
   box-shadow: inset 0 1px 0 color-mix(in srgb, #ffffff 10%, transparent);
 }
 
+.income-tab-row::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  left: 5px;
+  z-index: 0;
+  width: calc((100% - 14px) / 2);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 92%, #ffffff 8%);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--primary) 42%, transparent),
+    0 10px 28px color-mix(in srgb, var(--primary) 28%, transparent);
+  transform: translateX(0);
+  transition: transform 220ms ease;
+}
+
+.income-tab-row.is-right::before {
+  transform: translateX(calc(100% + 4px));
+}
+
 .income-tab-link {
+  position: relative;
+  z-index: 1;
   justify-content: center;
   min-height: 48px;
   border: 0;
@@ -579,11 +604,7 @@ th {
 }
 
 .income-tab-link.active {
-  background: color-mix(in srgb, var(--primary) 92%, #ffffff 8%);
   color: var(--on-primary);
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--primary) 42%, transparent),
-    0 10px 28px color-mix(in srgb, var(--primary) 28%, transparent);
 }
 
 .empty-table-text {
@@ -1287,9 +1308,11 @@ th {
 }
 
 .exchange-mode-switch {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 4px;
+  overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--line) 75%, var(--muted));
   border-radius: 999px;
   padding: 5px;
@@ -1297,7 +1320,30 @@ th {
   box-shadow: inset 0 1px 0 color-mix(in srgb, #ffffff 10%, transparent);
 }
 
+.exchange-mode-switch::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  left: 5px;
+  z-index: 0;
+  width: calc((100% - 14px) / 2);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 92%, #ffffff 8%);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--primary) 42%, transparent),
+    0 10px 28px color-mix(in srgb, var(--primary) 28%, transparent);
+  transform: translateX(0);
+  transition: transform 220ms ease;
+}
+
+.exchange-mode-switch.is-right::before {
+  transform: translateX(calc(100% + 4px));
+}
+
 .exchange-mode-switch button {
+  position: relative;
+  z-index: 1;
   min-height: 44px;
   border: 0;
   border-radius: 999px;
@@ -1309,11 +1355,7 @@ th {
 }
 
 .exchange-mode-switch button.active {
-  background: color-mix(in srgb, var(--primary) 92%, #ffffff 8%);
   color: var(--on-primary);
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--primary) 42%, transparent),
-    0 10px 28px color-mix(in srgb, var(--primary) 28%, transparent);
 }
 
 .exchange-input-label {
@@ -1432,6 +1474,13 @@ th {
   grid-column: 1 / -1;
   margin: 0;
   text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .income-tab-row::before,
+  .exchange-mode-switch::before {
+    transition: none;
+  }
 }
 
 .savings-summary-panel {
