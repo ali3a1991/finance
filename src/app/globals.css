@@ -67,7 +67,7 @@ html {
 }
 
 body {
-  min-height: 100vh;
+  min-height: 100dvh;
   margin: 0;
   background: var(--bg);
   color: var(--text);
@@ -138,7 +138,7 @@ button:disabled {
 .app-shell {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .sidebar {
@@ -147,7 +147,7 @@ button:disabled {
   display: grid;
   grid-template-rows: auto 1fr auto;
   gap: 12px;
-  height: 100vh;
+  height: 100dvh;
   padding: 24px 18px;
   background: var(--sidebar-bg);
   color: var(--sidebar-text);
@@ -2323,7 +2323,9 @@ th {
   }
 
   .app-shell {
-    display: block;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
     min-height: 100dvh;
   }
 
@@ -2386,7 +2388,7 @@ th {
     bottom: 0;
     left: 0;
     width: min(82vw, 320px);
-    height: 100vh;
+    height: 100dvh;
     padding: 18px;
     box-shadow: 22px 0 48px rgba(16, 24, 39, 0.2);
     transform: translateX(-105%);
@@ -2426,7 +2428,7 @@ th {
   }
 
   .main-content {
-    min-height: calc(100dvh - var(--mobile-header-height));
+    min-height: 0;
     padding: 18px 18px 32px;
   }
 
@@ -2507,7 +2509,7 @@ th {
   }
 
   .main-content {
-    min-height: calc(100dvh - var(--mobile-header-height));
+    min-height: 0;
     padding-inline: 14px;
   }
 
