@@ -858,7 +858,7 @@ th {
 
 .gauge-values {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
   width: min(100%, 520px);
   margin-top: 18px;
@@ -875,6 +875,11 @@ th {
 .gauge-value.income {
   border-color: rgba(17, 107, 95, 0.28);
   background: rgba(17, 107, 95, 0.08);
+}
+
+.gauge-value.carryover {
+  border-color: color-mix(in srgb, var(--accent) 34%, var(--line));
+  background: color-mix(in srgb, var(--accent-soft) 60%, var(--surface));
 }
 
 .gauge-value.outgoing {
@@ -2631,7 +2636,7 @@ th {
   }
 
   .gauge-values {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
     width: 100%;
   }
 

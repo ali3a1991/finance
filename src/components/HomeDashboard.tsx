@@ -28,6 +28,7 @@ type DashboardSummary = {
   loanCount: number;
   loanTotal: number;
   monthlyExpenseTotal: number;
+  previousMonthBalance: number;
   savingsTotal: number;
 };
 
@@ -49,6 +50,7 @@ const emptySummary: DashboardSummary = {
   loanCount: 0,
   loanTotal: 0,
   monthlyExpenseTotal: 0,
+  previousMonthBalance: 0,
   savingsTotal: 0
 };
 
@@ -134,7 +136,8 @@ export function HomeDashboard() {
 
   const paidTotal = payments.reduce((sum, payment) => sum + payment.paidAmount, 0);
   const monthTotal = payments.reduce((sum, payment) => sum + payment.amount, 0);
-  const pressureRatio = summary.incomeTotal > 0 ? Math.min(monthTotal / summary.incomeTotal, 1.35) : 0;
+  const availableTotal = summary.incomeTotal + summary.previousMonthBalance;
+  const pressureRatio = availableTotal > 0 ? Math.min(monthTotal / availableTotal, 1.35) : 0;
   const needleRotation = -90 + Math.min(pressureRatio, 1) * 180;
   const gaugeStatus =
     pressureRatio <= 0.55
@@ -243,6 +246,10 @@ export function HomeDashboard() {
               <span>{t("dashboard.income")}</span>
               <strong>{formatCurrency(summary.incomeTotal)}</strong>
             </div>
+            <div className="gauge-value carryover">
+              <span>{t("dashboard.previousBalance")}</span>
+              <strong>{formatCurrency(summary.previousMonthBalance)}</strong>
+            </div>
             <div className="gauge-value outgoing">
               <span>{t("dashboard.payments")}</span>
               <strong>{formatCurrency(monthTotal)}</strong>
@@ -266,7 +273,7 @@ export function HomeDashboard() {
           <div className="gauge-status">
             <strong>{gaugeStatus}</strong>
             <span>
-              {summary.incomeTotal > 0 ? `${Math.round(pressureRatio * 100)}% ${t("dashboard.used")}` : t("dashboard.noIncome")}
+              {availableTotal > 0 ? `${Math.round(pressureRatio * 100)}% ${t("dashboard.used")}` : t("dashboard.noIncome")}
             </span>
             <div className="gauge-free-amount">
               <span>{t("dashboard.freeAmount")}</span>

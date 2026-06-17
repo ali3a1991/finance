@@ -1376,6 +1376,44 @@ export function buildMonthlyPayments(db: FinanceDb, date = new Date()): MonthlyP
   );
 }
 
+function getMonthlyIncomeTotal(db: FinanceDb, date = new Date()) {
+  return (db.incomes ?? [])
+    .filter((income) => {
+      if (income.recurring) {
+        return true;
+      }
+
+      const incomeDate = new Date(`${income.date}T00:00:00`);
+      return incomeDate.getFullYear() === date.getFullYear() && incomeDate.getMonth() === date.getMonth();
+    })
+    .reduce((sum, income) => sum + income.amount, 0);
+}
+
+function getMonthlyExpenseTotal(db: FinanceDb, date = new Date()) {
+  return db.expenses
+    .filter((expense) => {
+      if (expense.recurring) {
+        return true;
+      }
+
+      const expenseDate = new Date(`${expense.date}T00:00:00`);
+      return expenseDate.getFullYear() === date.getFullYear() && expenseDate.getMonth() === date.getMonth();
+    })
+    .reduce((sum, expense) => sum + expense.amount, 0);
+}
+
+function getPreviousMonthDate(date = new Date()) {
+  return new Date(date.getFullYear(), date.getMonth() - 1, 1);
+}
+
+function getMonthlyBalanceBeforeCarryOver(db: FinanceDb, date = new Date()) {
+  const monthlyPayments = buildMonthlyPayments(db, date);
+  const incomeTotal = getMonthlyIncomeTotal(db, date);
+  const committed = monthlyPayments.reduce((sum, payment) => sum + payment.amount, 0);
+
+  return incomeTotal - committed;
+}
+
 export async function getDashboardData(ownerId: string, monthKey?: string | null) {
   const db = await readFinanceDb(ownerId);
   const selectedDate = getDateFromMonthKey(monthKey);
@@ -1399,26 +1437,9 @@ export async function getDashboardData(ownerId: string, monthKey?: string | null
   const investmentResult = investmentSummary.currentTotal - investmentSummary.investedTotal;
   const investmentReturnRate =
     investmentSummary.investedTotal > 0 ? (investmentResult / investmentSummary.investedTotal) * 100 : 0;
-  const incomeTotal = (db.incomes ?? [])
-    .filter((income) => {
-      if (income.recurring) {
-        return true;
-      }
-
-      const incomeDate = new Date(`${income.date}T00:00:00`);
-      return incomeDate.getFullYear() === selectedDate.getFullYear() && incomeDate.getMonth() === selectedDate.getMonth();
-    })
-    .reduce((sum, income) => sum + income.amount, 0);
-  const monthlyExpenseTotal = db.expenses
-    .filter((expense) => {
-      if (expense.recurring) {
-        return true;
-      }
-
-      const expenseDate = new Date(`${expense.date}T00:00:00`);
-      return expenseDate.getFullYear() === selectedDate.getFullYear() && expenseDate.getMonth() === selectedDate.getMonth();
-    })
-    .reduce((sum, expense) => sum + expense.amount, 0);
+  const incomeTotal = getMonthlyIncomeTotal(db, selectedDate);
+  const previousMonthBalance = getMonthlyBalanceBeforeCarryOver(db, getPreviousMonthDate(selectedDate));
+  const monthlyExpenseTotal = getMonthlyExpenseTotal(db, selectedDate);
   const loanTotal = db.loans.reduce((sum, loan) => sum + loan.balance, 0);
   const savingsTotal = (db.savingsGoals ?? []).reduce((sum, goal) => sum + goal.currentAmount, 0);
   const insuranceTotal = monthlyPayments
@@ -1430,7 +1451,7 @@ export async function getDashboardData(ownerId: string, monthKey?: string | null
     month: getMonthKey(selectedDate),
     monthlyPayments,
     summary: {
-      freeAmount: incomeTotal - committed,
+      freeAmount: incomeTotal + previousMonthBalance - committed,
       incomeTotal,
       insuranceTotal,
       investmentCurrentTotal: investmentSummary.currentTotal,
@@ -1441,6 +1462,7 @@ export async function getDashboardData(ownerId: string, monthKey?: string | null
       loanCount: db.loans.length,
       loanTotal,
       monthlyExpenseTotal,
+      previousMonthBalance,
       savingsTotal
     }
   };
