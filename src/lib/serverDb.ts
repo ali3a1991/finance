@@ -1416,12 +1416,77 @@ function getPreviousMonthDate(date = new Date()) {
   return new Date(date.getFullYear(), date.getMonth() - 1, 1);
 }
 
-function getMonthlyBalanceBeforeCarryOver(db: FinanceDb, date = new Date()) {
-  const monthlyPayments = buildMonthlyPayments(db, date);
-  const incomeTotal = getMonthlyIncomeTotal(db, date);
-  const committed = monthlyPayments.reduce((sum, payment) => sum + payment.amount, 0);
+function getMonthIndexFromKey(monthKey: string) {
+  const [year, month] = monthKey.split("-").map(Number);
+  return year * 12 + month - 1;
+}
 
-  return incomeTotal - committed;
+function getEarliestCarryOverMonthIndex(
+  db: FinanceDb,
+  carryOvers: Array<{ month: string }>
+) {
+  const monthIndexes: number[] = [];
+  const addDate = (value: string | null | undefined) => {
+    if (!value) {
+      return;
+    }
+
+    const date = new Date(`${value}T00:00:00`);
+
+    if (!Number.isNaN(date.getTime())) {
+      monthIndexes.push(getMonthIndex(date));
+    }
+  };
+
+  (db.incomes ?? []).forEach((income) => addDate(income.date));
+  (db.expenses ?? []).forEach((expense) => addDate(expense.date));
+  (db.loans ?? []).forEach((loan) => addDate(loan.nextPayment));
+  (db.insurances ?? []).forEach((insurance) => addDate(getFirstInsuranceDebitDate(insurance) ?? insurance.startDate));
+  (db.generalContracts ?? []).forEach((contract) => addDate(contract.startDate));
+  carryOvers.forEach((carryOver) => monthIndexes.push(getMonthIndexFromKey(carryOver.month)));
+
+  return monthIndexes.length > 0 ? Math.min(...monthIndexes) : getMonthIndex(new Date());
+}
+
+function getManualCarryOver(carryOvers: Array<{ amount: number; month: string }>, monthKey: string) {
+  return carryOvers.find((carryOver) => carryOver.month === monthKey);
+}
+
+function getPreviousMonthBalanceAmount(
+  db: FinanceDb,
+  carryOvers: Array<{ amount: number; month: string }>,
+  selectedDate = new Date()
+) {
+  const selectedMonth = getMonthKey(selectedDate);
+  const selectedManualCarryOver = getManualCarryOver(carryOvers, selectedMonth);
+
+  if (selectedManualCarryOver) {
+    return selectedManualCarryOver.amount;
+  }
+
+  const earliestMonthIndex = getEarliestCarryOverMonthIndex(db, carryOvers);
+  const freeAmountMemo = new Map<string, number>();
+
+  function getFreeAmountForMonth(date: Date): number {
+    const monthKey = getMonthKey(date);
+    const cachedAmount = freeAmountMemo.get(monthKey);
+
+    if (cachedAmount !== undefined) {
+      return cachedAmount;
+    }
+
+    const manualCarryOver = getManualCarryOver(carryOvers, monthKey);
+    const monthIndex = getMonthIndex(date);
+    const previousBalance =
+      manualCarryOver?.amount ?? (monthIndex <= earliestMonthIndex ? 0 : getFreeAmountForMonth(getPreviousMonthDate(date)));
+    const committed = buildMonthlyPayments(db, date).reduce((sum, payment) => sum + payment.amount, 0);
+    const freeAmount = getMonthlyIncomeTotal(db, date) + previousBalance - committed;
+
+    freeAmountMemo.set(monthKey, freeAmount);
+    return freeAmount;
+  }
+
+  return getFreeAmountForMonth(getPreviousMonthDate(selectedDate));
 }
 
 export async function getPreviousMonthBalance(ownerId: string, monthKey?: string | null) {
@@ -1429,17 +1494,11 @@ export async function getPreviousMonthBalance(ownerId: string, monthKey?: string
   const db = await readFinanceDb(ownerId);
   const selectedDate = getDateFromMonthKey(monthKey);
   const selectedMonth = getMonthKey(selectedDate);
-  const carryOver = await prisma.monthlyCarryOver.findUnique({
-    where: {
-      ownerId_month: {
-        month: selectedMonth,
-        ownerId
-      }
-    }
-  });
+  const carryOvers = await prisma.monthlyCarryOver.findMany({ where: { ownerId } });
+  const carryOver = getManualCarryOver(carryOvers, selectedMonth);
 
   return {
-    amount: carryOver?.amount ?? getMonthlyBalanceBeforeCarryOver(db, getPreviousMonthDate(selectedDate)),
+    amount: getPreviousMonthBalanceAmount(db, carryOvers, selectedDate),
     isManual: Boolean(carryOver),
     month: selectedMonth
   };
