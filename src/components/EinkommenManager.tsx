@@ -67,12 +67,47 @@ function formatMonthLabel(monthKey: string, language: "de" | "en") {
   );
 }
 
-function toAmountInputValue(value: number) {
-  return String(value).replace(".", ",");
+function toAmountInputValue(value: number, language: "de" | "en") {
+  return new Intl.NumberFormat(language === "de" ? "de-DE" : "en-US", {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 0
+  }).format(value);
 }
 
-function parseAmountInputValue(value: string) {
-  const amount = Number(value.replace(",", "."));
+function groupIntegerDigits(value: string, language: "de" | "en") {
+  const digits = value.replace(/\D/g, "");
+
+  if (!digits) {
+    return "";
+  }
+
+  return new Intl.NumberFormat(language === "de" ? "de-DE" : "en-US", { maximumFractionDigits: 0 }).format(
+    Number(digits)
+  );
+}
+
+function formatAmountInputValue(value: string, language: "de" | "en") {
+  const decimalSeparator = language === "de" ? "," : ".";
+  const groupSeparator = language === "de" ? "." : ",";
+  const isNegative = value.trim().startsWith("-");
+  const sign = isNegative ? "-" : "";
+  const cleanedValue = value.replace(/\s/g, "").replaceAll(groupSeparator, "").replace(/[^\d,.]/g, "");
+  const hasDecimal = cleanedValue.includes(decimalSeparator);
+  const [rawIntegerPart, ...rawDecimalParts] = cleanedValue.split(decimalSeparator);
+  const integerPart = groupIntegerDigits(rawIntegerPart, language) || (hasDecimal ? "0" : "");
+  const decimalPart = rawDecimalParts.join("").replace(/\D/g, "").slice(0, 2);
+
+  if (!integerPart && !hasDecimal) {
+    return sign;
+  }
+
+  return `${sign}${integerPart}${hasDecimal ? `${decimalSeparator}${decimalPart}` : ""}`;
+}
+
+function parseAmountInputValue(value: string, language: "de" | "en") {
+  const groupSeparator = language === "de" ? "." : ",";
+  const decimalSeparator = language === "de" ? "," : ".";
+  const amount = Number(value.replaceAll(groupSeparator, "").replace(decimalSeparator, "."));
   return Number.isNaN(amount) ? 0 : amount;
 }
 
@@ -105,13 +140,13 @@ export function EinkommenManager() {
       );
       setIncomes(body.incomes);
       setPreviousBalance(body.previousMonthBalance);
-      setPreviousBalanceDraft(toAmountInputValue(body.previousMonthBalance.amount));
+      setPreviousBalanceDraft(toAmountInputValue(body.previousMonthBalance.amount, language));
       setSelectedMonth(body.previousMonthBalance.month);
       setIsLoading(false);
     }
 
     loadIncomes().catch(() => setIsLoading(false));
-  }, [selectedMonth]);
+  }, [language, selectedMonth]);
 
   function updateForm(field: keyof IncomeForm, value: string | boolean) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -197,9 +232,7 @@ export function EinkommenManager() {
   }
 
   function handlePreviousBalanceChange(value: string) {
-    if (/^-?\d*([,.]\d{0,2})?$/.test(value)) {
-      setPreviousBalanceDraft(value);
-    }
+    setPreviousBalanceDraft(formatAmountInputValue(value, language));
   }
 
   async function submitPreviousBalance() {
@@ -208,14 +241,14 @@ export function EinkommenManager() {
     try {
       const body = await requestJson<{ previousMonthBalance: PreviousMonthBalance }>("/api/incomes", {
         body: JSON.stringify({
-          amount: parseAmountInputValue(previousBalanceDraft),
+          amount: parseAmountInputValue(previousBalanceDraft, language),
           month: selectedMonth
         }),
         method: "PATCH"
       });
 
       setPreviousBalance(body.previousMonthBalance);
-      setPreviousBalanceDraft(toAmountInputValue(body.previousMonthBalance.amount));
+      setPreviousBalanceDraft(toAmountInputValue(body.previousMonthBalance.amount, language));
       setSelectedMonth(body.previousMonthBalance.month);
     } finally {
       setOperationLabel("");
@@ -231,7 +264,7 @@ export function EinkommenManager() {
 
   const visibleIncomes = incomes.filter((income) => (visibleType === "recurring" ? income.recurring : !income.recurring));
   const visibleIncomeTotal = visibleIncomes.reduce((sum, income) => sum + income.amount, 0);
-  const previousBalanceAmount = parseAmountInputValue(previousBalanceDraft);
+  const previousBalanceAmount = parseAmountInputValue(previousBalanceDraft, language);
   const hasPreviousBalanceChange = Math.abs(previousBalanceAmount - previousBalance.amount) > 0.009;
   const isCurrentMonth = selectedMonth === getMonthKey();
 
