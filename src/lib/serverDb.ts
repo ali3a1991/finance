@@ -252,11 +252,21 @@ async function ensureSavingsTransactionTable() {
   );
 }
 
+async function ensureMonthlyCarryOverTable() {
+  await prisma.$executeRawUnsafe(
+    'CREATE TABLE IF NOT EXISTS "MonthlyCarryOver" ("id" TEXT PRIMARY KEY, "ownerId" TEXT, "month" TEXT NOT NULL, "amount" DOUBLE PRECISION NOT NULL, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP)'
+  );
+  await prisma.$executeRawUnsafe(
+    'CREATE UNIQUE INDEX IF NOT EXISTS "MonthlyCarryOver_ownerId_month_key" ON "MonthlyCarryOver" ("ownerId", "month")'
+  );
+}
+
 export async function readFinanceDb(ownerId: string): Promise<FinanceDb> {
   await ensureLoanNoteColumn();
   await ensurePaymentIntervalColumns();
   await ensureFinanceNoteColumns();
   await ensureSavingsGoalTable();
+  await ensureMonthlyCarryOverTable();
 
   const [loans, insurances, generalContracts, incomes, expenses, investments, savingsGoals, monthlyBudgets, paymentConfirmations] =
     await Promise.all([
@@ -1414,6 +1424,54 @@ function getMonthlyBalanceBeforeCarryOver(db: FinanceDb, date = new Date()) {
   return incomeTotal - committed;
 }
 
+export async function getPreviousMonthBalance(ownerId: string, monthKey?: string | null) {
+  await ensureMonthlyCarryOverTable();
+  const db = await readFinanceDb(ownerId);
+  const selectedDate = getDateFromMonthKey(monthKey);
+  const selectedMonth = getMonthKey(selectedDate);
+  const carryOver = await prisma.monthlyCarryOver.findUnique({
+    where: {
+      ownerId_month: {
+        month: selectedMonth,
+        ownerId
+      }
+    }
+  });
+
+  return {
+    amount: carryOver?.amount ?? getMonthlyBalanceBeforeCarryOver(db, getPreviousMonthDate(selectedDate)),
+    isManual: Boolean(carryOver),
+    month: selectedMonth
+  };
+}
+
+export async function updatePreviousMonthBalance(ownerId: string, monthKey: string, amount: number) {
+  await ensureMonthlyCarryOverTable();
+  const selectedDate = getDateFromMonthKey(monthKey);
+  const selectedMonth = getMonthKey(selectedDate);
+  const normalizedAmount = Number.isFinite(amount) ? amount : 0;
+  const carryOver = await prisma.monthlyCarryOver.upsert({
+    create: {
+      amount: normalizedAmount,
+      month: selectedMonth,
+      ownerId
+    },
+    update: { amount: normalizedAmount },
+    where: {
+      ownerId_month: {
+        month: selectedMonth,
+        ownerId
+      }
+    }
+  });
+
+  return {
+    amount: carryOver.amount,
+    isManual: true,
+    month: carryOver.month
+  };
+}
+
 export async function getDashboardData(ownerId: string, monthKey?: string | null) {
   const db = await readFinanceDb(ownerId);
   const selectedDate = getDateFromMonthKey(monthKey);
@@ -1438,7 +1496,7 @@ export async function getDashboardData(ownerId: string, monthKey?: string | null
   const investmentReturnRate =
     investmentSummary.investedTotal > 0 ? (investmentResult / investmentSummary.investedTotal) * 100 : 0;
   const incomeTotal = getMonthlyIncomeTotal(db, selectedDate);
-  const previousMonthBalance = getMonthlyBalanceBeforeCarryOver(db, getPreviousMonthDate(selectedDate));
+  const previousMonthBalance = (await getPreviousMonthBalance(ownerId, getMonthKey(selectedDate))).amount;
   const monthlyExpenseTotal = getMonthlyExpenseTotal(db, selectedDate);
   const loanTotal = db.loans.reduce((sum, loan) => sum + loan.balance, 0);
   const savingsTotal = (db.savingsGoals ?? []).reduce((sum, goal) => sum + goal.currentAmount, 0);

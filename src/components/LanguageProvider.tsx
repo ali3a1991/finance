@@ -268,7 +268,10 @@ const translations = {
       deleteLabel: "Einnahme loschen",
       deleteTitle: "Einnahme wirklich loschen?",
       recurringMonthly: "Feste monatliche Einnahme",
-      entryDay: "Eingangstag"
+      entryDay: "Eingangstag",
+      previousBalance: "Vormonat",
+      previousBalanceAutomatic: "Automatisch aus dem Vormonat berechnet",
+      previousBalanceManual: "Manuell festgelegt"
     },
     expenses: {
       add: "Neue Ausgabe",
@@ -704,7 +707,10 @@ const translations = {
       deleteLabel: "Delete income",
       deleteTitle: "Delete this income?",
       recurringMonthly: "Fixed monthly income",
-      entryDay: "Entry day"
+      entryDay: "Entry day",
+      previousBalance: "Previous month",
+      previousBalanceAutomatic: "Calculated automatically from the previous month",
+      previousBalanceManual: "Set manually"
     },
     expenses: {
       add: "New expense",

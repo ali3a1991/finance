@@ -134,6 +134,17 @@ model MonthlyBudget {
   spent    Float
 }
 
+model MonthlyCarryOver {
+  id        String   @id @default(cuid())
+  ownerId   String?
+  month     String
+  amount    Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([ownerId, month])
+}
+
 model PaymentConfirmation {
   id         String @id
   ownerId    String?

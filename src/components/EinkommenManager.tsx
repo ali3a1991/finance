@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState, useTransition } from "react";
-import { Pencil, PlusCircle, Save, Trash2, TrendingUp, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil, PlusCircle, Save, Trash2, TrendingUp, X } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
 import { formatCurrency, formatDate } from "@/lib/formatting";
@@ -16,6 +16,12 @@ type IncomeForm = {
   recurring: boolean;
   entryDay: string;
   note: string;
+};
+
+type PreviousMonthBalance = {
+  amount: number;
+  isManual: boolean;
+  month: string;
 };
 
 const emptyForm: IncomeForm = {
@@ -44,9 +50,35 @@ function isSavingsGeneratedIncome(income: Income) {
   return income.id.startsWith("income-saving-");
 }
 
+function getMonthKey(date = new Date()) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function addMonths(monthKey: string, amount: number) {
+  const [year, month] = monthKey.split("-").map(Number);
+  const date = new Date(year, month - 1 + amount, 1);
+  return getMonthKey(date);
+}
+
+function formatMonthLabel(monthKey: string, language: "de" | "en") {
+  const [year, month] = monthKey.split("-").map(Number);
+  return new Intl.DateTimeFormat(language === "de" ? "de-DE" : "en-US", { month: "long", year: "numeric" }).format(
+    new Date(year, month - 1, 1)
+  );
+}
+
+function toAmountInputValue(value: number) {
+  return String(value).replace(".", ",");
+}
+
+function parseAmountInputValue(value: string) {
+  const amount = Number(value.replace(",", "."));
+  return Number.isNaN(amount) ? 0 : amount;
+}
+
 export function EinkommenManager() {
   const { canWrite } = useAuth();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const [activeType, setActiveType] = useState<"recurring" | "oneTime">("recurring");
   const [visibleType, setVisibleType] = useState<"recurring" | "oneTime">("recurring");
   const [editForm, setEditForm] = useState<IncomeForm>(emptyForm);
@@ -57,17 +89,29 @@ export function EinkommenManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [operationLabel, setOperationLabel] = useState("");
+  const [previousBalance, setPreviousBalance] = useState<PreviousMonthBalance>({
+    amount: 0,
+    isManual: false,
+    month: getMonthKey()
+  });
+  const [previousBalanceDraft, setPreviousBalanceDraft] = useState("0");
+  const [selectedMonth, setSelectedMonth] = useState(getMonthKey());
   const [, startTabTransition] = useTransition();
 
   useEffect(() => {
     async function loadIncomes() {
-      const body = await requestJson<{ incomes: Income[] }>("/api/incomes");
+      const body = await requestJson<{ incomes: Income[]; previousMonthBalance: PreviousMonthBalance }>(
+        `/api/incomes?month=${selectedMonth}`
+      );
       setIncomes(body.incomes);
+      setPreviousBalance(body.previousMonthBalance);
+      setPreviousBalanceDraft(toAmountInputValue(body.previousMonthBalance.amount));
+      setSelectedMonth(body.previousMonthBalance.month);
       setIsLoading(false);
     }
 
     loadIncomes().catch(() => setIsLoading(false));
-  }, []);
+  }, [selectedMonth]);
 
   function updateForm(field: keyof IncomeForm, value: string | boolean) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -152,6 +196,32 @@ export function EinkommenManager() {
     }
   }
 
+  function handlePreviousBalanceChange(value: string) {
+    if (/^-?\d*([,.]\d{0,2})?$/.test(value)) {
+      setPreviousBalanceDraft(value);
+    }
+  }
+
+  async function submitPreviousBalance() {
+    setOperationLabel("save-previous-balance");
+
+    try {
+      const body = await requestJson<{ previousMonthBalance: PreviousMonthBalance }>("/api/incomes", {
+        body: JSON.stringify({
+          amount: parseAmountInputValue(previousBalanceDraft),
+          month: selectedMonth
+        }),
+        method: "PATCH"
+      });
+
+      setPreviousBalance(body.previousMonthBalance);
+      setPreviousBalanceDraft(toAmountInputValue(body.previousMonthBalance.amount));
+      setSelectedMonth(body.previousMonthBalance.month);
+    } finally {
+      setOperationLabel("");
+    }
+  }
+
   function changeActiveType(type: "recurring" | "oneTime") {
     setActiveType(type);
     startTabTransition(() => {
@@ -161,6 +231,8 @@ export function EinkommenManager() {
 
   const visibleIncomes = incomes.filter((income) => (visibleType === "recurring" ? income.recurring : !income.recurring));
   const visibleIncomeTotal = visibleIncomes.reduce((sum, income) => sum + income.amount, 0);
+  const previousBalanceAmount = parseAmountInputValue(previousBalanceDraft);
+  const hasPreviousBalanceChange = Math.abs(previousBalanceAmount - previousBalance.amount) > 0.009;
 
   return (
     <>
@@ -172,6 +244,58 @@ export function EinkommenManager() {
           </button>
         </div>
       ) : null}
+
+      <section className="income-carryover-panel" aria-label={t("incomes.previousBalance")}>
+        <div className="income-carryover-heading">
+          <span>{t("incomes.previousBalance")}</span>
+          <strong>{formatMonthLabel(selectedMonth, language)}</strong>
+          <small>
+            {previousBalance.isManual ? t("incomes.previousBalanceManual") : t("incomes.previousBalanceAutomatic")}
+          </small>
+        </div>
+        <div className="income-carryover-controls">
+          <button
+            className="icon-button"
+            type="button"
+            onClick={() => setSelectedMonth((current) => addMonths(current, -1))}
+            aria-label={t("dashboard.previousMonth")}
+          >
+            <ChevronLeft size={18} aria-hidden="true" />
+          </button>
+          <button
+            className="icon-button"
+            type="button"
+            onClick={() => setSelectedMonth((current) => addMonths(current, 1))}
+            aria-label={t("dashboard.nextMonth")}
+          >
+            <ChevronRight size={18} aria-hidden="true" />
+          </button>
+          {canWrite ? (
+            <>
+              <label className="income-carryover-input">
+                <span>{t("incomes.amount")}</span>
+                <input
+                  autoComplete="off"
+                  inputMode="decimal"
+                  value={previousBalanceDraft}
+                  onChange={(event) => handlePreviousBalanceChange(event.target.value)}
+                />
+              </label>
+              <button
+                className="button primary compact"
+                type="button"
+                onClick={submitPreviousBalance}
+                disabled={!hasPreviousBalanceChange || operationLabel === "save-previous-balance"}
+              >
+                <Save size={16} aria-hidden="true" />
+                {operationLabel === "save-previous-balance" ? t("common.saving") : t("common.save")}
+              </button>
+            </>
+          ) : (
+            <strong className="income-carryover-readonly">{formatCurrency(previousBalance.amount)}</strong>
+          )}
+        </div>
+      </section>
 
       <nav
         className={`tab-row income-tab-row ${activeType === "recurring" ? "is-left" : "is-right"}`}

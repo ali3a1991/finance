@@ -613,6 +613,83 @@ th {
   box-shadow: none;
 }
 
+.income-carryover-panel {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  align-items: end;
+  gap: 16px;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--line));
+  border-radius: 8px;
+  padding: 16px;
+  background: color-mix(in srgb, var(--accent-soft) 56%, var(--surface));
+}
+
+.income-carryover-heading {
+  display: grid;
+  gap: 4px;
+}
+
+.income-carryover-heading span {
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.income-carryover-heading strong {
+  color: var(--text);
+  font-size: 1.25rem;
+}
+
+.income-carryover-heading small {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.income-carryover-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.income-carryover-input {
+  display: grid;
+  gap: 6px;
+  min-width: 180px;
+}
+
+.income-carryover-input span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.income-carryover-input input {
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 12px;
+  background: var(--input-bg);
+  color: var(--text);
+  font: inherit;
+  font-weight: 800;
+}
+
+.income-carryover-input input:focus {
+  border-color: var(--primary);
+  outline: 0;
+  box-shadow: 0 0 0 4px var(--focus-ring);
+}
+
+.income-carryover-readonly {
+  min-width: 150px;
+  color: var(--text);
+  font-size: 1.2rem;
+  text-align: right;
+}
+
 .empty-table-text {
   margin: 0;
   padding: 18px;
@@ -1649,6 +1726,11 @@ th {
   background: var(--primary-dark);
 }
 
+.button.compact {
+  min-height: 40px;
+  padding-inline: 12px;
+}
+
 .button.secondary {
   border-color: var(--line);
   background: var(--surface);
@@ -2618,6 +2700,22 @@ th {
   .monthly-list,
   .settings-panel {
     grid-template-columns: 1fr;
+  }
+
+  .income-carryover-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .income-carryover-controls {
+    justify-content: stretch;
+  }
+
+  .income-carryover-input {
+    flex: 1 1 100%;
+  }
+
+  .income-carryover-controls .button {
+    flex: 1 1 100%;
   }
 
   .theme-switcher {
