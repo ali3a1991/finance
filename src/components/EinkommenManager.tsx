@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState, useTransition } from "react";
-import { ChevronLeft, ChevronRight, Pencil, PlusCircle, Save, Trash2, TrendingUp, X } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Pencil, PlusCircle, Save, Trash2, TrendingUp, X } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
 import { formatCurrency, formatDate } from "@/lib/formatting";
@@ -233,6 +233,7 @@ export function EinkommenManager() {
   const visibleIncomeTotal = visibleIncomes.reduce((sum, income) => sum + income.amount, 0);
   const previousBalanceAmount = parseAmountInputValue(previousBalanceDraft);
   const hasPreviousBalanceChange = Math.abs(previousBalanceAmount - previousBalance.amount) > 0.009;
+  const isCurrentMonth = selectedMonth === getMonthKey();
 
   return (
     <>
@@ -248,12 +249,11 @@ export function EinkommenManager() {
       <section className="income-carryover-panel" aria-label={t("incomes.previousBalance")}>
         <div className="income-carryover-heading">
           <span>{t("incomes.previousBalance")}</span>
-          <strong>{formatMonthLabel(selectedMonth, language)}</strong>
           <small>
             {previousBalance.isManual ? t("incomes.previousBalanceManual") : t("incomes.previousBalanceAutomatic")}
           </small>
         </div>
-        <div className="income-carryover-controls">
+        <div className="month-switcher income-carryover-switcher" aria-label={t("dashboard.monthPicker")}>
           <button
             className="icon-button"
             type="button"
@@ -262,6 +262,13 @@ export function EinkommenManager() {
           >
             <ChevronLeft size={18} aria-hidden="true" />
           </button>
+          <div className="month-switcher-current">
+            <CalendarDays size={18} aria-hidden="true" />
+            <div>
+              <span>{isCurrentMonth ? t("dashboard.currentMonth") : t("dashboard.selectedMonth")}</span>
+              <strong>{formatMonthLabel(selectedMonth, language)}</strong>
+            </div>
+          </div>
           <button
             className="icon-button"
             type="button"
@@ -270,6 +277,8 @@ export function EinkommenManager() {
           >
             <ChevronRight size={18} aria-hidden="true" />
           </button>
+        </div>
+        <div className="income-carryover-controls">
           {canWrite ? (
             <>
               <label className="income-carryover-input">

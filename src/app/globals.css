@@ -615,7 +615,7 @@ th {
 
 .income-carryover-panel {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) auto;
+  grid-template-columns: minmax(180px, 1fr) auto auto;
   align-items: end;
   gap: 16px;
   border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--line));
@@ -639,6 +639,13 @@ th {
 .income-carryover-heading strong {
   color: var(--text);
   font-size: 1.25rem;
+}
+
+.income-carryover-switcher {
+  width: auto;
+  min-width: min(100%, 338px);
+  margin: 0;
+  box-shadow: none;
 }
 
 .income-carryover-heading small {
@@ -2580,6 +2587,16 @@ th {
   .access-settings-panel {
     grid-template-columns: 1fr;
   }
+
+  .income-carryover-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .income-carryover-switcher {
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    min-width: 0;
+    width: 100%;
+  }
 }
 
 @media (max-width: 640px) {
@@ -2704,6 +2721,12 @@ th {
 
   .income-carryover-panel {
     grid-template-columns: 1fr;
+  }
+
+  .income-carryover-switcher {
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    min-width: 0;
+    width: 100%;
   }
 
   .income-carryover-controls {
