@@ -616,7 +616,7 @@ th {
 .income-carryover-panel {
   display: grid;
   grid-template-columns: minmax(180px, 1fr) auto auto;
-  align-items: end;
+  align-items: center;
   gap: 16px;
   border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--line));
   border-radius: 8px;
