@@ -1622,7 +1622,7 @@ th {
 }
 
 .payment-row.locked {
-  grid-template-columns: 44px minmax(220px, 1fr) minmax(130px, auto) minmax(160px, 220px);
+  grid-template-columns: 44px minmax(220px, 1fr) minmax(170px, 220px);
 }
 
 .payment-row.paid {
@@ -1669,6 +1669,16 @@ th {
   font-size: 0.82rem;
   font-weight: 700;
   line-height: 1.35;
+}
+
+.payment-row.locked .payment-amount {
+  justify-items: start;
+}
+
+.payment-row.locked .payment-lock-note {
+  grid-column: 3;
+  justify-self: start;
+  max-width: 170px;
 }
 
 .partial-input {
@@ -2883,6 +2893,16 @@ th {
   .payment-lock-note {
     grid-column: 2 / -1;
     font-size: 0.76rem;
+  }
+
+  .payment-row.locked .payment-amount {
+    justify-items: end;
+  }
+
+  .payment-row.locked .payment-lock-note {
+    grid-column: 2 / -1;
+    justify-self: stretch;
+    max-width: none;
   }
 
   .partial-input input {
