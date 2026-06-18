@@ -1895,6 +1895,43 @@ export async function listTelegramContacts() {
   });
 }
 
+export async function canBroadcastFromTelegram(username: string | null | undefined, contact: string) {
+  await ensureRegistrationTables();
+  const normalizedUsername = username?.replace(/^@/, "").trim();
+  const matchingContacts = await prisma.telegramContact.findMany({
+    where: {
+      OR: [
+        { contact },
+        ...(normalizedUsername
+          ? [{ username: normalizedUsername }, { username: `@${normalizedUsername}` }]
+          : [])
+      ]
+    }
+  });
+  const usernames = Array.from(
+    new Set(
+      [
+        normalizedUsername,
+        ...matchingContacts.map((telegramContact) => telegramContact.username.replace(/^@/, ""))
+      ].filter(Boolean) as string[]
+    )
+  );
+
+  if (!usernames.length) {
+    return false;
+  }
+
+  const owner = await prisma.appUser.findFirst({
+    where: {
+      accessLevel: "owner",
+      username: { in: usernames }
+    },
+    select: { id: true }
+  });
+
+  return Boolean(owner);
+}
+
 export async function createPasswordResetChallenge(username: string, code: string) {
   await ensureRegistrationTables();
   const [user, contact] = await Promise.all([
