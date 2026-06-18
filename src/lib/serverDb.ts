@@ -1347,14 +1347,15 @@ export function buildMonthlyPayments(db: FinanceDb, date = new Date()): MonthlyP
     .map((expense) => {
       const dueDay = new Date(`${expense.date}T00:00:00`).getDate();
       const id = `expense:${expense.id}:${monthKey}`;
+      const lockedBySavings = isSavingsExpenseId(expense.id);
 
       return {
         amount: expense.amount,
         category: expense.category,
         dueDate: getCurrentMonthDate(dueDay, date),
         id,
-        lockedBySavings: isSavingsExpenseId(expense.id),
-        paidAmount: getPaymentStatus(db, id),
+        lockedBySavings,
+        paidAmount: lockedBySavings ? expense.amount : getPaymentStatus(db, id),
         sourceType: "expense",
         title: expense.title
       };
