@@ -1622,7 +1622,7 @@ th {
 }
 
 .payment-row.locked {
-  grid-template-columns: 44px minmax(220px, 1fr) minmax(170px, 220px);
+  grid-template-columns: 44px minmax(220px, 1fr) minmax(120px, auto) minmax(130px, 170px);
 }
 
 .payment-row.paid {
@@ -1676,7 +1676,7 @@ th {
 }
 
 .payment-row.locked .payment-lock-note {
-  grid-column: 3;
+  grid-column: 4;
   justify-self: start;
   max-width: 170px;
 }
