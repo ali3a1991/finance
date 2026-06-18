@@ -1912,7 +1912,11 @@ export async function canBroadcastFromTelegram(username: string | null | undefin
     new Set(
       [
         normalizedUsername,
-        ...matchingContacts.map((telegramContact) => telegramContact.username.replace(/^@/, ""))
+        ...(normalizedUsername ? [`@${normalizedUsername}`] : []),
+        ...matchingContacts.flatMap((telegramContact) => {
+          const savedUsername = telegramContact.username.replace(/^@/, "");
+          return [savedUsername, `@${savedUsername}`];
+        })
       ].filter(Boolean) as string[]
     )
   );
