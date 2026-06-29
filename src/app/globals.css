@@ -936,6 +936,11 @@ th {
   font-size: 1.25rem;
 }
 
+.gauge-value strong.negative-amount,
+.gauge-free-amount strong.negative-amount {
+  color: var(--rose);
+}
+
 .gauge-free-amount small {
   font-size: 0.82rem;
 }

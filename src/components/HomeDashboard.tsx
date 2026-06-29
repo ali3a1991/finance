@@ -72,7 +72,8 @@ function formatMonthLabel(monthKey: string, language: "de" | "en") {
 }
 
 function toPaymentInputValue(value: number) {
-  return String(value).replace(".", ",");
+  const roundedValue = Math.round((value + Number.EPSILON) * 100) / 100;
+  return String(roundedValue).replace(".", ",");
 }
 
 function parsePaymentInputValue(value: string) {
@@ -248,7 +249,9 @@ export function HomeDashboard() {
             </div>
             <div className="gauge-value carryover">
               <span>{t("dashboard.previousBalance")}</span>
-              <strong>{formatCurrency(summary.previousMonthBalance)}</strong>
+              <strong className={summary.previousMonthBalance < 0 ? "negative-amount" : undefined}>
+                {formatCurrency(summary.previousMonthBalance)}
+              </strong>
             </div>
             <div className="gauge-value outgoing">
               <span>{t("dashboard.payments")}</span>
@@ -277,7 +280,9 @@ export function HomeDashboard() {
             </span>
             <div className="gauge-free-amount">
               <span>{t("dashboard.freeAmount")}</span>
-              <strong>{formatCurrency(summary.freeAmount)}</strong>
+              <strong className={summary.freeAmount < 0 ? "negative-amount" : undefined}>
+                {formatCurrency(summary.freeAmount)}
+              </strong>
               <small>{t("dashboard.afterFixedPayments")}</small>
             </div>
           </div>
