@@ -290,7 +290,6 @@ export function HomeDashboard() {
               <strong className={summary.freeAmount < 0 ? "negative-amount" : undefined}>
                 {formatCurrency(summary.freeAmount)}
               </strong>
-              <small>{t("dashboard.afterFixedPayments")}</small>
             </div>
           </div>
         </div>
