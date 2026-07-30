@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
-import { formatCurrency, formatDate } from "@/lib/formatting";
+import { formatCurrency, formatShortDate } from "@/lib/formatting";
 import { requestJson } from "@/lib/requestJson";
 import type { MonthlyPayment } from "@/lib/types";
 
@@ -80,6 +80,13 @@ function parsePaymentInputValue(value: string) {
   const paidAmount = Number(value.replace(",", "."));
   return Number.isNaN(paidAmount) ? 0 : paidAmount;
 }
+
+const paymentTypeTranslationKeys: Record<MonthlyPayment["sourceType"], string> = {
+  loan: "dashboard.paymentTypeLoan",
+  insurance: "dashboard.paymentTypeInsurance",
+  expense: "dashboard.paymentTypeExpense",
+  contract: "dashboard.paymentTypeContract"
+};
 
 export function HomeDashboard() {
   const { canWrite } = useAuth();
@@ -336,7 +343,8 @@ export function HomeDashboard() {
                 <div className="payment-main">
                   <strong>{payment.title}</strong>
                   <span>
-                    {payment.category} · {formatDate(payment.dueDate)}
+                    {payment.category} · {formatShortDate(payment.dueDate, language)} ·{" "}
+                    {t(paymentTypeTranslationKeys[payment.sourceType])}
                   </span>
                 </div>
                 <div className="payment-amount">

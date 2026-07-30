@@ -14,3 +14,11 @@ export function formatDate(value: string) {
     year: "numeric"
   }).format(new Date(value));
 }
+
+export function formatShortDate(value: string, language: "de" | "en") {
+  return new Intl.DateTimeFormat(language === "de" ? "de-DE" : "en-US", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit"
+  }).format(new Date(value));
+}
