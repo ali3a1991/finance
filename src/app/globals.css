@@ -2772,13 +2772,24 @@ th {
   }
 
   .gauge-values {
-    grid-template-columns: 3fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
     width: 100%;
   }
 
   .gauge-value {
+    min-width: 0;
     min-height: 96px;
-    padding: 12px;
+    padding: 10px 8px;
+  }
+
+  .gauge-value span {
+    font-size: 0.72rem;
+  }
+
+  .gauge-value strong {
+    font-size: clamp(0.82rem, 3.7vw, 1.05rem);
+    white-space: nowrap;
   }
 
   .stat-card {
