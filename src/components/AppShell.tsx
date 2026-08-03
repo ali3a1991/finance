@@ -27,10 +27,13 @@ const navItems = [
   { href: "/", labelKey: "home", icon: Home },
   { href: "/incomes", labelKey: "incomes", icon: TrendingUp },
   { href: "/expenses", labelKey: "expenses", icon: WalletCards },
-  { href: "/projects", labelKey: "projects", icon: FolderKanban },
   { href: "/savings", labelKey: "savings", icon: PiggyBank },
-  { href: "/investments", labelKey: "investments", icon: TrendingUp },
-  { href: "/exchange", labelKey: "exchange", icon: CircleDollarSign }
+  { href: "/investments", labelKey: "investments", icon: TrendingUp }
+];
+
+const toolItems = [
+  { href: "/exchange", labelKey: "exchange", icon: CircleDollarSign },
+  { href: "/projects", labelKey: "projects", icon: FolderKanban }
 ];
 
 const contractItems = [
@@ -59,6 +62,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   const hasActiveContract = contractItems.some((item) => isActivePath(item.href));
+  const hasActiveTool = toolItems.some((item) => isActivePath(item.href));
   const accessLabel =
     user?.accessLevel === "owner"
       ? t("nav.owner")
@@ -132,6 +136,31 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </Link>
             );
           })}
+          <div className="nav-group">
+            <div className={`nav-group-label ${hasActiveTool ? "active" : ""}`}>
+              <FolderKanban size={18} aria-hidden="true" />
+              <span>{t("nav.tools")}</span>
+            </div>
+            <div className="nav-sublist">
+              {toolItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = isActivePath(item.href);
+
+                return (
+                  <Link
+                    href={item.href}
+                    className={`nav-subitem ${isActive ? "active" : ""}`}
+                    key={item.href}
+                    onClick={closeMobileMenu}
+                    aria-current={isActive ? "page" : undefined}
+                  >
+                    <Icon size={16} aria-hidden="true" />
+                    <span>{t(`nav.${item.labelKey}`)}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
           <div className="nav-group">
             <div className={`nav-group-label ${hasActiveContract ? "active" : ""}`}>
               <FileText size={18} aria-hidden="true" />
