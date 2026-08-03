@@ -4,6 +4,9 @@ import { getPasswordHash } from "@/lib/auth";
 import type {
   AccessLevel,
   Expense,
+  ExpenseProject,
+  ExpenseProjectDetail,
+  ExpenseProjectInput,
   FinanceDb,
   GeneralContract,
   Income,
@@ -13,6 +16,8 @@ import type {
   InvestmentWithQuote,
   Loan,
   MonthlyPayment,
+  ProjectExpense,
+  ProjectExpenseInput,
   SavingsGoal,
   SavingsTransaction,
   SharedUser
@@ -258,6 +263,36 @@ async function ensureMonthlyCarryOverTable() {
   );
   await prisma.$executeRawUnsafe(
     'CREATE UNIQUE INDEX IF NOT EXISTS "MonthlyCarryOver_ownerId_month_key" ON "MonthlyCarryOver" ("ownerId", "month")'
+  );
+}
+
+async function ensureExpenseProjectTables() {
+  await prisma.$executeRawUnsafe(
+    'CREATE TABLE IF NOT EXISTS "ExpenseProject" ("id" TEXT PRIMARY KEY, "ownerId" TEXT, "title" TEXT NOT NULL, "startDate" TIMESTAMP(3) NOT NULL, "description" TEXT, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP)'
+  );
+  await prisma.$executeRawUnsafe(
+    'CREATE TABLE IF NOT EXISTS "ProjectCategory" ("id" TEXT PRIMARY KEY, "ownerId" TEXT, "projectId" TEXT NOT NULL, "name" TEXT NOT NULL, "active" BOOLEAN NOT NULL DEFAULT TRUE, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP)'
+  );
+  await prisma.$executeRawUnsafe(
+    'CREATE UNIQUE INDEX IF NOT EXISTS "ProjectCategory_projectId_name_key" ON "ProjectCategory" ("projectId", "name")'
+  );
+  await prisma.$executeRawUnsafe(
+    'CREATE TABLE IF NOT EXISTS "ProjectMember" ("id" TEXT PRIMARY KEY, "ownerId" TEXT, "projectId" TEXT NOT NULL, "name" TEXT NOT NULL, "shareWeight" DOUBLE PRECISION NOT NULL, "active" BOOLEAN NOT NULL DEFAULT TRUE, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP)'
+  );
+  await prisma.$executeRawUnsafe(
+    'CREATE TABLE IF NOT EXISTS "ProjectExpense" ("id" TEXT PRIMARY KEY, "ownerId" TEXT, "projectId" TEXT NOT NULL, "amount" DOUBLE PRECISION NOT NULL, "date" TIMESTAMP(3) NOT NULL, "categoryId" TEXT NOT NULL, "paidByMemberId" TEXT NOT NULL, "description" TEXT, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP)'
+  );
+  await prisma.$executeRawUnsafe(
+    'CREATE TABLE IF NOT EXISTS "ProjectExpenseShare" ("id" TEXT PRIMARY KEY, "expenseId" TEXT NOT NULL, "memberId" TEXT NOT NULL, "shareWeight" DOUBLE PRECISION NOT NULL, "amount" DOUBLE PRECISION NOT NULL, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP)'
+  );
+  await prisma.$executeRawUnsafe(
+    'CREATE UNIQUE INDEX IF NOT EXISTS "ProjectExpenseShare_expenseId_memberId_key" ON "ProjectExpenseShare" ("expenseId", "memberId")'
+  );
+  await prisma.$executeRawUnsafe(
+    'CREATE INDEX IF NOT EXISTS "ExpenseProject_ownerId_idx" ON "ExpenseProject" ("ownerId")'
+  );
+  await prisma.$executeRawUnsafe(
+    'CREATE INDEX IF NOT EXISTS "ProjectExpense_projectId_idx" ON "ProjectExpense" ("projectId")'
   );
 }
 
@@ -1015,6 +1050,393 @@ export async function deleteSavingsTransaction({
   } catch {
     return null;
   }
+}
+
+function mapExpenseProject(project: {
+  id: string;
+  title: string;
+  startDate: Date;
+  description: string | null;
+  categories: Array<{ id: string; name: string; active: boolean }>;
+  members: Array<{ id: string; name: string; shareWeight: number; active: boolean }>;
+  expenses: Array<{ amount: number }>;
+}): ExpenseProject {
+  return {
+    categories: project.categories,
+    description: project.description,
+    expenseCount: project.expenses.length,
+    id: project.id,
+    members: project.members,
+    startDate: toDateInput(project.startDate),
+    title: project.title,
+    totalExpense: project.expenses.reduce((sum, expense) => sum + expense.amount, 0)
+  };
+}
+
+function mapProjectExpense(expense: {
+  id: string;
+  amount: number;
+  date: Date;
+  categoryId: string;
+  paidByMemberId: string;
+  description: string | null;
+  category: { name: string };
+  paidBy: { name: string };
+  shares: Array<{
+    id: string;
+    memberId: string;
+    shareWeight: number;
+    amount: number;
+    member: { name: string };
+  }>;
+}): ProjectExpense {
+  return {
+    amount: expense.amount,
+    categoryId: expense.categoryId,
+    categoryName: expense.category.name,
+    date: toDateInput(expense.date),
+    description: expense.description,
+    id: expense.id,
+    paidByMemberId: expense.paidByMemberId,
+    paidByMemberName: expense.paidBy.name,
+    shares: expense.shares.map((share) => ({
+      amount: share.amount,
+      id: share.id,
+      memberId: share.memberId,
+      memberName: share.member.name,
+      shareWeight: share.shareWeight
+    }))
+  };
+}
+
+function allocateProjectExpense(amount: number, members: Array<{ id: string; shareWeight: number }>) {
+  const totalCents = Math.round(amount * 100);
+  const totalWeight = members.reduce((sum, member) => sum + member.shareWeight, 0);
+  const rawShares = members.map((member, index) => {
+    const rawCents = (totalCents * member.shareWeight) / totalWeight;
+    return { floorCents: Math.floor(rawCents), fraction: rawCents - Math.floor(rawCents), index };
+  });
+  let remainingCents = totalCents - rawShares.reduce((sum, share) => sum + share.floorCents, 0);
+  const remainderOrder = [...rawShares].sort((a, b) => b.fraction - a.fraction || a.index - b.index);
+  const extraCentIndexes = new Set<number>();
+
+  for (const share of remainderOrder) {
+    if (remainingCents <= 0) break;
+    extraCentIndexes.add(share.index);
+    remainingCents -= 1;
+  }
+
+  return members.map((member, index) => ({
+    amount: (rawShares[index].floorCents + (extraCentIndexes.has(index) ? 1 : 0)) / 100,
+    memberId: member.id,
+    shareWeight: member.shareWeight
+  }));
+}
+
+const projectInclude = {
+  categories: { orderBy: { createdAt: "asc" as const } },
+  expenses: { select: { amount: true } },
+  members: { orderBy: { createdAt: "asc" as const } }
+};
+
+export async function listExpenseProjects(ownerId: string): Promise<ExpenseProject[]> {
+  await ensureExpenseProjectTables();
+  const projects = await prisma.expenseProject.findMany({
+    include: projectInclude,
+    orderBy: { startDate: "desc" },
+    where: { ownerId }
+  });
+
+  return projects.map(mapExpenseProject);
+}
+
+export async function getExpenseProject(ownerId: string, id: string): Promise<ExpenseProjectDetail | null> {
+  await ensureExpenseProjectTables();
+  const project = await prisma.expenseProject.findFirst({
+    include: {
+      categories: { orderBy: { createdAt: "asc" } },
+      expenses: {
+        include: {
+          category: { select: { name: true } },
+          paidBy: { select: { name: true } },
+          shares: {
+            include: { member: { select: { name: true } } },
+            orderBy: { createdAt: "asc" }
+          }
+        },
+        orderBy: [{ date: "desc" }, { createdAt: "desc" }]
+      },
+      members: { orderBy: { createdAt: "asc" } }
+    },
+    where: { id, ownerId }
+  });
+
+  if (!project) {
+    return null;
+  }
+
+  const expenses = project.expenses.map(mapProjectExpense);
+  const totalExpense = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+  const memberBalances = project.members
+    .map((member) => {
+      const paid = expenses
+        .filter((expense) => expense.paidByMemberId === member.id)
+        .reduce((sum, expense) => sum + expense.amount, 0);
+      const expected = expenses.reduce(
+        (sum, expense) => sum + (expense.shares.find((share) => share.memberId === member.id)?.amount ?? 0),
+        0
+      );
+      return {
+        balance: paid - expected,
+        expected,
+        memberId: member.id,
+        memberName: member.name,
+        paid,
+        shareWeight: member.shareWeight
+      };
+    })
+    .filter((balance) => project.members.find((member) => member.id === balance.memberId)?.active || balance.paid > 0 || balance.expected > 0);
+  const categoryTotals = project.categories
+    .map((category) => ({
+      amount: expenses
+        .filter((expense) => expense.categoryId === category.id)
+        .reduce((sum, expense) => sum + expense.amount, 0),
+      categoryId: category.id,
+      categoryName: category.name
+    }))
+    .filter((total) => project.categories.find((category) => category.id === total.categoryId)?.active || total.amount > 0);
+
+  return {
+    categories: project.categories,
+    categoryTotals,
+    description: project.description,
+    expenseCount: expenses.length,
+    expenses,
+    id: project.id,
+    memberBalances,
+    members: project.members,
+    startDate: toDateInput(project.startDate),
+    title: project.title,
+    totalExpense
+  };
+}
+
+export async function createExpenseProject(ownerId: string, input: ExpenseProjectInput) {
+  await ensureExpenseProjectTables();
+  const projectId = `project-${Date.now()}-${randomUUID().slice(0, 8)}`;
+  await prisma.$transaction(async (tx) => {
+    await tx.expenseProject.create({
+      data: {
+        description: input.description?.trim() || null,
+        id: projectId,
+        ownerId,
+        startDate: toDate(input.startDate),
+        title: input.title.trim()
+      }
+    });
+    await tx.projectCategory.createMany({
+      data: input.categories.map((category) => ({
+        id: `project-category-${randomUUID()}`,
+        name: category.name.trim(),
+        ownerId,
+        projectId
+      }))
+    });
+    await tx.projectMember.createMany({
+      data: input.members.map((member) => ({
+        id: `project-member-${randomUUID()}`,
+        name: member.name.trim(),
+        ownerId,
+        projectId,
+        shareWeight: member.shareWeight
+      }))
+    });
+  });
+  return getExpenseProject(ownerId, projectId);
+}
+
+export async function updateExpenseProject(ownerId: string, id: string, input: ExpenseProjectInput) {
+  await ensureExpenseProjectTables();
+  const project = await prisma.expenseProject.findFirst({ where: { id, ownerId } });
+
+  if (!project) {
+    return null;
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.expenseProject.update({
+      data: {
+        description: input.description?.trim() || null,
+        startDate: toDate(input.startDate),
+        title: input.title.trim()
+      },
+      where: { id }
+    });
+    await tx.projectCategory.updateMany({ data: { active: false }, where: { ownerId, projectId: id } });
+    await tx.projectMember.updateMany({ data: { active: false }, where: { ownerId, projectId: id } });
+
+    for (const category of input.categories) {
+      const existingWithName = await tx.projectCategory.findFirst({
+        where: { name: category.name.trim(), ownerId, projectId: id }
+      });
+      const existing =
+        existingWithName ??
+        (category.id
+          ? await tx.projectCategory.findFirst({ where: { id: category.id, ownerId, projectId: id } })
+          : null);
+      if (existing) {
+        await tx.projectCategory.update({
+          data: { active: true, name: category.name.trim() },
+          where: { id: existing.id }
+        });
+      } else {
+        await tx.projectCategory.create({
+          data: {
+            id: `project-category-${randomUUID()}`,
+            name: category.name.trim(),
+            ownerId,
+            projectId: id
+          }
+        });
+      }
+    }
+
+    for (const member of input.members) {
+      const existing = member.id
+        ? await tx.projectMember.findFirst({ where: { id: member.id, ownerId, projectId: id } })
+        : null;
+      if (existing) {
+        await tx.projectMember.update({
+          data: { active: true, name: member.name.trim(), shareWeight: member.shareWeight },
+          where: { id: existing.id }
+        });
+      } else {
+        await tx.projectMember.create({
+          data: {
+            id: `project-member-${randomUUID()}`,
+            name: member.name.trim(),
+            ownerId,
+            projectId: id,
+            shareWeight: member.shareWeight
+          }
+        });
+      }
+    }
+  });
+
+  return getExpenseProject(ownerId, id);
+}
+
+export async function deleteExpenseProject(ownerId: string, id: string) {
+  await ensureExpenseProjectTables();
+  const project = await prisma.expenseProject.findFirst({ where: { id, ownerId } });
+  if (!project) {
+    return false;
+  }
+
+  await prisma.$transaction(async (tx) => {
+    const expenses = await tx.projectExpense.findMany({ select: { id: true }, where: { ownerId, projectId: id } });
+    await tx.projectExpenseShare.deleteMany({ where: { expenseId: { in: expenses.map((expense) => expense.id) } } });
+    await tx.projectExpense.deleteMany({ where: { ownerId, projectId: id } });
+    await tx.projectCategory.deleteMany({ where: { ownerId, projectId: id } });
+    await tx.projectMember.deleteMany({ where: { ownerId, projectId: id } });
+    await tx.expenseProject.delete({ where: { id } });
+  });
+  return true;
+}
+
+export async function createProjectExpense(ownerId: string, projectId: string, input: ProjectExpenseInput) {
+  await ensureExpenseProjectTables();
+  const [project, category, payer, members] = await Promise.all([
+    prisma.expenseProject.findFirst({ where: { id: projectId, ownerId } }),
+    prisma.projectCategory.findFirst({ where: { active: true, id: input.categoryId, ownerId, projectId } }),
+    prisma.projectMember.findFirst({ where: { active: true, id: input.paidByMemberId, ownerId, projectId } }),
+    prisma.projectMember.findMany({ orderBy: { createdAt: "asc" }, where: { active: true, ownerId, projectId } })
+  ]);
+  if (!project || !category || !payer || members.length === 0) {
+    return null;
+  }
+
+  const expenseId = `project-expense-${Date.now()}-${randomUUID().slice(0, 8)}`;
+  const normalizedAmount = Math.round(input.amount * 100) / 100;
+  const allocations = allocateProjectExpense(normalizedAmount, members);
+  await prisma.$transaction(async (tx) => {
+    await tx.projectExpense.create({
+      data: {
+        amount: normalizedAmount,
+        categoryId: category.id,
+        date: toDate(input.date),
+        description: input.description?.trim() || null,
+        id: expenseId,
+        ownerId,
+        paidByMemberId: payer.id,
+        projectId
+      }
+    });
+    await tx.projectExpenseShare.createMany({
+      data: allocations.map((allocation) => ({
+        ...allocation,
+        expenseId,
+        id: `project-expense-share-${randomUUID()}`
+      }))
+    });
+  });
+  return getExpenseProject(ownerId, projectId);
+}
+
+export async function updateProjectExpense(
+  ownerId: string,
+  projectId: string,
+  expenseId: string,
+  input: ProjectExpenseInput
+) {
+  await ensureExpenseProjectTables();
+  const [expense, category, payer, members] = await Promise.all([
+    prisma.projectExpense.findFirst({ where: { id: expenseId, ownerId, projectId } }),
+    prisma.projectCategory.findFirst({ where: { active: true, id: input.categoryId, ownerId, projectId } }),
+    prisma.projectMember.findFirst({ where: { active: true, id: input.paidByMemberId, ownerId, projectId } }),
+    prisma.projectMember.findMany({ orderBy: { createdAt: "asc" }, where: { active: true, ownerId, projectId } })
+  ]);
+  if (!expense || !category || !payer || members.length === 0) {
+    return null;
+  }
+
+  const normalizedAmount = Math.round(input.amount * 100) / 100;
+  const allocations = allocateProjectExpense(normalizedAmount, members);
+  await prisma.$transaction(async (tx) => {
+    await tx.projectExpense.update({
+      data: {
+        amount: normalizedAmount,
+        categoryId: category.id,
+        date: toDate(input.date),
+        description: input.description?.trim() || null,
+        paidByMemberId: payer.id
+      },
+      where: { id: expense.id }
+    });
+    await tx.projectExpenseShare.deleteMany({ where: { expenseId: expense.id } });
+    await tx.projectExpenseShare.createMany({
+      data: allocations.map((allocation) => ({
+        ...allocation,
+        expenseId: expense.id,
+        id: `project-expense-share-${randomUUID()}`
+      }))
+    });
+  });
+  return getExpenseProject(ownerId, projectId);
+}
+
+export async function deleteProjectExpense(ownerId: string, projectId: string, expenseId: string) {
+  await ensureExpenseProjectTables();
+  const expense = await prisma.projectExpense.findFirst({ where: { id: expenseId, ownerId, projectId } });
+  if (!expense) {
+    return false;
+  }
+  await prisma.$transaction(async (tx) => {
+    await tx.projectExpenseShare.deleteMany({ where: { expenseId } });
+    await tx.projectExpense.delete({ where: { id: expenseId } });
+  });
+  return true;
 }
 
 type YahooChartResponse = {

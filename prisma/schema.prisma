@@ -7,7 +7,7 @@ datasource db {
 }
 
 model Loan {
-  id            String @id
+  id            String    @id
   ownerId       String?
   name          String
   bank          String
@@ -20,47 +20,47 @@ model Loan {
   nextPayment   DateTime
   status        String
   note          String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model Insurance {
-  id             String @id
-  ownerId        String?
-  name           String
-  provider       String
-  monthlyPremium Float
-  debitDay       Int
-  paymentIntervalMonths Int @default(1)
-  firstDebitDate DateTime?
-  startDate      DateTime?
-  endDate        DateTime?
-  renewalDate    DateTime?
-  coverage       String
-  note           String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                    String    @id
+  ownerId               String?
+  name                  String
+  provider              String
+  monthlyPremium        Float
+  debitDay              Int
+  paymentIntervalMonths Int       @default(1)
+  firstDebitDate        DateTime?
+  startDate             DateTime?
+  endDate               DateTime?
+  renewalDate           DateTime?
+  coverage              String
+  note                  String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 }
 
 model GeneralContract {
-  id            String   @id
-  ownerId       String?
-  title         String
-  provider      String
-  category      String
-  monthlyAmount Float
-  debitDay      Int
-  paymentIntervalMonths Int @default(1)
-  startDate     DateTime
-  endDate       DateTime?
-  note          String?
-  status        String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                    String    @id
+  ownerId               String?
+  title                 String
+  provider              String
+  category              String
+  monthlyAmount         Float
+  debitDay              Int
+  paymentIntervalMonths Int       @default(1)
+  startDate             DateTime
+  endDate               DateTime?
+  note                  String?
+  status                String
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 }
 
 model Income {
-  id        String @id
+  id        String   @id
   ownerId   String?
   title     String
   source    String
@@ -74,7 +74,7 @@ model Income {
 }
 
 model Expense {
-  id        String @id
+  id        String   @id
   ownerId   String?
   title     String
   category  String
@@ -100,7 +100,7 @@ model Investment {
 }
 
 model SavingsGoal {
-  id                  String   @id
+  id                  String    @id
   ownerId             String?
   name                String
   targetAmount        Float
@@ -108,8 +108,8 @@ model SavingsGoal {
   monthlyContribution Float
   targetDate          DateTime?
   note                String?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 }
 
 model SavingsTransaction {
@@ -127,7 +127,7 @@ model SavingsTransaction {
 }
 
 model MonthlyBudget {
-  id       String @id @default(cuid())
+  id       String  @id @default(cuid())
   ownerId  String?
   category String
   planned  Float
@@ -146,7 +146,7 @@ model MonthlyCarryOver {
 }
 
 model PaymentConfirmation {
-  id         String @id
+  id         String   @id
   ownerId    String?
   paidAmount Float
   updatedAt  DateTime @updatedAt
@@ -189,4 +189,75 @@ model PasswordResetChallenge {
   codeHash  String
   expiresAt DateTime
   createdAt DateTime @default(now())
+}
+
+model ExpenseProject {
+  id          String            @id
+  ownerId     String?
+  title       String
+  startDate   DateTime
+  description String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  categories  ProjectCategory[]
+  members     ProjectMember[]
+  expenses    ProjectExpense[]
+}
+
+model ProjectCategory {
+  id        String           @id
+  ownerId   String?
+  projectId String
+  name      String
+  active    Boolean          @default(true)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  project   ExpenseProject   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  expenses  ProjectExpense[]
+
+  @@unique([projectId, name])
+}
+
+model ProjectMember {
+  id            String                @id
+  ownerId       String?
+  projectId     String
+  name          String
+  shareWeight   Float
+  active        Boolean               @default(true)
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  project       ExpenseProject        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  paidExpenses  ProjectExpense[]      @relation("ProjectExpensePayer")
+  expenseShares ProjectExpenseShare[]
+}
+
+model ProjectExpense {
+  id             String                @id
+  ownerId        String?
+  projectId      String
+  amount         Float
+  date           DateTime
+  categoryId     String
+  paidByMemberId String
+  description    String?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  project        ExpenseProject        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  category       ProjectCategory       @relation(fields: [categoryId], references: [id])
+  paidBy         ProjectMember         @relation("ProjectExpensePayer", fields: [paidByMemberId], references: [id])
+  shares         ProjectExpenseShare[]
+}
+
+model ProjectExpenseShare {
+  id          String         @id
+  expenseId   String
+  memberId    String
+  shareWeight Float
+  amount      Float
+  createdAt   DateTime       @default(now())
+  expense     ProjectExpense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  member      ProjectMember  @relation(fields: [memberId], references: [id])
+
+  @@unique([expenseId, memberId])
 }

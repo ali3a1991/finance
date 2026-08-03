@@ -138,6 +138,87 @@ export type SharedUser = {
   createdAt: string;
 };
 
+export type ProjectCategory = {
+  id: string;
+  name: string;
+  active: boolean;
+};
+
+export type ProjectMember = {
+  id: string;
+  name: string;
+  shareWeight: number;
+  active: boolean;
+};
+
+export type ProjectExpenseShare = {
+  id: string;
+  memberId: string;
+  memberName: string;
+  shareWeight: number;
+  amount: number;
+};
+
+export type ProjectExpense = {
+  id: string;
+  amount: number;
+  date: string;
+  categoryId: string;
+  categoryName: string;
+  paidByMemberId: string;
+  paidByMemberName: string;
+  description: string | null;
+  shares: ProjectExpenseShare[];
+};
+
+export type ExpenseProject = {
+  id: string;
+  title: string;
+  startDate: string;
+  description: string | null;
+  categories: ProjectCategory[];
+  members: ProjectMember[];
+  expenseCount: number;
+  totalExpense: number;
+};
+
+export type ProjectMemberBalance = {
+  memberId: string;
+  memberName: string;
+  shareWeight: number;
+  paid: number;
+  expected: number;
+  balance: number;
+};
+
+export type ProjectCategoryTotal = {
+  categoryId: string;
+  categoryName: string;
+  amount: number;
+};
+
+export type ExpenseProjectDetail = ExpenseProject & {
+  expenses: ProjectExpense[];
+  memberBalances: ProjectMemberBalance[];
+  categoryTotals: ProjectCategoryTotal[];
+};
+
+export type ExpenseProjectInput = {
+  title: string;
+  startDate: string;
+  description: string | null;
+  categories: Array<{ id?: string; name: string }>;
+  members: Array<{ id?: string; name: string; shareWeight: number }>;
+};
+
+export type ProjectExpenseInput = {
+  amount: number;
+  date: string;
+  categoryId: string;
+  paidByMemberId: string;
+  description: string | null;
+};
+
 export type FinanceDb = {
   owner: {
     name: string;

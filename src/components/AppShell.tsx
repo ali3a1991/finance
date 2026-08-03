@@ -6,6 +6,7 @@ import {
   Banknote,
   CircleDollarSign,
   FileText,
+  FolderKanban,
   Home,
   Menu,
   PiggyBank,
@@ -26,6 +27,7 @@ const navItems = [
   { href: "/", labelKey: "home", icon: Home },
   { href: "/incomes", labelKey: "incomes", icon: TrendingUp },
   { href: "/expenses", labelKey: "expenses", icon: WalletCards },
+  { href: "/projects", labelKey: "projects", icon: FolderKanban },
   { href: "/savings", labelKey: "savings", icon: PiggyBank },
   { href: "/investments", labelKey: "investments", icon: TrendingUp },
   { href: "/exchange", labelKey: "exchange", icon: CircleDollarSign }

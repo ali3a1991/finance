@@ -21,6 +21,7 @@ Version `1.0.0` ist die erste stabile Ausgangsversion. Sie enthalt:
 - Zahlungen im Dashboard konnen bezahlt oder teilweise bezahlt markiert werden.
 - Einnahmen mit festen und einmaligen Eintragen.
 - Ausgaben mit Monatswechsel, Popup-Formular, Bearbeiten und Loschen.
+- Gemeinsame Ausgabenprojekte mit eigenen Kategorien, Mitgliedern, frei wahlbaren Anteilen und Projekt-Dashboard.
 - Vertrage:
   - Versicherungen mit Zahlungsrhythmus, erster Abbuchung, Start- und Enddatum.
   - Kredite mit erster Zahlung, Rate und Tilgungsdetails.
@@ -45,6 +46,7 @@ Version `1.0.0` is the first stable baseline release. It includes:
 - Dashboard payments can be marked as paid or partially paid.
 - Income management with fixed and one-time entries.
 - Expense management with month switching, popup form, edit and delete.
+- Shared expense projects with custom categories, members, flexible share weights and a project dashboard.
 - Contracts:
   - Insurances with payment interval, first debit date, start date and end date.
   - Credits with first payment, installment and repayment details.
