@@ -342,7 +342,7 @@ export function HomeDashboard() {
                 <div className="payment-main">
                   <strong>{payment.title}</strong>
                   <span>
-                    {t(paymentTypeTranslationKeys[payment.sourceType])} ({payment.category}) -{" "}
+                    {payment.category} ({t(paymentTypeTranslationKeys[payment.sourceType])}) -{" "}
                     {formatShortDate(payment.dueDate, language)} 
                   </span>
                 </div>
