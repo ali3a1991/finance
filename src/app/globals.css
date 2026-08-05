@@ -958,7 +958,7 @@ th {
   gap: 4px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 14px;
+  padding: 12px;
 }
 
 .gauge-value.income {
