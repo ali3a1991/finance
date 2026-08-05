@@ -883,7 +883,7 @@ th {
 
 .gauge-needle {
   position: absolute;
-  bottom: 0;
+  bottom: 10px;
   left: 50%;
   z-index: 2;
   width: 4px;
@@ -896,7 +896,7 @@ th {
 
 .gauge-center {
   position: absolute;
-  bottom: -10px;
+  bottom: -6px;
   left: calc(50% - 18px);
   z-index: 3;
   width: 36px;
