@@ -314,6 +314,7 @@ button:disabled {
 .page-header {
   display: grid;
   gap: 8px;
+  margin-bottom: 25px;
 }
 
 .page-header span {
@@ -2932,6 +2933,10 @@ th {
     align-content: center;
     overflow: hidden;
     padding: 74px 14px 14px;
+  }
+
+  .page-header {
+    margin-bottom: 10px;
   }
 
   .public-preferences {
