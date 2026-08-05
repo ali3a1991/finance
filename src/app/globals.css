@@ -318,7 +318,7 @@ button:disabled {
 
 .page-header span {
   color: var(--primary);
-  font-size: 0.82rem;
+  font-size: 1rem;
   font-weight: 800;
   text-transform: uppercase;
 }
