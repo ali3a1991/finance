@@ -1091,7 +1091,7 @@ th {
 .investment-summary-grid > div {
   display: grid;
   gap: 6px;
-  min-height: 92px;
+  min-height: 71px;
   align-content: center;
   border: 1px solid var(--line);
   border-radius: 8px;
