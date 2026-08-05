@@ -1098,10 +1098,6 @@ th {
   background: var(--surface-soft);
 }
 
-.investment-summary-grid strong {
-  font-size: 1.25rem;
-}
-
 .investment-summary-grid .positive {
   color: var(--primary);
 }
@@ -3124,10 +3120,6 @@ th {
   .investment-summary-grid > div {
     min-height: 82px;
     padding: 10px;
-  }
-
-  .investment-summary-grid strong {
-    font-size: 1.05rem;
   }
 
   .tether-panel {
