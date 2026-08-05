@@ -306,7 +306,7 @@ button:disabled {
 
 .page-stack {
   display: grid;
-  gap: 24px;
+  gap: 8px;
   width: min(1120px, 100%);
   margin: 0 auto;
 }
