@@ -247,8 +247,6 @@ export function HomeDashboard() {
 
       <section className="cash-gauge-panel" aria-label={t("dashboard.compass")}>
         <div className="gauge-copy">
-          <span>{t("dashboard.compass")}</span>
-          <h2>{t("dashboard.gaugeTitle")}</h2>
           <div className="gauge-values">
             <div className="gauge-value income">
               <span>{t("dashboard.income")}</span>
