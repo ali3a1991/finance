@@ -914,7 +914,14 @@ th {
   height: 36px;
   border: 6px solid var(--surface);
   border-radius: 50%;
-  background: var(--gauge-pin);
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gauge-center span {
+  font-size: .7rem;
 }
 
 .gauge-status {

@@ -276,13 +276,12 @@ export function HomeDashboard() {
               <span>100</span>
             </div>
             <div className="gauge-needle" style={{ transform: `rotate(${needleRotation}deg)` }} />
-            <div className="gauge-center" />
+            <div className="gauge-center">
+              <span>{Math.round(pressureRatio * 100)}%</span>
+            </div>
           </div>
           <div className="gauge-status">
             <strong>{gaugeStatus}</strong>
-            <span>
-              {availableTotal > 0 ? `${Math.round(pressureRatio * 100)}% ${t("dashboard.used")}` : t("dashboard.noIncome")}
-            </span>
             <div className="gauge-free-amount">
               <span>{t("dashboard.freeAmount")}</span>
               <strong className={summary.freeAmount < 0 ? "negative-amount" : undefined}>
