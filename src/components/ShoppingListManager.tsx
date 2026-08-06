@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { CalendarDays, Check, PlusCircle, Save, ShoppingBasket, Trash2, X } from "lucide-react";
+import { CalendarDays, Check, Pencil, PlusCircle, Save, ShoppingBasket, Trash2, X } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
 import { requestJson } from "@/lib/requestJson";
@@ -27,6 +27,7 @@ export function ShoppingListManager() {
   const { language, t } = useLanguage();
   const [items, setItems] = useState<ShoppingItem[]>([]);
   const [form, setForm] = useState<ShoppingForm>(emptyForm);
+  const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -68,24 +69,46 @@ export function ShoppingListManager() {
   }
   function closeModal() {
     setIsOpen(false);
+    setEditingItem(null);
     setForm(emptyForm);
   }
 
-  async function addItem(event: FormEvent<HTMLFormElement>) {
+  function openAddModal() {
+    setEditingItem(null);
+    setForm(emptyForm);
+    setIsOpen(true);
+  }
+
+  function openEditModal(item: ShoppingItem) {
+    setEditingItem(item);
+    setForm({
+      deadline: item.deadline ?? "",
+      hasDeadline: Boolean(item.deadline),
+      name: item.name,
+      quantity: String(item.quantity),
+      unit: item.unit
+    });
+    setIsOpen(true);
+  }
+
+  async function saveItem(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSaving(true);
     setError("");
     try {
-      const body = await requestJson<{ item: ShoppingItem }>("/api/shopping-list", {
+      const body = await requestJson<{ item: ShoppingItem }>(editingItem ? `/api/shopping-list/${editingItem.id}` : "/api/shopping-list", {
         body: JSON.stringify({
           deadline: form.hasDeadline ? form.deadline : null,
           name: form.name.trim(),
           quantity: Number(form.quantity),
           unit: form.unit
         }),
-        method: "POST"
+        method: editingItem ? "PATCH" : "POST"
       });
-      setItems((current) => [body.item, ...current]);
+      setItems((current) => editingItem
+        ? current.map((item) => item.id === editingItem.id ? body.item : item)
+        : [body.item, ...current]
+      );
       closeModal();
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : t("shoppingList.error"));
@@ -144,9 +167,10 @@ export function ShoppingListManager() {
           <span className="shopping-deadline"><CalendarDays size={15} aria-hidden="true" />{formatDay(item.deadline)}</span>
         ) : null}
         {canWrite ? (
-          <button className="icon-button danger shopping-delete" type="button" disabled={busyId === item.id} onClick={() => deleteItem(item)} aria-label={t("shoppingList.delete")}>
-            <Trash2 size={17} aria-hidden="true" />
-          </button>
+          <div className="shopping-actions">
+            {!completed ? <button className="icon-button" type="button" disabled={busyId === item.id} onClick={() => openEditModal(item)} aria-label={t("shoppingList.edit")}><Pencil size={17} aria-hidden="true" /></button> : null}
+            <button className="icon-button danger" type="button" disabled={busyId === item.id} onClick={() => deleteItem(item)} aria-label={t("shoppingList.delete")}><Trash2 size={17} aria-hidden="true" /></button>
+          </div>
         ) : null}
       </article>
     );
@@ -154,7 +178,7 @@ export function ShoppingListManager() {
 
   return (
     <>
-      {canWrite ? <div className="action-row"><button className="button primary" type="button" onClick={() => setIsOpen(true)}><PlusCircle size={18} aria-hidden="true" />{t("shoppingList.add")}</button></div> : null}
+      {canWrite ? <div className="action-row"><button className="button primary" type="button" onClick={openAddModal}><PlusCircle size={18} aria-hidden="true" />{t("shoppingList.add")}</button></div> : null}
       {error ? <p className="form-error" role="alert">{error}</p> : null}
       {isLoading ? <p className="muted-text">{t("shoppingList.loading")}</p> : null}
 
@@ -178,8 +202,8 @@ export function ShoppingListManager() {
       {isOpen ? (
         <div className="modal-backdrop" role="presentation">
           <section className="modal-panel" role="dialog" aria-modal="true" aria-labelledby="shopping-modal-title">
-            <div className="modal-header"><div><span>{t("nav.shoppingList")}</span><h2 id="shopping-modal-title">{t("shoppingList.addTitle")}</h2></div><button className="icon-button" type="button" onClick={closeModal} aria-label={t("common.closeDialog")}><X size={20} aria-hidden="true" /></button></div>
-            <form className="modal-form" onSubmit={addItem}>
+            <div className="modal-header"><div><span>{t("nav.shoppingList")}</span><h2 id="shopping-modal-title">{editingItem ? t("shoppingList.editTitle") : t("shoppingList.addTitle")}</h2></div><button className="icon-button" type="button" onClick={closeModal} aria-label={t("common.closeDialog")}><X size={20} aria-hidden="true" /></button></div>
+            <form className="modal-form" onSubmit={saveItem}>
               <label className="form-field-full"><span>{t("shoppingList.name")}</span><input autoFocus required value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} /></label>
               <label><span>{t("shoppingList.quantity")}</span><input required min="0.01" step="any" type="number" value={form.quantity} onChange={(event) => setForm((current) => ({ ...current, quantity: event.target.value }))} /></label>
               <label><span>{t("shoppingList.unit")}</span><select value={form.unit} onChange={(event) => setForm((current) => ({ ...current, unit: event.target.value as ShoppingUnit }))}><option value="kg">{unitLabel("kg")}</option><option value="package">{unitLabel("package")}</option><option value="piece">{unitLabel("piece")}</option></select></label>

@@ -1,19 +1,42 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireWriteAccess } from "@/lib/auth";
-import { deleteShoppingItem, setShoppingItemCompleted } from "@/lib/serverDb";
+import { deleteShoppingItem, setShoppingItemCompleted, updateOpenShoppingItem } from "@/lib/serverDb";
+import type { ShoppingItem, ShoppingUnit } from "@/lib/types";
 
 type RouteContext = { params: Promise<{ id: string }> };
+const units: ShoppingUnit[] = ["kg", "package", "piece"];
 
 export async function PATCH(request: NextRequest, context: RouteContext) {
   const auth = requireWriteAccess(request);
   if (auth.error) return auth.error;
   const { id } = await context.params;
-  const body = (await request.json()) as { completed?: boolean };
-  if (typeof body.completed !== "boolean") {
-    return NextResponse.json({ message: "Ungültiger Status." }, { status: 400 });
+  const body = (await request.json()) as Partial<Pick<ShoppingItem, "name" | "quantity" | "unit" | "deadline">> & { completed?: boolean };
+
+  if (typeof body.completed === "boolean") {
+    const item = await setShoppingItemCompleted(auth.payload.ownerId, id, body.completed);
+    if (!item) return NextResponse.json({ message: "Eintrag nicht gefunden." }, { status: 404 });
+    return NextResponse.json({ item });
   }
-  const item = await setShoppingItemCompleted(auth.payload.ownerId, id, body.completed);
-  if (!item) return NextResponse.json({ message: "Eintrag nicht gefunden." }, { status: 404 });
+
+  if (
+    !body.name?.trim() ||
+    typeof body.quantity !== "number" ||
+    !Number.isFinite(body.quantity) ||
+    body.quantity <= 0 ||
+    !body.unit ||
+    !units.includes(body.unit) ||
+    (body.deadline !== null && (typeof body.deadline !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(body.deadline)))
+  ) {
+    return NextResponse.json({ message: "Ungültige Einkaufsdaten." }, { status: 400 });
+  }
+
+  const item = await updateOpenShoppingItem(auth.payload.ownerId, id, {
+    deadline: body.deadline ?? null,
+    name: body.name.trim(),
+    quantity: body.quantity,
+    unit: body.unit
+  });
+  if (!item) return NextResponse.json({ message: "Offener Eintrag nicht gefunden." }, { status: 404 });
   return NextResponse.json({ item });
 }
 

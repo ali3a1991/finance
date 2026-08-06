@@ -366,6 +366,8 @@ const translations = {
     shoppingList: {
       add: "Eintrag hinzufügen",
       addTitle: "Neuen Einkauf hinzufügen",
+      edit: "Eintrag bearbeiten",
+      editTitle: "Einkauf bearbeiten",
       name: "Was möchtest du kaufen?",
       quantity: "Menge",
       unit: "Einheit",
@@ -882,6 +884,8 @@ const translations = {
     shoppingList: {
       add: "Add item",
       addTitle: "Add shopping item",
+      edit: "Edit item",
+      editTitle: "Edit shopping item",
       name: "What do you want to buy?",
       quantity: "Quantity",
       unit: "Unit",

@@ -792,6 +792,26 @@ export async function setShoppingItemCompleted(
   return item ? mapShoppingItem(item) : null;
 }
 
+export async function updateOpenShoppingItem(
+  ownerId: string,
+  id: string,
+  input: Pick<ShoppingItem, "name" | "quantity" | "unit" | "deadline">
+): Promise<ShoppingItem | null> {
+  await ensureShoppingItemTable();
+  const result = await prisma.shoppingItem.updateMany({
+    data: {
+      deadline: input.deadline ? toDate(input.deadline) : null,
+      name: input.name,
+      quantity: input.quantity,
+      unit: input.unit
+    },
+    where: { completedAt: null, id, ownerId }
+  });
+  if (result.count === 0) return null;
+  const item = await prisma.shoppingItem.findFirst({ where: { id, ownerId } });
+  return item ? mapShoppingItem(item) : null;
+}
+
 export async function deleteShoppingItem(ownerId: string, id: string): Promise<boolean> {
   await ensureShoppingItemTable();
   const result = await prisma.shoppingItem.deleteMany({ where: { id, ownerId } });
