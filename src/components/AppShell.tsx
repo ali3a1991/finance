@@ -16,7 +16,7 @@ import {
   WalletCards,
   X
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useApiLoading } from "@/components/ApiLoadingProvider";
 import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -48,6 +48,33 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const { t } = useLanguage();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) {
+      return;
+    }
+
+    const scrollY = window.scrollY;
+    const previousStyles = {
+      overflow: document.body.style.overflow,
+      position: document.body.style.position,
+      top: document.body.style.top,
+      width: document.body.style.width
+    };
+
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
+
+    return () => {
+      document.body.style.overflow = previousStyles.overflow;
+      document.body.style.position = previousStyles.position;
+      document.body.style.top = previousStyles.top;
+      document.body.style.width = previousStyles.width;
+      window.scrollTo(0, scrollY);
+    };
+  }, [isMobileMenuOpen]);
 
   function isActivePath(href: string) {
     if (href === "/") {
