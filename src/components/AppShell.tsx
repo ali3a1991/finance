@@ -185,18 +185,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               })}
             </div>
           </div>
-          <Link
-            href="/settings"
-            className={`nav-item ${isActivePath("/settings") ? "active" : ""}`}
-            onClick={closeMobileMenu}
-            aria-current={isActivePath("/settings") ? "page" : undefined}
-          >
-            <Settings size={18} aria-hidden="true" />
-            <span>{t("nav.settings")}</span>
-          </Link>
         </nav>
         {user ? (
           <div className="sidebar-footer">
+            <Link
+              href="/settings"
+              className={`nav-item ${isActivePath("/settings") ? "active" : ""}`}
+              onClick={closeMobileMenu}
+              aria-current={isActivePath("/settings") ? "page" : undefined}
+            >
+              <Settings size={18} aria-hidden="true" />
+              <span>{t("nav.settings")}</span>
+            </Link>
             <div className="sidebar-user" aria-label={t("nav.signedInAs")}>
               <span>{t("nav.signedInAs")}</span>
               <strong>{user.username}</strong>

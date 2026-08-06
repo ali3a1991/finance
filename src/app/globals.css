@@ -235,13 +235,9 @@ button:disabled {
 }
 
 .nav-group-label {
-  color: var(--sidebar-link);
-  text-decoration: underline;
-}
-
-.nav-group-label.active {
-  background: var(--sidebar-hover);
-  color: var(--sidebar-text);
+  text-transform: uppercase;
+  color: gray;
+  font-size: 0.8rem;
 }
 
 .nav-sublist {
