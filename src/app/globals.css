@@ -2162,6 +2162,12 @@ th {
   text-align: center;
 }
 
+.shopping-suggestions-status {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
 .completed-panel .shopping-section-heading {
   color: var(--muted);
 }

@@ -140,6 +140,8 @@ export type ShoppingItem = {
   createdAt: string;
 };
 
+export type ShoppingSuggestion = Pick<ShoppingItem, "name" | "unit">;
+
 export type AccessLevel = "readonly" | "readwrite";
 
 export type SharedUser = {

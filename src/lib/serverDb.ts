@@ -21,6 +21,7 @@ import type {
   SavingsGoal,
   SavingsTransaction,
   ShoppingItem,
+  ShoppingSuggestion,
   SharedUser
 } from "@/lib/types";
 
@@ -48,6 +49,37 @@ async function ensureShoppingItemTable() {
   `);
   await prisma.$executeRawUnsafe('CREATE INDEX IF NOT EXISTS "ShoppingItem_ownerId_createdAt_idx" ON "ShoppingItem"("ownerId", "createdAt")');
   await prisma.$executeRawUnsafe('CREATE INDEX IF NOT EXISTS "ShoppingItem_ownerId_completedAt_idx" ON "ShoppingItem"("ownerId", "completedAt")');
+}
+
+async function ensureShoppingCatalogTable() {
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS "ShoppingCatalogItem" (
+      "id" TEXT PRIMARY KEY,
+      "ownerId" TEXT,
+      "normalizedName" TEXT NOT NULL,
+      "name" TEXT NOT NULL,
+      "unit" TEXT NOT NULL,
+      "lastUsedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  await prisma.$executeRawUnsafe('CREATE UNIQUE INDEX IF NOT EXISTS "ShoppingCatalogItem_ownerId_normalizedName_key" ON "ShoppingCatalogItem"("ownerId", "normalizedName")');
+  await prisma.$executeRawUnsafe('CREATE INDEX IF NOT EXISTS "ShoppingCatalogItem_ownerId_lastUsedAt_idx" ON "ShoppingCatalogItem"("ownerId", "lastUsedAt")');
+}
+
+function normalizeShoppingName(name: string) {
+  return name.trim().toLocaleLowerCase();
+}
+
+async function rememberShoppingSuggestion(ownerId: string, name: string, unit: ShoppingItem["unit"]) {
+  await ensureShoppingCatalogTable();
+  const normalizedName = normalizeShoppingName(name);
+  await prisma.shoppingCatalogItem.upsert({
+    create: { id: randomUUID(), lastUsedAt: new Date(), name, normalizedName, ownerId, unit },
+    update: { lastUsedAt: new Date(), name, unit },
+    where: { ownerId_normalizedName: { normalizedName, ownerId } }
+  });
 }
 
 function mapShoppingItem(item: {
@@ -759,6 +791,20 @@ export async function listShoppingItems(ownerId: string): Promise<ShoppingItem[]
   return items.map(mapShoppingItem);
 }
 
+export async function listShoppingSuggestions(ownerId: string): Promise<ShoppingSuggestion[]> {
+  await Promise.all([ensureShoppingItemTable(), ensureShoppingCatalogTable()]);
+  const [catalogItems, shoppingItems] = await Promise.all([
+    prisma.shoppingCatalogItem.findMany({ orderBy: { lastUsedAt: "desc" }, where: { ownerId } }),
+    prisma.shoppingItem.findMany({ orderBy: { createdAt: "desc" }, select: { name: true, unit: true }, where: { ownerId } })
+  ]);
+  const suggestions = new Map<string, ShoppingSuggestion>();
+  for (const item of [...catalogItems, ...shoppingItems]) {
+    const key = normalizeShoppingName(item.name);
+    if (!suggestions.has(key)) suggestions.set(key, { name: item.name, unit: item.unit as ShoppingItem["unit"] });
+  }
+  return [...suggestions.values()];
+}
+
 export async function createShoppingItem(
   ownerId: string,
   input: Pick<ShoppingItem, "name" | "quantity" | "unit" | "deadline">
@@ -774,6 +820,7 @@ export async function createShoppingItem(
       unit: input.unit
     }
   });
+  await rememberShoppingSuggestion(ownerId, input.name, input.unit);
   return mapShoppingItem(item);
 }
 
@@ -808,6 +855,7 @@ export async function updateOpenShoppingItem(
     where: { completedAt: null, id, ownerId }
   });
   if (result.count === 0) return null;
+  await rememberShoppingSuggestion(ownerId, input.name, input.unit);
   const item = await prisma.shoppingItem.findFirst({ where: { id, ownerId } });
   return item ? mapShoppingItem(item) : null;
 }

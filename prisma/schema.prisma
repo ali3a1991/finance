@@ -276,3 +276,17 @@ model ShoppingItem {
   @@index([ownerId, createdAt])
   @@index([ownerId, completedAt])
 }
+
+model ShoppingCatalogItem {
+  id             String   @id
+  ownerId        String?
+  normalizedName String
+  name           String
+  unit           String
+  lastUsedAt     DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([ownerId, normalizedName])
+  @@index([ownerId, lastUsedAt])
+}

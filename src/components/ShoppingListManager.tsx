@@ -5,7 +5,7 @@ import { CalendarDays, Check, Pencil, PlusCircle, Save, ShoppingBasket, Trash2, 
 import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
 import { requestJson } from "@/lib/requestJson";
-import type { ShoppingItem, ShoppingUnit } from "@/lib/types";
+import type { ShoppingItem, ShoppingSuggestion, ShoppingUnit } from "@/lib/types";
 
 type ShoppingForm = {
   name: string;
@@ -28,6 +28,8 @@ export function ShoppingListManager() {
   const [items, setItems] = useState<ShoppingItem[]>([]);
   const [form, setForm] = useState<ShoppingForm>(emptyForm);
   const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null);
+  const [suggestions, setSuggestions] = useState<ShoppingSuggestion[]>([]);
+  const [areSuggestionsLoading, setAreSuggestionsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -73,10 +75,23 @@ export function ShoppingListManager() {
     setForm(emptyForm);
   }
 
+  async function loadSuggestions() {
+    setAreSuggestionsLoading(true);
+    try {
+      const body = await requestJson<{ suggestions: ShoppingSuggestion[] }>("/api/shopping-list/suggestions");
+      setSuggestions(body.suggestions);
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : t("shoppingList.error"));
+    } finally {
+      setAreSuggestionsLoading(false);
+    }
+  }
+
   function openAddModal() {
     setEditingItem(null);
     setForm(emptyForm);
     setIsOpen(true);
+    void loadSuggestions();
   }
 
   function openEditModal(item: ShoppingItem) {
@@ -89,6 +104,12 @@ export function ShoppingListManager() {
       unit: item.unit
     });
     setIsOpen(true);
+    void loadSuggestions();
+  }
+
+  function updateItemName(name: string) {
+    const selected = suggestions.find((suggestion) => suggestion.name.trim().toLocaleLowerCase() === name.trim().toLocaleLowerCase());
+    setForm((current) => ({ ...current, name, unit: selected?.unit ?? current.unit }));
   }
 
   async function saveItem(event: FormEvent<HTMLFormElement>) {
@@ -204,7 +225,7 @@ export function ShoppingListManager() {
           <section className="modal-panel" role="dialog" aria-modal="true" aria-labelledby="shopping-modal-title">
             <div className="modal-header"><div><span>{t("nav.shoppingList")}</span><h2 id="shopping-modal-title">{editingItem ? t("shoppingList.editTitle") : t("shoppingList.addTitle")}</h2></div><button className="icon-button" type="button" onClick={closeModal} aria-label={t("common.closeDialog")}><X size={20} aria-hidden="true" /></button></div>
             <form className="modal-form" onSubmit={saveItem}>
-              <label className="form-field-full"><span>{t("shoppingList.name")}</span><input autoFocus required value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} /></label>
+              <label className="form-field-full"><span>{t("shoppingList.name")}</span><input autoFocus required list="shopping-item-suggestions" autoComplete="off" value={form.name} onChange={(event) => updateItemName(event.target.value)} /><datalist id="shopping-item-suggestions">{suggestions.map((suggestion) => <option key={suggestion.name.toLocaleLowerCase()} value={suggestion.name} label={`${suggestion.name} · ${unitLabel(suggestion.unit)}`} />)}</datalist>{areSuggestionsLoading ? <small className="shopping-suggestions-status">{t("shoppingList.loadingSuggestions")}</small> : null}</label>
               <label><span>{t("shoppingList.quantity")}</span><input required min="0.01" step="any" type="number" value={form.quantity} onChange={(event) => setForm((current) => ({ ...current, quantity: event.target.value }))} /></label>
               <label><span>{t("shoppingList.unit")}</span><select value={form.unit} onChange={(event) => setForm((current) => ({ ...current, unit: event.target.value as ShoppingUnit }))}><option value="kg">{unitLabel("kg")}</option><option value="package">{unitLabel("package")}</option><option value="piece">{unitLabel("piece")}</option></select></label>
               <label className="checkbox-row form-field-full"><input type="checkbox" checked={form.hasDeadline} onChange={(event) => setForm((current) => ({ ...current, hasDeadline: event.target.checked, deadline: event.target.checked ? current.deadline : "" }))} /><span>{t("shoppingList.hasDeadline")}</span></label>
