@@ -1014,10 +1014,11 @@ th {
   color: var(--muted);
   font-weight: 800;
   text-transform: uppercase;
+  font-size: 0.82rem;
 }
 
 .table-total-row strong {
-  font-size: 1.2rem;
+  font-size: 1rem;
 }
 
 .investment-result {
