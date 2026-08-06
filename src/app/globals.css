@@ -961,7 +961,6 @@ th {
 
 .gauge-values {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
   width: min(100%, 520px);
   margin-top: 18px;
@@ -2912,6 +2911,7 @@ th {
   }
 
   .gauge-values {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     width: 100%;
   }
 
