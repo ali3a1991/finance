@@ -147,7 +147,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 return (
                   <Link
                     href={item.href}
-                    className={`nav-subitem ${isActive ? "active" : ""}`}
+                    className={`nav-item ${isActive ? "active" : ""}`}
                     key={item.href}
                     onClick={closeMobileMenu}
                     aria-current={isActive ? "page" : undefined}
@@ -171,7 +171,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 return (
                   <Link
                     href={item.href}
-                    className={`nav-subitem ${isActive ? "active" : ""}`}
+                    className={`nav-item ${isActive ? "active" : ""}`}
                     key={item.href}
                     onClick={closeMobileMenu}
                     aria-current={isActive ? "page" : undefined}
