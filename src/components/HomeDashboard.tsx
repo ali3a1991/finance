@@ -155,65 +155,65 @@ export function HomeDashboard() {
         : t("dashboard.critical");
   const isCurrentMonth = selectedMonth === getMonthKey();
   const investmentResultClass = summary.investmentResult >= 0 ? "positive" : "negative";
-  const showWealthSummaries =
-    isLoading || summary.investmentCurrentTotal !== 0 || summary.savingsTotal !== 0;
+  const showSvingsTotal = isLoading || summary.savingsTotal !== 0;
+  const showInvestmentTotal = isLoading || summary.investmentCurrentTotal !== 0;
 
   return (
     <>
-      {showWealthSummaries ? (
-        <>
-          <section className="investment-summary-panel" aria-label={t("dashboard.investmentOverview")}>
-            <div className="investment-summary-heading">
-              <div className="summary-icon">
-                <LineChart size={20} aria-hidden="true" />
-              </div>
-              <div>
-                <span>{t("dashboard.investmentOverview")}</span>
-                <strong>
-                  {summary.investmentItemCount} {t("dashboard.investmentItems")}
-                </strong>
-              </div>
+      {showInvestmentTotal ? (
+        <section className="investment-summary-panel" aria-label={t("dashboard.investmentOverview")}>
+          <div className="investment-summary-heading">
+            <div className="summary-icon">
+              <LineChart size={20} aria-hidden="true" />
             </div>
-            <div className="investment-summary-grid">
-              <div>
-                <span>{t("dashboard.currentInvestmentValue")}</span>
-                <strong>{formatCurrency(summary.investmentCurrentTotal)}</strong>
-              </div>
-              <div>
-                <span>{t("dashboard.returnRate")}</span>
-                <strong className={investmentResultClass}>
-                  {summary.investmentReturnRate.toLocaleString(language === "de" ? "de-DE" : "en-US", {
-                    maximumFractionDigits: 2,
-                    minimumFractionDigits: 2
-                  })}
-                  %
-                </strong>
-              </div>
-              <div>
-                <span>{t("dashboard.investmentResult")}</span>
-                <strong className={investmentResultClass}>{formatCurrency(summary.investmentResult)}</strong>
-              </div>
+            <div>
+              <span>{t("dashboard.investmentOverview")}</span>
+              <strong>
+                {summary.investmentItemCount} {t("dashboard.investmentItems")}
+              </strong>
             </div>
-          </section>
+          </div>
+          <div className="investment-summary-grid">
+            <div>
+              <span>{t("dashboard.currentInvestmentValue")}</span>
+              <strong>{formatCurrency(summary.investmentCurrentTotal)}</strong>
+            </div>
+            <div>
+              <span>{t("dashboard.returnRate")}</span>
+              <strong className={investmentResultClass}>
+                {summary.investmentReturnRate.toLocaleString(language === "de" ? "de-DE" : "en-US", {
+                  maximumFractionDigits: 2,
+                  minimumFractionDigits: 2
+                })}
+                %
+              </strong>
+            </div>
+            <div>
+              <span>{t("dashboard.investmentResult")}</span>
+              <strong className={investmentResultClass}>{formatCurrency(summary.investmentResult)}</strong>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
-          <section className="investment-summary-panel savings-summary-panel" aria-label={t("dashboard.savings")}>
-            <div className="investment-summary-heading">
-              <div className="summary-icon">
-                <PiggyBank size={20} aria-hidden="true" />
-              </div>
-              <div>
-                <span>{t("dashboard.savings")}</span>
-                <strong>{t("dashboard.savingsTotal")}</strong>
-              </div>
+      {showSvingsTotal ? (
+        <section className="investment-summary-panel savings-summary-panel" aria-label={t("dashboard.savings")}>
+          <div className="investment-summary-heading">
+            <div className="summary-icon">
+              <PiggyBank size={20} aria-hidden="true" />
             </div>
-            <div className="investment-summary-grid savings-summary-grid">
-              <div>
-                <span>{t("dashboard.savings")}</span>
-                <strong>{formatCurrency(summary.savingsTotal)}</strong>
-              </div>
+            <div>
+              <span>{t("dashboard.savings")}</span>
+              <strong>{t("dashboard.savingsTotal")}</strong>
             </div>
-          </section>
-        </>
+          </div>
+          <div className="investment-summary-grid savings-summary-grid">
+            <div>
+              <span>{t("dashboard.savings")}</span>
+              <strong>{formatCurrency(summary.savingsTotal)}</strong>
+            </div>
+          </div>
+        </section>
       ) : null}
 
       <section className="month-switcher" aria-label={t("dashboard.monthPicker")}>
