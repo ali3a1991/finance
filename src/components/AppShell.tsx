@@ -111,7 +111,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Image src="/logo.png" alt="FyNest Logo" width={44} height={44} className="brand-logo" />
             <span>
               <strong>FyNest</strong>
-              <small>{t("app.cockpit")}</small>
             </span>
           </Link>
           <button className="sidebar-close" type="button" onClick={closeMobileMenu} aria-label={t("nav.closeMenu")}>

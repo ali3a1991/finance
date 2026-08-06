@@ -12,7 +12,6 @@ const translations = {
   de: {
     app: {
       brand: "FyNest",
-      cockpit: "Privates Cockpit"
     },
     nav: {
       home: "Startseite",
@@ -505,7 +504,6 @@ const translations = {
   en: {
     app: {
       brand: "Finance Manager",
-      cockpit: "Private cockpit"
     },
     nav: {
       home: "Home",
