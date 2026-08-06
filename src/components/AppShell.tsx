@@ -10,6 +10,7 @@ import {
   Home,
   Menu,
   PiggyBank,
+  ShoppingBasket,
   Settings,
   ShieldCheck,
   TrendingUp,
@@ -32,6 +33,7 @@ const navItems = [
 ];
 
 const toolItems = [
+  { href: "/shopping-list", labelKey: "shoppingList", icon: ShoppingBasket },
   { href: "/exchange", labelKey: "exchange", icon: CircleDollarSign },
   { href: "/projects", labelKey: "projects", icon: FolderKanban }
 ];

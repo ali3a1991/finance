@@ -10,6 +10,7 @@ type PageHeaderProps = {
     | "incomes"
     | "expenses"
     | "projects"
+    | "shoppingList"
     | "savings"
     | "investments"
     | "exchange"

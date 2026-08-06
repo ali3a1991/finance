@@ -20,6 +20,7 @@ import type {
   ProjectExpenseInput,
   SavingsGoal,
   SavingsTransaction,
+  ShoppingItem,
   SharedUser
 } from "@/lib/types";
 
@@ -29,6 +30,44 @@ function toDateInput(date: Date) {
 
 function toDate(value: string) {
   return new Date(`${value.slice(0, 10)}T00:00:00`);
+}
+
+async function ensureShoppingItemTable() {
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS "ShoppingItem" (
+      "id" TEXT PRIMARY KEY,
+      "ownerId" TEXT,
+      "name" TEXT NOT NULL,
+      "quantity" DOUBLE PRECISION NOT NULL,
+      "unit" TEXT NOT NULL,
+      "deadline" TIMESTAMP(3),
+      "completedAt" TIMESTAMP(3),
+      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  await prisma.$executeRawUnsafe('CREATE INDEX IF NOT EXISTS "ShoppingItem_ownerId_createdAt_idx" ON "ShoppingItem"("ownerId", "createdAt")');
+  await prisma.$executeRawUnsafe('CREATE INDEX IF NOT EXISTS "ShoppingItem_ownerId_completedAt_idx" ON "ShoppingItem"("ownerId", "completedAt")');
+}
+
+function mapShoppingItem(item: {
+  id: string;
+  name: string;
+  quantity: number;
+  unit: string;
+  deadline: Date | null;
+  completedAt: Date | null;
+  createdAt: Date;
+}): ShoppingItem {
+  return {
+    completedAt: item.completedAt?.toISOString() ?? null,
+    createdAt: item.createdAt.toISOString(),
+    deadline: item.deadline ? toDateInput(item.deadline) : null,
+    id: item.id,
+    name: item.name,
+    quantity: item.quantity,
+    unit: item.unit as ShoppingItem["unit"]
+  };
 }
 
 function normalizePaymentInterval(value: number | null | undefined) {
@@ -708,6 +747,54 @@ export async function updateInvestment(ownerId: string, id: string, patch: Omit<
 
 export async function deleteInvestment(ownerId: string, id: string): Promise<boolean> {
   const result = await prisma.investment.deleteMany({ where: { id, ownerId } });
+  return result.count > 0;
+}
+
+export async function listShoppingItems(ownerId: string): Promise<ShoppingItem[]> {
+  await ensureShoppingItemTable();
+  const items = await prisma.shoppingItem.findMany({
+    orderBy: [{ completedAt: "asc" }, { createdAt: "desc" }],
+    where: { ownerId }
+  });
+  return items.map(mapShoppingItem);
+}
+
+export async function createShoppingItem(
+  ownerId: string,
+  input: Pick<ShoppingItem, "name" | "quantity" | "unit" | "deadline">
+): Promise<ShoppingItem> {
+  await ensureShoppingItemTable();
+  const item = await prisma.shoppingItem.create({
+    data: {
+      deadline: input.deadline ? toDate(input.deadline) : null,
+      id: randomUUID(),
+      name: input.name,
+      ownerId,
+      quantity: input.quantity,
+      unit: input.unit
+    }
+  });
+  return mapShoppingItem(item);
+}
+
+export async function setShoppingItemCompleted(
+  ownerId: string,
+  id: string,
+  completed: boolean
+): Promise<ShoppingItem | null> {
+  await ensureShoppingItemTable();
+  const result = await prisma.shoppingItem.updateMany({
+    data: { completedAt: completed ? new Date() : null },
+    where: { id, ownerId }
+  });
+  if (result.count === 0) return null;
+  const item = await prisma.shoppingItem.findFirst({ where: { id, ownerId } });
+  return item ? mapShoppingItem(item) : null;
+}
+
+export async function deleteShoppingItem(ownerId: string, id: string): Promise<boolean> {
+  await ensureShoppingItemTable();
+  const result = await prisma.shoppingItem.deleteMany({ where: { id, ownerId } });
   return result.count > 0;
 }
 

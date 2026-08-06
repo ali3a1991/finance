@@ -128,6 +128,18 @@ export type MonthlyPayment = {
   lockedBySavings?: boolean;
 };
 
+export type ShoppingUnit = "kg" | "package" | "piece";
+
+export type ShoppingItem = {
+  id: string;
+  name: string;
+  quantity: number;
+  unit: ShoppingUnit;
+  deadline: string | null;
+  completedAt: string | null;
+  createdAt: string;
+};
+
 export type AccessLevel = "readonly" | "readwrite";
 
 export type SharedUser = {

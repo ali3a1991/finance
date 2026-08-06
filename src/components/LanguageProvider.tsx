@@ -22,6 +22,7 @@ const translations = {
       projects: "Gemeinsame Ausgaben",
       savings: "Sparen",
       investments: "Investitionen",
+      shoppingList: "Einkaufsliste",
       exchange: "Wechsel",
       tools: "Werkzeuge",
       contracts: "Verträge",
@@ -77,6 +78,11 @@ const translations = {
         eyebrow: "Wechsel",
         title: "Euro, Tether und Toman umrechnen.",
         description: "Live-Kurse fur deine Umrechnung zwischen Euro, USDT und Toman."
+      },
+      shoppingList: {
+        eyebrow: "Einkaufsliste",
+        title: "Einkäufe einfach planen.",
+        description: "Produkte, Mengen und Fristen in einer übersichtlichen Checkliste."
       },
       savings: {
         eyebrow: "Sparen",
@@ -357,6 +363,24 @@ const translations = {
         rateNote: "Berechnet mit"
       }
     },
+    shoppingList: {
+      add: "Eintrag hinzufügen",
+      addTitle: "Neuen Einkauf hinzufügen",
+      name: "Was möchtest du kaufen?",
+      quantity: "Menge",
+      unit: "Einheit",
+      hasDeadline: "Frist festlegen",
+      deadline: "Frist",
+      loading: "Einkaufsliste wird geladen...",
+      openItems: "Offene Einkäufe",
+      empty: "Deine Einkaufsliste ist leer.",
+      completedOn: "Erledigt am",
+      markDone: "Als erledigt markieren",
+      markOpen: "Wieder öffnen",
+      delete: "Eintrag löschen",
+      error: "Die Aktion konnte nicht abgeschlossen werden.",
+      units: { kg: "Kilo", package: "Packung", piece: "Stück" }
+    },
     savings: {
       add: "Spartopf hinzufugen",
       loading: "Spartopfe werden geladen...",
@@ -514,6 +538,7 @@ const translations = {
       projects: "Shared Expenses",
       savings: "Savings",
       investments: "Investments",
+      shoppingList: "Shopping List",
       exchange: "Exchange",
       tools: "Tools",
       contracts: "Contracts",
@@ -569,6 +594,11 @@ const translations = {
         eyebrow: "Exchange",
         title: "Convert Euro, Tether and Toman.",
         description: "Live rates for converting between Euro, USDT and Toman."
+      },
+      shoppingList: {
+        eyebrow: "Shopping list",
+        title: "Plan shopping with ease.",
+        description: "Keep products, quantities and deadlines in a clear checklist."
       },
       savings: {
         eyebrow: "Savings",
@@ -848,6 +878,24 @@ const translations = {
         beforeKucoinFee: "Before KuCoin fee",
         rateNote: "Calculated with"
       }
+    },
+    shoppingList: {
+      add: "Add item",
+      addTitle: "Add shopping item",
+      name: "What do you want to buy?",
+      quantity: "Quantity",
+      unit: "Unit",
+      hasDeadline: "Set a deadline",
+      deadline: "Deadline",
+      loading: "Loading shopping list...",
+      openItems: "Open items",
+      empty: "Your shopping list is empty.",
+      completedOn: "Completed on",
+      markDone: "Mark as completed",
+      markOpen: "Reopen item",
+      delete: "Delete item",
+      error: "The action could not be completed.",
+      units: { kg: "kg", package: "package", piece: "piece" }
     },
     savings: {
       add: "Add savings fund",
