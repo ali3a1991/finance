@@ -2964,10 +2964,6 @@ th {
     left: 14px;
   }
 
-  .gauge-free-amount {
-    padding: 10px 8px;
-  }
-
   .public-preference-group {
     flex: 1 1 0;
   }
@@ -3000,6 +2996,14 @@ th {
   .exchange-refresh-button {
     top: 12px;
     right: 12px;
+  }
+
+  .gauge-free-amount {
+    padding: 10px 8px;
+  }
+
+  .gauge-free-amount span {
+    font-size: 0.72rem;
   }
 
   .exchange-pair {
