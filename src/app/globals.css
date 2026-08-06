@@ -3156,8 +3156,7 @@ th {
   }
 
   .investment-summary-grid > div {
-    min-height: 82px;
-    padding: 10px;
+    padding: 10px 8px;
   }
 
   .tether-panel {
