@@ -210,7 +210,7 @@ button:disabled {
   align-items: center;
   gap: 10px;
   min-height: 38px;
-  padding: 9px 12px;
+  padding: 8px 10px;
   border-radius: 8px;
   color: var(--sidebar-link);
 }
@@ -266,7 +266,7 @@ button:disabled {
 .sidebar-version span,
 .sidebar-version small {
   color: var(--sidebar-muted);
-  font-size: 0.78rem;
+  font-size: 0.7rem;
 }
 
 .sidebar-user span,
@@ -279,7 +279,7 @@ button:disabled {
 .sidebar-version strong {
   overflow-wrap: anywhere;
   color: var(--sidebar-text);
-  font-size: 0.98rem;
+  font-size: 0.8rem;
 }
 
 .sidebar-version {
@@ -2857,7 +2857,7 @@ th {
 
   .nav-item {
     justify-content: flex-start;
-    min-height: 44px;
+    min-height: 38px;
     padding: 8px;
   }
 
