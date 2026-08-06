@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { CalendarDays, Check, Pencil, PlusCircle, Save, ShoppingBasket, Trash2, X } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -35,12 +35,19 @@ export function ShoppingListManager() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
+  const suggestionsLoaded = useRef(false);
 
   useEffect(() => {
     requestJson<{ items: ShoppingItem[] }>("/api/shopping-list")
       .then((body) => setItems(body.items))
       .catch((loadError: unknown) => setError(loadError instanceof Error ? loadError.message : t("shoppingList.error")))
       .finally(() => setIsLoading(false));
+  }, [t]);
+
+  useEffect(() => {
+    if (suggestionsLoaded.current) return;
+    suggestionsLoaded.current = true;
+    void loadSuggestions();
   }, [t]);
 
   const openItems = useMemo(
@@ -91,7 +98,6 @@ export function ShoppingListManager() {
     setEditingItem(null);
     setForm(emptyForm);
     setIsOpen(true);
-    void loadSuggestions();
   }
 
   function openEditModal(item: ShoppingItem) {
@@ -104,7 +110,6 @@ export function ShoppingListManager() {
       unit: item.unit
     });
     setIsOpen(true);
-    void loadSuggestions();
   }
 
   function updateItemName(name: string) {
