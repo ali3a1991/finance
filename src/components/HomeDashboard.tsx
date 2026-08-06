@@ -155,8 +155,8 @@ export function HomeDashboard() {
         : t("dashboard.critical");
   const isCurrentMonth = selectedMonth === getMonthKey();
   const investmentResultClass = summary.investmentResult >= 0 ? "positive" : "negative";
-  const showSavingsTotal = isLoading || summary.savingsTotal !== 0;
-  const showInvestmentTotal = isLoading || summary.investmentCurrentTotal !== 0;
+  const showSavingsTotal = summary.savingsTotal !== 0;
+  const showInvestmentTotal = summary.investmentCurrentTotal !== 0;
 
   return (
     <>
