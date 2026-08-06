@@ -155,7 +155,7 @@ export function HomeDashboard() {
         : t("dashboard.critical");
   const isCurrentMonth = selectedMonth === getMonthKey();
   const investmentResultClass = summary.investmentResult >= 0 ? "positive" : "negative";
-  const showSvingsTotal = isLoading || summary.savingsTotal !== 0;
+  const showSavingsTotal = isLoading || summary.savingsTotal !== 0;
   const showInvestmentTotal = isLoading || summary.investmentCurrentTotal !== 0;
 
   return (
@@ -196,7 +196,7 @@ export function HomeDashboard() {
         </section>
       ) : null}
 
-      {showSvingsTotal ? (
+      {showSavingsTotal ? (
         <section className="investment-summary-panel savings-summary-panel" aria-label={t("dashboard.savings")}>
           <div className="investment-summary-heading">
             <div className="summary-icon">
