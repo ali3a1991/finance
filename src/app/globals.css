@@ -206,8 +206,8 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 10px;
-  min-height: 44px;
-  padding: 11px 12px;
+  min-height: 38px;
+  padding: 9px 12px;
   border-radius: 8px;
   color: var(--sidebar-link);
 }
@@ -2865,7 +2865,7 @@ th {
     justify-content: flex-start;
     min-height: 44px;
     padding: 8px;
-    font-size: 0.95rem;
+    font-size: 0.92rem;
   }
 
   .nav-item span {

@@ -137,7 +137,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           })}
           <div className="nav-group">
             <div className={`nav-group-label ${hasActiveTool ? "active" : ""}`}>
-              <FolderKanban size={18} aria-hidden="true" />
               <span>{t("nav.tools")}</span>
             </div>
             <div className="nav-sublist">
@@ -162,7 +161,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
           <div className="nav-group">
             <div className={`nav-group-label ${hasActiveContract ? "active" : ""}`}>
-              <FileText size={18} aria-hidden="true" />
               <span>{t("nav.contracts")}</span>
             </div>
             <div className="nav-sublist">
