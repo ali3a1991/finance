@@ -7,7 +7,7 @@ import type { ProjectExpenseInput } from "@/lib/types";
 type RouteContext = { params: Promise<{ id: string }> };
 
 export async function POST(request: NextRequest, context: RouteContext) {
-  const auth = requireWriteAccess(request);
+  const auth = await requireWriteAccess(request);
   if (auth.error) return auth.error;
   const { id } = await context.params;
   const body = (await request.json()) as ProjectExpenseInput;

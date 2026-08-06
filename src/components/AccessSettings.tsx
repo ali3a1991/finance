@@ -1,10 +1,11 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { Pencil, PlusCircle, Save, Trash2, UserRound, X } from "lucide-react";
+import { KeyRound, Pencil, PlusCircle, Save, Trash2, UserRound, X } from "lucide-react";
 import { useLanguage } from "@/components/LanguageProvider";
 import { requestJson } from "@/lib/requestJson";
 import type { AccessLevel, SharedUser } from "@/lib/types";
+import { ACTION_PERMISSION_GROUPS, ALL_ACTION_PERMISSIONS, permissionActionName, type ActionPermission } from "@/lib/actionPermissions";
 
 type MeResponse = {
   accessLevel: "owner" | "readonly" | "readwrite";
@@ -32,6 +33,8 @@ export function AccessSettings() {
   const [form, setForm] = useState<UserForm>(emptyForm);
   const [isOpen, setIsOpen] = useState(false);
   const [operationLabel, setOperationLabel] = useState("");
+  const [permissionsUser, setPermissionsUser] = useState<SharedUser | null>(null);
+  const [permissionDraft, setPermissionDraft] = useState<ActionPermission[]>([]);
   const [userToDelete, setUserToDelete] = useState<SharedUser | null>(null);
   const [users, setUsers] = useState<SharedUser[]>([]);
 
@@ -134,6 +137,33 @@ export function AccessSettings() {
     }
   }
 
+  function openPermissionsModal(user: SharedUser) {
+    setPermissionsUser(user);
+    setPermissionDraft(user.permissions);
+  }
+
+  function togglePermission(permission: ActionPermission) {
+    setPermissionDraft((current) => current.includes(permission)
+      ? current.filter((item) => item !== permission)
+      : [...current, permission]
+    );
+  }
+
+  async function savePermissions() {
+    if (!permissionsUser) return;
+    setOperationLabel("save-permissions");
+    try {
+      const body = await requestJson<{ user: SharedUser }>(`/api/users/${permissionsUser.id}/permissions`, {
+        body: JSON.stringify({ permissions: permissionDraft }),
+        method: "PUT"
+      });
+      setUsers((current) => current.map((user) => user.id === body.user.id ? body.user : user));
+      setPermissionsUser(null);
+    } finally {
+      setOperationLabel("");
+    }
+  }
+
   return (
     <section className="settings-panel settings-panel-block access-settings-panel" aria-labelledby="access-title">
       <div className="settings-copy">
@@ -182,6 +212,14 @@ export function AccessSettings() {
                 <td>{user.accessLevel === "readonly" ? t("settings.readonly") : t("settings.readwrite")}</td>
                 <td>
                   <div className="table-actions">
+                    <button
+                      className="icon-button"
+                      type="button"
+                      onClick={() => openPermissionsModal(user)}
+                      aria-label={`${user.username} ${t("settings.managePermissions")}`}
+                    >
+                      <KeyRound size={16} aria-hidden="true" />
+                    </button>
                     <button
                       className="icon-button"
                       type="button"
@@ -258,6 +296,41 @@ export function AccessSettings() {
                 <Trash2 size={18} aria-hidden="true" />
                 {operationLabel === "delete-user" ? t("common.deleting") : t("common.delete")}
               </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
+
+      {permissionsUser ? (
+        <div className="modal-backdrop" role="presentation">
+          <section className="modal-panel permissions-modal" role="dialog" aria-modal="true" aria-labelledby="permissions-modal-title">
+            <div className="modal-header">
+              <div><span>{permissionsUser.username}</span><h2 id="permissions-modal-title">{t("settings.managePermissions")}</h2></div>
+              <button className="icon-button" type="button" onClick={() => setPermissionsUser(null)} aria-label={t("common.closeDialog")}><X size={20} aria-hidden="true" /></button>
+            </div>
+            <div className="permissions-toolbar">
+              <p>{t("settings.permissionsDescription")}</p>
+              <div className="table-actions">
+                <button className="button secondary" type="button" onClick={() => setPermissionDraft(ALL_ACTION_PERMISSIONS)}>{t("settings.selectAll")}</button>
+                <button className="button secondary" type="button" onClick={() => setPermissionDraft([])}>{t("settings.clearAll")}</button>
+              </div>
+            </div>
+            <div className="permissions-grid">
+              {ACTION_PERMISSION_GROUPS.map((group) => (
+                <fieldset className="permission-group" key={group.section}>
+                  <legend>{t(`settings.permissionSections.${group.section}`)}</legend>
+                  {group.actions.map((permission) => (
+                    <label className="permission-option" key={permission}>
+                      <input type="checkbox" checked={permissionDraft.includes(permission)} onChange={() => togglePermission(permission)} />
+                      <span>{t(`settings.permissionActions.${permissionActionName(permission)}`)}</span>
+                    </label>
+                  ))}
+                </fieldset>
+              ))}
+            </div>
+            <div className="modal-actions permissions-actions">
+              <button className="button secondary" type="button" onClick={() => setPermissionsUser(null)}>{t("common.cancel")}</button>
+              <button className="button primary" type="button" onClick={savePermissions} disabled={operationLabel === "save-permissions"}><Save size={18} aria-hidden="true" />{operationLabel === "save-permissions" ? t("common.saving") : t("common.save")}</button>
             </div>
           </section>
         </div>

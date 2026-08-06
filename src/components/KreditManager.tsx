@@ -36,7 +36,7 @@ const emptyForm: KreditForm = {
 };
 
 export function KreditManager() {
-  const { canWrite } = useAuth();
+  const { can } = useAuth();
   const { t } = useLanguage();
   const [loans, setLoans] = useState<Loan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -201,7 +201,7 @@ export function KreditManager() {
 
   return (
     <>
-      {canWrite ? (
+      {can("loans.create") ? (
         <div className="action-row">
           <button className="button primary" type="button" onClick={() => setIsOpen(true)}>
             <PlusCircle size={18} aria-hidden="true" />
@@ -250,24 +250,24 @@ export function KreditManager() {
                       >
                         <ListOrdered size={16} aria-hidden="true" />
                       </button>
-                      {canWrite ? (
+                      {can("loans.edit") || can("loans.delete") ? (
                         <>
-                          <button
+                          {can("loans.edit") ? <button
                             className="icon-button"
                             type="button"
                             onClick={() => openEditModal(loan)}
                             aria-label={`${loan.name} ${t("common.edit")}`}
                           >
                             <Pencil size={16} aria-hidden="true" />
-                          </button>
-                          <button
+                          </button> : null}
+                          {can("loans.delete") ? <button
                             className="icon-button danger"
                             type="button"
                             onClick={() => setLoanToDelete(loan)}
                             aria-label={`${loan.name} ${t("common.delete")}`}
                           >
                             <Trash2 size={16} aria-hidden="true" />
-                          </button>
+                          </button> : null}
                         </>
                       ) : null}
                     </div>

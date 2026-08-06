@@ -2271,6 +2271,77 @@ th {
   font-weight: 700;
 }
 
+.permissions-modal {
+  width: min(920px, 100%);
+}
+
+.permissions-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+.permissions-toolbar p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.permissions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding: 22px;
+}
+
+.permission-group {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.permission-group legend {
+  padding: 0 6px;
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.permission-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.permission-option input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+}
+
+.permissions-actions {
+  padding: 0 22px 22px;
+}
+
+@media (max-width: 700px) {
+  .permissions-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .permissions-grid {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+}
+
 .theme-switcher {
   display: grid;
   grid-template-columns: repeat(2, minmax(112px, 1fr));

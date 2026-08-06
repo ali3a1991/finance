@@ -16,7 +16,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
 }
 
 export async function PUT(request: NextRequest, context: RouteContext) {
-  const auth = requireWriteAccess(request);
+  const auth = await requireWriteAccess(request);
   if (auth.error) return auth.error;
   const { id } = await context.params;
   const body = (await request.json()) as ExpenseProjectInput;
@@ -29,7 +29,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 }
 
 export async function DELETE(request: NextRequest, context: RouteContext) {
-  const auth = requireWriteAccess(request);
+  const auth = await requireWriteAccess(request);
   if (auth.error) return auth.error;
   const { id } = await context.params;
   const deleted = await deleteExpenseProject(auth.payload.ownerId, id);

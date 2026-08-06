@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireApiAuth, requireWriteAccess } from "@/lib/auth";
+import { requireActionAccess, requireApiAuth } from "@/lib/auth";
 import { applySavingsTransaction, listSavingsTransactions } from "@/lib/serverDb";
 
 type RouteContext = {
@@ -20,19 +20,15 @@ export async function GET(request: NextRequest, context: RouteContext) {
 }
 
 export async function POST(request: NextRequest, context: RouteContext) {
-  const auth = requireWriteAccess(request);
-
-  if (auth.error) {
-    return auth.error;
-  }
-
-  const { id } = await context.params;
   const body = (await request.json()) as {
     amount?: number;
     date?: string;
     note?: string | null;
     type?: "deposit" | "withdrawal";
   };
+  const auth = await requireActionAccess(request, body.type === "withdrawal" ? "savings.withdraw" : "savings.deposit");
+  if (auth.error) return auth.error;
+  const { id } = await context.params;
 
   if (
     (body.type !== "deposit" && body.type !== "withdrawal") ||

@@ -58,7 +58,7 @@ function formFromInvestment(investment: InvestmentWithQuote): InvestmentForm {
 }
 
 export function InvestmentsManager() {
-  const { canWrite } = useAuth();
+  const { can } = useAuth();
   const { t } = useLanguage();
   const [editingInvestment, setEditingInvestment] = useState<InvestmentWithQuote | null>(null);
   const [form, setForm] = useState<InvestmentForm>(emptyForm);
@@ -165,7 +165,7 @@ export function InvestmentsManager() {
 
   return (
     <>
-      {canWrite ? (
+      {can("investments.create") ? (
         <div className="action-row">
           <button className="button primary" type="button" onClick={openAddModal}>
             <PlusCircle size={18} aria-hidden="true" />
@@ -187,7 +187,7 @@ export function InvestmentsManager() {
                 <th>{t("investments.currentPrice")}</th>
                 <th>{t("investments.currentValue")}</th>
                 <th>{t("investments.result")}</th>
-                {canWrite ? <th>{t("common.actions")}</th> : null}
+                {can("investments.edit") || can("investments.delete") ? <th>{t("common.actions")}</th> : null}
               </tr>
             </thead>
             <tbody>
@@ -222,25 +222,25 @@ export function InvestmentsManager() {
                         {formatCurrency(result, "EUR")}
                       </span>
                     </td>
-                    {canWrite ? (
+                    {can("investments.edit") || can("investments.delete") ? (
                       <td>
                         <div className="table-actions">
-                          <button
+                          {can("investments.edit") ? <button
                             className="icon-button"
                             type="button"
                             onClick={() => openEditModal(investment)}
                             aria-label={`${investment.assetName} ${t("common.edit")}`}
                           >
                             <Pencil size={16} aria-hidden="true" />
-                          </button>
-                          <button
+                          </button> : null}
+                          {can("investments.delete") ? <button
                             className="icon-button danger"
                             type="button"
                             onClick={() => setInvestmentToDelete(investment)}
                             aria-label={`${investment.assetName} ${t("common.delete")}`}
                           >
                             <Trash2 size={16} aria-hidden="true" />
-                          </button>
+                          </button> : null}
                         </div>
                       </td>
                     ) : null}

@@ -23,7 +23,7 @@ function localDateKey(value: string) {
 }
 
 export function ShoppingListManager() {
-  const { canWrite } = useAuth();
+  const { can } = useAuth();
   const { language, t } = useLanguage();
   const [items, setItems] = useState<ShoppingItem[]>([]);
   const [form, setForm] = useState<ShoppingForm>(emptyForm);
@@ -174,7 +174,7 @@ export function ShoppingListManager() {
         <button
           className="shopping-check"
           type="button"
-          disabled={!canWrite || busyId === item.id}
+          disabled={!can("shopping.complete") || busyId === item.id}
           onClick={() => toggleItem(item)}
           aria-label={completed ? t("shoppingList.markOpen") : t("shoppingList.markDone")}
         >
@@ -187,10 +187,10 @@ export function ShoppingListManager() {
         {item.deadline ? (
           <span className="shopping-deadline"><CalendarDays size={15} aria-hidden="true" />{formatDay(item.deadline)}</span>
         ) : null}
-        {canWrite ? (
+        {can("shopping.edit") || can("shopping.delete") ? (
           <div className="shopping-actions">
-            {!completed ? <button className="icon-button" type="button" disabled={busyId === item.id} onClick={() => openEditModal(item)} aria-label={t("shoppingList.edit")}><Pencil size={17} aria-hidden="true" /></button> : null}
-            <button className="icon-button danger" type="button" disabled={busyId === item.id} onClick={() => deleteItem(item)} aria-label={t("shoppingList.delete")}><Trash2 size={17} aria-hidden="true" /></button>
+            {!completed && can("shopping.edit") ? <button className="icon-button" type="button" disabled={busyId === item.id} onClick={() => openEditModal(item)} aria-label={t("shoppingList.edit")}><Pencil size={17} aria-hidden="true" /></button> : null}
+            {can("shopping.delete") ? <button className="icon-button danger" type="button" disabled={busyId === item.id} onClick={() => deleteItem(item)} aria-label={t("shoppingList.delete")}><Trash2 size={17} aria-hidden="true" /></button> : null}
           </div>
         ) : null}
       </article>
@@ -199,7 +199,7 @@ export function ShoppingListManager() {
 
   return (
     <>
-      {canWrite ? <div className="action-row"><button className="button primary" type="button" onClick={openAddModal}><PlusCircle size={18} aria-hidden="true" />{t("shoppingList.add")}</button></div> : null}
+      {can("shopping.create") ? <div className="action-row"><button className="button primary" type="button" onClick={openAddModal}><PlusCircle size={18} aria-hidden="true" />{t("shoppingList.add")}</button></div> : null}
       {error ? <p className="form-error" role="alert">{error}</p> : null}
       {isLoading ? <p className="muted-text">{t("shoppingList.loading")}</p> : null}
 

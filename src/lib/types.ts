@@ -142,6 +142,8 @@ export type ShoppingItem = {
 
 export type ShoppingSuggestion = Pick<ShoppingItem, "name" | "unit">;
 
+import type { ActionPermission } from "@/lib/actionPermissions";
+
 export type AccessLevel = "readonly" | "readwrite";
 
 export type SharedUser = {
@@ -150,6 +152,7 @@ export type SharedUser = {
   accessLevel: AccessLevel;
   ownerId: string;
   createdAt: string;
+  permissions: ActionPermission[];
 };
 
 export type ProjectCategory = {

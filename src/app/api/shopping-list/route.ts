@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const auth = requireWriteAccess(request);
+  const auth = await requireWriteAccess(request);
   if (auth.error) return auth.error;
 
   const body = (await request.json()) as Pick<ShoppingItem, "name" | "quantity" | "unit" | "deadline">;

@@ -86,7 +86,7 @@ function errorMessage(error: unknown, fallback: string) {
 }
 
 export function ProjectsManager() {
-  const { canWrite } = useAuth();
+  const { can } = useAuth();
   const { t } = useLanguage();
   const [projects, setProjects] = useState<ExpenseProject[]>([]);
   const [form, setForm] = useState<ProjectFormState>(emptyProjectForm());
@@ -168,7 +168,7 @@ export function ProjectsManager() {
 
   return (
     <>
-      {canWrite ? (
+      {can("projects.create") ? (
         <div className="action-row">
           <button className="button primary" type="button" onClick={openAdd}>
             <PlusCircle size={18} aria-hidden="true" />
@@ -207,14 +207,14 @@ export function ProjectsManager() {
               <Link className="button secondary" href={`/projects/${project.id}`}>
                 {t("projects.openProject")} <ArrowRight size={17} aria-hidden="true" />
               </Link>
-              {canWrite ? (
+              {can("projects.edit") || can("projects.delete") ? (
                 <div className="table-actions">
-                  <button className="icon-button" type="button" onClick={() => openEdit(project)} aria-label={t("projects.editProject")}>
+                  {can("projects.edit") ? <button className="icon-button" type="button" onClick={() => openEdit(project)} aria-label={t("projects.editProject")}>
                     <Pencil size={16} aria-hidden="true" />
-                  </button>
-                  <button className="icon-button danger" type="button" onClick={() => setDeletingProject(project)} aria-label={t("projects.deleteProject")}>
+                  </button> : null}
+                  {can("projects.delete") ? <button className="icon-button danger" type="button" onClick={() => setDeletingProject(project)} aria-label={t("projects.deleteProject")}>
                     <Trash2 size={16} aria-hidden="true" />
-                  </button>
+                  </button> : null}
                 </div>
               ) : null}
             </div>
@@ -247,7 +247,7 @@ export function ProjectsManager() {
 }
 
 export function ProjectDetailManager({ projectId }: { projectId: string }) {
-  const { canWrite } = useAuth();
+  const { can } = useAuth();
   const { t } = useLanguage();
   const [project, setProject] = useState<ExpenseProjectDetail | null>(null);
   const [expenseForm, setExpenseForm] = useState<ExpenseFormState | null>(null);
@@ -354,7 +354,7 @@ export function ProjectDetailManager({ projectId }: { projectId: string }) {
     <>
       <div className="project-detail-nav">
         <Link className="button secondary" href="/projects"><ArrowLeft size={17} aria-hidden="true" /> {t("nav.projects")}</Link>
-        {canWrite ? (
+        {can("projects.expenses.create") ? (
           <button className="button primary" type="button" onClick={openAddExpense} disabled={!activeCategories.length || !activeMembers.length}>
             <PlusCircle size={18} aria-hidden="true" /> {t("projects.addExpense")}
           </button>
@@ -414,7 +414,7 @@ export function ProjectDetailManager({ projectId }: { projectId: string }) {
         <div className="section-title"><span>{t("projects.expenseHistory")}</span></div>
         <div className="responsive-table">
           <table>
-            <thead><tr><th>{t("projects.date")}</th><th>{t("projects.expenseDescription")}</th><th>{t("projects.category")}</th><th>{t("projects.paidBy")}</th><th>{t("projects.amount")}</th>{canWrite ? <th>{t("common.actions")}</th> : null}</tr></thead>
+            <thead><tr><th>{t("projects.date")}</th><th>{t("projects.expenseDescription")}</th><th>{t("projects.category")}</th><th>{t("projects.paidBy")}</th><th>{t("projects.amount")}</th>{can("projects.expenses.edit") || can("projects.expenses.delete") ? <th>{t("common.actions")}</th> : null}</tr></thead>
             <tbody>
               {project.expenses.map((expense) => (
                 <tr key={expense.id}>
@@ -423,7 +423,7 @@ export function ProjectDetailManager({ projectId }: { projectId: string }) {
                   <td><span className="project-category-chip">{expense.categoryName}</span></td>
                   <td>{expense.paidByMemberName}</td>
                   <td><strong>{formatCurrency(expense.amount)}</strong></td>
-                  {canWrite ? <td><div className="table-actions"><button className="icon-button" type="button" onClick={() => openEditExpense(expense)} aria-label={t("projects.editExpense")}><Pencil size={16} aria-hidden="true" /></button><button className="icon-button danger" type="button" onClick={() => setDeletingExpense(expense)} aria-label={t("projects.deleteExpense")}><Trash2 size={16} aria-hidden="true" /></button></div></td> : null}
+                  {can("projects.expenses.edit") || can("projects.expenses.delete") ? <td><div className="table-actions">{can("projects.expenses.edit") ? <button className="icon-button" type="button" onClick={() => openEditExpense(expense)} aria-label={t("projects.editExpense")}><Pencil size={16} aria-hidden="true" /></button> : null}{can("projects.expenses.delete") ? <button className="icon-button danger" type="button" onClick={() => setDeletingExpense(expense)} aria-label={t("projects.deleteExpense")}><Trash2 size={16} aria-hidden="true" /></button> : null}</div></td> : null}
                 </tr>
               ))}
             </tbody>

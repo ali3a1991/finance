@@ -7,7 +7,7 @@ type RouteContext = {
 };
 
 export async function PUT(request: NextRequest, context: RouteContext) {
-  const auth = requireWriteAccess(request);
+  const auth = await requireWriteAccess(request);
 
   if (auth.error) {
     return auth.error;
@@ -41,7 +41,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 }
 
 export async function DELETE(request: NextRequest, context: RouteContext) {
-  const auth = requireWriteAccess(request);
+  const auth = await requireWriteAccess(request);
 
   if (auth.error) {
     return auth.error;

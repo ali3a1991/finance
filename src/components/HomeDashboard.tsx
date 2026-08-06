@@ -89,7 +89,7 @@ const paymentTypeTranslationKeys: Record<MonthlyPayment["sourceType"], string> =
 };
 
 export function HomeDashboard() {
-  const { canWrite } = useAuth();
+  const { can } = useAuth();
   const { language, t } = useLanguage();
   const [selectedMonth, setSelectedMonth] = useState(getMonthKey());
   const [isLoading, setIsLoading] = useState(true);
@@ -316,11 +316,11 @@ export function HomeDashboard() {
             const draftValue = paymentDrafts[payment.id] ?? toPaymentInputValue(payment.paidAmount);
             const draftAmount = parsePaymentInputValue(draftValue);
             const hasDraftChange = Math.abs(draftAmount - payment.paidAmount) > 0.009;
-            const canUpdatePayment = canWrite && !payment.lockedBySavings;
+            const canUpdatePayment = can("dashboard.payments.update") && !payment.lockedBySavings;
 
             return (
               <article
-                className={`payment-row ${!canWrite ? "readonly" : ""} ${payment.lockedBySavings ? "locked" : ""} ${isPaid ? "paid" : ""} ${isPartial ? "partial" : ""}`}
+                className={`payment-row ${!can("dashboard.payments.update") ? "readonly" : ""} ${payment.lockedBySavings ? "locked" : ""} ${isPaid ? "paid" : ""} ${isPartial ? "partial" : ""}`}
                 key={payment.id}
               >
                 {canUpdatePayment ? (

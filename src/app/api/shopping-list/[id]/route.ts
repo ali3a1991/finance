@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireWriteAccess } from "@/lib/auth";
+import { requireActionAccess, requireWriteAccess } from "@/lib/auth";
 import { deleteShoppingItem, setShoppingItemCompleted, updateOpenShoppingItem } from "@/lib/serverDb";
 import type { ShoppingItem, ShoppingUnit } from "@/lib/types";
 
@@ -7,10 +7,10 @@ type RouteContext = { params: Promise<{ id: string }> };
 const units: ShoppingUnit[] = ["kg", "package", "piece"];
 
 export async function PATCH(request: NextRequest, context: RouteContext) {
-  const auth = requireWriteAccess(request);
+  const body = (await request.json()) as Partial<Pick<ShoppingItem, "name" | "quantity" | "unit" | "deadline">> & { completed?: boolean };
+  const auth = await requireActionAccess(request, typeof body.completed === "boolean" ? "shopping.complete" : "shopping.edit");
   if (auth.error) return auth.error;
   const { id } = await context.params;
-  const body = (await request.json()) as Partial<Pick<ShoppingItem, "name" | "quantity" | "unit" | "deadline">> & { completed?: boolean };
 
   if (typeof body.completed === "boolean") {
     const item = await setShoppingItemCompleted(auth.payload.ownerId, id, body.completed);
@@ -41,7 +41,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 }
 
 export async function DELETE(request: NextRequest, context: RouteContext) {
-  const auth = requireWriteAccess(request);
+  const auth = await requireWriteAccess(request);
   if (auth.error) return auth.error;
   const { id } = await context.params;
   const deleted = await deleteShoppingItem(auth.payload.ownerId, id);

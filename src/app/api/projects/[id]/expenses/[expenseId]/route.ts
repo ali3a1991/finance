@@ -7,7 +7,7 @@ import type { ProjectExpenseInput } from "@/lib/types";
 type RouteContext = { params: Promise<{ id: string; expenseId: string }> };
 
 export async function PUT(request: NextRequest, context: RouteContext) {
-  const auth = requireWriteAccess(request);
+  const auth = await requireWriteAccess(request);
   if (auth.error) return auth.error;
   const { id, expenseId } = await context.params;
   const body = (await request.json()) as ProjectExpenseInput;
@@ -20,7 +20,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 }
 
 export async function DELETE(request: NextRequest, context: RouteContext) {
-  const auth = requireWriteAccess(request);
+  const auth = await requireWriteAccess(request);
   if (auth.error) return auth.error;
   const { id, expenseId } = await context.params;
   const deleted = await deleteProjectExpense(auth.payload.ownerId, id, expenseId);

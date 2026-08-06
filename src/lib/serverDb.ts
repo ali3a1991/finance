@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { randomUUID } from "crypto";
 import { getPasswordHash } from "@/lib/auth";
+import { ALL_ACTION_PERMISSIONS, isActionPermission, type ActionPermission } from "@/lib/actionPermissions";
 import type {
   AccessLevel,
   Expense,
@@ -2194,17 +2195,25 @@ function mapSharedUser(user: {
   accessLevel: string;
   ownerId: string;
   createdAt: Date;
+  permissions: string[];
 }): SharedUser {
+  const permissions = user.permissions.filter(isActionPermission);
   return {
     accessLevel: user.accessLevel === "readonly" ? "readonly" : "readwrite",
     createdAt: user.createdAt.toISOString(),
     id: user.id,
     ownerId: user.ownerId,
+    permissions: permissions.length === 0 && user.accessLevel === "readwrite" ? ALL_ACTION_PERMISSIONS : permissions,
     username: user.username
   };
 }
 
+async function ensureSharedUserPermissionsColumn() {
+  await prisma.$executeRawUnsafe('ALTER TABLE "AppUser" ADD COLUMN IF NOT EXISTS "permissions" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[]');
+}
+
 export async function listSharedUsers(ownerId: string): Promise<SharedUser[]> {
+  await ensureSharedUserPermissionsColumn();
   const users = await prisma.appUser.findMany({
     orderBy: { createdAt: "desc" },
     where: {
@@ -2227,11 +2236,13 @@ export async function createSharedUser({
   password: string;
   username: string;
 }): Promise<SharedUser> {
+  await ensureSharedUserPermissionsColumn();
   const user = await prisma.appUser.create({
     data: {
       accessLevel,
       ownerId,
       passwordHash: getPasswordHash(password),
+      permissions: accessLevel === "readwrite" ? ALL_ACTION_PERMISSIONS : [],
       username
     }
   });
@@ -2248,9 +2259,14 @@ export async function updateSharedUser(
     username: string;
   }
 ): Promise<SharedUser | null> {
+  await ensureSharedUserPermissionsColumn();
+  const existingUser = await prisma.appUser.findFirst({ where: { accessLevel: { not: "owner" }, id, ownerId } });
+  if (!existingUser) return null;
+  const accessLevelChanged = existingUser.accessLevel !== patch.accessLevel;
   const result = await prisma.appUser.updateMany({
     data: {
       accessLevel: patch.accessLevel,
+      permissions: accessLevelChanged ? (patch.accessLevel === "readwrite" ? ALL_ACTION_PERMISSIONS : []) : undefined,
       passwordHash: patch.password ? getPasswordHash(patch.password) : undefined,
       username: patch.username
     },
@@ -2269,12 +2285,28 @@ export async function updateSharedUser(
   return user ? mapSharedUser(user) : null;
 }
 
+export async function updateSharedUserPermissions(
+  ownerId: string,
+  id: string,
+  permissions: ActionPermission[]
+): Promise<SharedUser | null> {
+  await ensureSharedUserPermissionsColumn();
+  const result = await prisma.appUser.updateMany({
+    data: { accessLevel: permissions.length > 0 ? "readwrite" : "readonly", permissions },
+    where: { accessLevel: { not: "owner" }, id, ownerId }
+  });
+  if (result.count === 0) return null;
+  const user = await prisma.appUser.findFirst({ where: { accessLevel: { not: "owner" }, id, ownerId } });
+  return user ? mapSharedUser(user) : null;
+}
+
 export async function deleteSharedUser(ownerId: string, id: string) {
   const result = await prisma.appUser.deleteMany({ where: { accessLevel: { not: "owner" }, id, ownerId } });
   return result.count > 0;
 }
 
 export async function findRegistrationAccount(username: string) {
+  await ensureSharedUserPermissionsColumn();
   return prisma.appUser.findUnique({ where: { username } });
 }
 
@@ -2402,6 +2434,7 @@ export async function findTelegramContactByUsername(username: string) {
 
 export async function completeRegistration(challengeId: string, code: string) {
   await ensureRegistrationTables();
+  await ensureSharedUserPermissionsColumn();
   const challenge = await prisma.registrationChallenge.findUnique({ where: { id: challengeId } });
 
   if (!challenge || challenge.expiresAt.getTime() < Date.now() || challenge.codeHash !== getPasswordHash(code)) {
@@ -2515,6 +2548,7 @@ export async function canBroadcastFromTelegram(username: string | null | undefin
 
 export async function createPasswordResetChallenge(username: string, code: string) {
   await ensureRegistrationTables();
+  await ensureSharedUserPermissionsColumn();
   const [user, contact] = await Promise.all([
     prisma.appUser.findUnique({ where: { username } }),
     prisma.telegramContact.findUnique({ where: { username } })
@@ -2543,6 +2577,7 @@ export async function createPasswordResetChallenge(username: string, code: strin
 
 export async function completePasswordReset(challengeId: string, code: string, password: string) {
   await ensureRegistrationTables();
+  await ensureSharedUserPermissionsColumn();
   const challenge = await prisma.passwordResetChallenge.findUnique({ where: { id: challengeId } });
 
   if (!challenge || challenge.expiresAt.getTime() < Date.now() || challenge.codeHash !== getPasswordHash(code)) {

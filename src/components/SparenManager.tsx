@@ -80,7 +80,7 @@ function formFromGoal(goal: SavingsGoal): SavingsForm {
 }
 
 export function SparenManager() {
-  const { canWrite } = useAuth();
+  const { can } = useAuth();
   const { t } = useLanguage();
   const [detailGoal, setDetailGoal] = useState<SavingsGoal | null>(null);
   const [editingTransaction, setEditingTransaction] = useState<SavingsTransaction | null>(null);
@@ -312,7 +312,7 @@ export function SparenManager() {
 
   return (
     <>
-      {canWrite ? (
+      {can("savings.goals.create") ? (
         <div className="action-row">
           <button className="button primary" type="button" onClick={openAddModal}>
             <PlusCircle size={18} aria-hidden="true" />
@@ -357,9 +357,9 @@ export function SparenManager() {
                     </td>
                     <td>
                       <div className="table-actions">
-                        {canWrite ? (
+                        {can("savings.deposit") || can("savings.withdraw") ? (
                           <>
-                            <button
+                            {can("savings.deposit") ? <button
                               className="button secondary compact-action"
                               type="button"
                               onClick={() => openTransactionModal(goal, "deposit")}
@@ -367,8 +367,8 @@ export function SparenManager() {
                             >
                               <ArrowDownToLine size={16} aria-hidden="true" />
                               {t("savings.deposit")}
-                            </button>
-                            <button
+                            </button> : null}
+                            {can("savings.withdraw") ? <button
                               className="button secondary compact-action"
                               type="button"
                               onClick={() => openTransactionModal(goal, "withdrawal")}
@@ -376,7 +376,7 @@ export function SparenManager() {
                             >
                               <ArrowUpFromLine size={16} aria-hidden="true" />
                               {t("savings.withdraw")}
-                            </button>
+                            </button> : null}
                           </>
                         ) : null}
                         <button
@@ -387,24 +387,24 @@ export function SparenManager() {
                         >
                           <List size={16} aria-hidden="true" />
                         </button>
-                        {canWrite ? (
+                        {can("savings.goals.edit") || can("savings.goals.delete") ? (
                           <>
-                          <button
+                          {can("savings.goals.edit") ? <button
                             className="icon-button"
                             type="button"
                             onClick={() => openEditModal(goal)}
                             aria-label={`${goal.name} ${t("common.edit")}`}
                           >
                             <Pencil size={16} aria-hidden="true" />
-                          </button>
-                          <button
+                          </button> : null}
+                          {can("savings.goals.delete") ? <button
                             className="icon-button danger"
                             type="button"
                             onClick={() => setGoalToDelete(goal)}
                             aria-label={`${goal.name} ${t("common.delete")}`}
                           >
                             <Trash2 size={16} aria-hidden="true" />
-                          </button>
+                          </button> : null}
                           </>
                         ) : null}
                       </div>
@@ -448,7 +448,8 @@ export function SparenManager() {
 
       {detailGoal ? (
         <SavingsDetailsModal
-          canWrite={canWrite}
+          canDelete={can("savings.transactions.delete")}
+          canEdit={can("savings.transactions.edit")}
           goal={detailGoal}
           isLoading={isDetailLoading}
           onClose={closeDetailsModal}
@@ -683,7 +684,8 @@ function SavingsTransactionModal({
 }
 
 function SavingsDetailsModal({
-  canWrite,
+  canDelete,
+  canEdit,
   goal,
   isLoading,
   onClose,
@@ -691,7 +693,8 @@ function SavingsDetailsModal({
   onEdit,
   transactions
 }: {
-  canWrite: boolean;
+  canDelete: boolean;
+  canEdit: boolean;
   goal: SavingsGoal;
   isLoading: boolean;
   onClose: () => void;
@@ -724,7 +727,7 @@ function SavingsDetailsModal({
                 <th>{t("savings.transactionDate")}</th>
                 <th>{t("savings.transactionAmount")}</th>
                 <th>{t("common.description")}</th>
-                {canWrite ? <th>{t("common.actions")}</th> : null}
+                {canEdit || canDelete ? <th>{t("common.actions")}</th> : null}
               </tr>
             </thead>
             <tbody>
@@ -734,25 +737,25 @@ function SavingsDetailsModal({
                   <td>{formatDate(transaction.date)}</td>
                   <td>{formatCurrency(transaction.amount)}</td>
                   <td>{transaction.note || "-"}</td>
-                  {canWrite ? (
+                  {canEdit || canDelete ? (
                     <td>
                       <div className="table-actions">
-                        <button
+                        {canEdit ? <button
                           className="icon-button"
                           type="button"
                           onClick={() => onEdit(transaction)}
                           aria-label={`${formatCurrency(transaction.amount)} ${t("common.edit")}`}
                         >
                           <Pencil size={16} aria-hidden="true" />
-                        </button>
-                        <button
+                        </button> : null}
+                        {canDelete ? <button
                           className="icon-button danger"
                           type="button"
                           onClick={() => onDelete(transaction)}
                           aria-label={`${formatCurrency(transaction.amount)} ${t("common.delete")}`}
                         >
                           <Trash2 size={16} aria-hidden="true" />
-                        </button>
+                        </button> : null}
                       </div>
                     </td>
                   ) : null}

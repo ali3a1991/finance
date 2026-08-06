@@ -55,7 +55,7 @@ const paymentIntervalOptions = [
 ];
 
 export function VersicherungManager() {
-  const { canWrite } = useAuth();
+  const { can } = useAuth();
   const { t } = useLanguage();
   const [insurances, setInsurances] = useState<Insurance[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -199,7 +199,7 @@ export function VersicherungManager() {
 
   return (
     <>
-      {canWrite ? (
+      {can("insurances.create") ? (
         <div className="action-row">
           <button className="button primary" type="button" onClick={() => setIsOpen(true)}>
             <PlusCircle size={18} aria-hidden="true" />
@@ -222,7 +222,7 @@ export function VersicherungManager() {
                 <th>{t("insurances.debitDay")}</th>
                 <th>{t("insurances.startDate")}</th>
                 <th>{t("insurances.endDate")}</th>
-                {canWrite ? <th>{t("common.actions")}</th> : null}
+                {can("insurances.edit") || can("insurances.delete") ? <th>{t("common.actions")}</th> : null}
               </tr>
             </thead>
             <tbody>
@@ -240,25 +240,25 @@ export function VersicherungManager() {
                   <td>{insurance.debitDay}. {t("common.day")}</td>
                   <td>{insurance.startDate ? formatDate(insurance.startDate) : "-"}</td>
                   <td>{insurance.endDate ? formatDate(insurance.endDate) : "-"}</td>
-                  {canWrite ? (
+                  {can("insurances.edit") || can("insurances.delete") ? (
                     <td>
                       <div className="table-actions">
-                        <button
+                        {can("insurances.edit") ? <button
                           className="icon-button"
                           type="button"
                           onClick={() => openEditModal(insurance)}
                           aria-label={`${insurance.provider} ${t("common.edit")}`}
                         >
                           <Pencil size={16} aria-hidden="true" />
-                        </button>
-                        <button
+                        </button> : null}
+                        {can("insurances.delete") ? <button
                           className="icon-button danger"
                           type="button"
                           onClick={() => setInsuranceToDelete(insurance)}
                           aria-label={`${insurance.provider} ${t("common.delete")}`}
                         >
                           <Trash2 size={16} aria-hidden="true" />
-                        </button>
+                        </button> : null}
                       </div>
                     </td>
                   ) : null}

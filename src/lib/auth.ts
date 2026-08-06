@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from "crypto";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { ALL_ACTION_PERMISSIONS, isActionPermission, type ActionPermission } from "@/lib/actionPermissions";
 
 const TOKEN_TTL_SECONDS = 60 * 60 * 24 * 30;
 const TOKEN_COOKIE = "finance_token";
@@ -127,20 +128,76 @@ export function requireApiAuth(request: NextRequest) {
   return { error: null, payload };
 }
 
-export function requireWriteAccess(request: NextRequest) {
+function permissionForWriteRequest(request: NextRequest): ActionPermission | null {
+  const path = request.nextUrl.pathname;
+  const method = request.method;
+  if (path === "/api/monthly-payments" && method === "PATCH") return "dashboard.payments.update";
+  if (path === "/api/incomes") return method === "POST" ? "incomes.create" : method === "PATCH" ? "incomes.carryover" : null;
+  if (/^\/api\/incomes\/[^/]+$/.test(path)) return method === "PUT" ? "incomes.edit" : method === "DELETE" ? "incomes.delete" : null;
+  if (path === "/api/expenses" && method === "POST") return "expenses.create";
+  if (/^\/api\/expenses\/[^/]+$/.test(path)) return method === "PUT" ? "expenses.edit" : method === "DELETE" ? "expenses.delete" : null;
+  if (path === "/api/investments" && method === "POST") return "investments.create";
+  if (/^\/api\/investments\/[^/]+$/.test(path)) return method === "PATCH" ? "investments.edit" : method === "DELETE" ? "investments.delete" : null;
+  if (path === "/api/loans" && method === "POST") return "loans.create";
+  if (/^\/api\/loans\/[^/]+$/.test(path)) return method === "PUT" ? "loans.edit" : method === "DELETE" ? "loans.delete" : null;
+  if (path === "/api/insurances" && method === "POST") return "insurances.create";
+  if (/^\/api\/insurances\/[^/]+$/.test(path)) return method === "PUT" ? "insurances.edit" : method === "DELETE" ? "insurances.delete" : null;
+  if (path === "/api/general-contracts" && method === "POST") return "contracts.create";
+  if (/^\/api\/general-contracts\/[^/]+$/.test(path)) return method === "PUT" ? "contracts.edit" : method === "DELETE" ? "contracts.delete" : null;
+  if (path === "/api/savings" && method === "POST") return "savings.goals.create";
+  if (/^\/api\/savings\/[^/]+$/.test(path)) return method === "PUT" ? "savings.goals.edit" : method === "DELETE" ? "savings.goals.delete" : null;
+  if (/^\/api\/savings\/[^/]+\/transactions\/[^/]+$/.test(path)) return method === "PUT" ? "savings.transactions.edit" : method === "DELETE" ? "savings.transactions.delete" : null;
+  if (path === "/api/projects" && method === "POST") return "projects.create";
+  if (/^\/api\/projects\/[^/]+$/.test(path)) return method === "PUT" ? "projects.edit" : method === "DELETE" ? "projects.delete" : null;
+  if (/^\/api\/projects\/[^/]+\/expenses$/.test(path) && method === "POST") return "projects.expenses.create";
+  if (/^\/api\/projects\/[^/]+\/expenses\/[^/]+$/.test(path)) return method === "PUT" ? "projects.expenses.edit" : method === "DELETE" ? "projects.expenses.delete" : null;
+  if (path === "/api/shopping-list" && method === "POST") return "shopping.create";
+  if (/^\/api\/shopping-list\/[^/]+$/.test(path) && method === "DELETE") return "shopping.delete";
+  return null;
+}
+
+export async function requireWriteAccess(request: NextRequest) {
   const auth = requireApiAuth(request);
 
   if (auth.error) {
     return auth;
   }
 
-  if (auth.payload.accessLevel === "readonly") {
+  const permission = permissionForWriteRequest(request);
+  const permissions = permission ? await getUserActionPermissions(auth.payload) : [];
+  if (!permission || !permissions.includes(permission)) {
     return {
       error: NextResponse.json({ message: "Nur-Lesen Zugriff erlaubt diese Aktion nicht." }, { status: 403 }),
       payload: auth.payload
     };
   }
 
+  return auth;
+}
+
+export async function ensureUserPermissionsColumn() {
+  await prisma.$executeRawUnsafe('ALTER TABLE "AppUser" ADD COLUMN IF NOT EXISTS "permissions" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[]');
+}
+
+export async function getUserActionPermissions(payload: { accessLevel: AccessLevel; sub: string }) {
+  if (payload.accessLevel === "owner") return ALL_ACTION_PERMISSIONS;
+  await ensureUserPermissionsColumn();
+  const user = await prisma.appUser.findUnique({ select: { accessLevel: true, permissions: true }, where: { username: payload.sub } });
+  if (!user) return [];
+  const permissions = user.permissions.filter(isActionPermission);
+  return permissions.length === 0 && user.accessLevel === "readwrite" ? ALL_ACTION_PERMISSIONS : permissions;
+}
+
+export async function requireActionAccess(request: NextRequest, permission: ActionPermission) {
+  const auth = requireApiAuth(request);
+  if (auth.error) return auth;
+  const permissions = await getUserActionPermissions(auth.payload);
+  if (!permissions.includes(permission)) {
+    return {
+      error: NextResponse.json({ message: "Keine Berechtigung für diese Aktion." }, { status: 403 }),
+      payload: auth.payload
+    };
+  }
   return auth;
 }
 
@@ -184,6 +241,7 @@ export async function authenticateUser(username: string, password: string) {
     };
   }
 
+  await ensureUserPermissionsColumn();
   const user = await prisma.appUser.findUnique({ where: { username } });
 
   if (!user || !verifyPassword(password, user.passwordHash)) {

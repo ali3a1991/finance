@@ -112,7 +112,7 @@ function parseAmountInputValue(value: string, language: "de" | "en") {
 }
 
 export function EinkommenManager() {
-  const { canWrite } = useAuth();
+  const { can } = useAuth();
   const { language, t } = useLanguage();
   const [activeType, setActiveType] = useState<"recurring" | "oneTime">("recurring");
   const [visibleType, setVisibleType] = useState<"recurring" | "oneTime">("recurring");
@@ -270,7 +270,7 @@ export function EinkommenManager() {
 
   return (
     <>
-      {canWrite ? (
+      {can("incomes.create") ? (
         <div className="action-row">
           <button className="button primary" type="button" onClick={() => setIsOpen(true)}>
             <PlusCircle size={18} aria-hidden="true" />
@@ -312,7 +312,7 @@ export function EinkommenManager() {
           </button>
         </div>
         <div className="income-carryover-controls">
-          {canWrite ? (
+          {can("incomes.carryover") ? (
             <>
               <label className="income-carryover-input">
                 <span>{t("incomes.amount")}</span>
@@ -371,7 +371,7 @@ export function EinkommenManager() {
                 <th>{t("incomes.amount")}</th>
                 <th>{t("incomes.date")}</th>
                 <th>{t("incomes.type")}</th>
-                {canWrite ? <th>{t("common.actions")}</th> : null}
+                {can("incomes.edit") || can("incomes.delete") ? <th>{t("common.actions")}</th> : null}
               </tr>
             </thead>
             <tbody>
@@ -387,28 +387,28 @@ export function EinkommenManager() {
                   <td>{formatCurrency(income.amount)}</td>
                   <td>{income.recurring ? `${income.entryDay}. ${t("common.day")}` : formatDate(income.date)}</td>
                   <td>{income.recurring ? t("incomes.fixed") : t("common.oneTime")}</td>
-                  {canWrite ? (
+                  {can("incomes.edit") || can("incomes.delete") ? (
                     <td>
                       {isSavingsGeneratedIncome(income) ? (
                         <span className="table-note">{t("savings.manageOnlyInSavings")}</span>
                       ) : (
                         <div className="table-actions">
-                          <button
+                          {can("incomes.edit") ? <button
                             className="icon-button"
                             type="button"
                             onClick={() => openEditModal(income)}
                             aria-label={`${income.title} ${t("common.edit")}`}
                           >
                             <Pencil size={16} aria-hidden="true" />
-                          </button>
-                          <button
+                          </button> : null}
+                          {can("incomes.delete") ? <button
                             className="icon-button danger"
                             type="button"
                             onClick={() => setIncomeToDelete(income)}
                             aria-label={`${income.title} ${t("common.delete")}`}
                           >
                             <Trash2 size={16} aria-hidden="true" />
-                          </button>
+                          </button> : null}
                         </div>
                       )}
                     </td>

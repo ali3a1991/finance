@@ -63,7 +63,7 @@ function isSavingsGeneratedExpense(expense: Expense) {
 }
 
 export function AusgabenManager() {
-  const { canWrite } = useAuth();
+  const { can } = useAuth();
   const { language, t } = useLanguage();
   const [editForm, setEditForm] = useState<ExpenseForm>(emptyForm);
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
@@ -174,7 +174,7 @@ export function AusgabenManager() {
 
   return (
     <>
-      {canWrite ? (
+      {can("expenses.create") ? (
         <div className="action-row">
           <button className="button primary" type="button" onClick={() => setIsOpen(true)}>
             <PlusCircle size={18} aria-hidden="true" />
@@ -224,7 +224,7 @@ export function AusgabenManager() {
                 <th>{t("expenses.title")}</th>
                 <th>{t("expenses.date")}</th>
                 <th>{t("expenses.amount")}</th>
-                {canWrite ? <th>{t("common.actions")}</th> : null}
+                {can("expenses.edit") || can("expenses.delete") ? <th>{t("common.actions")}</th> : null}
               </tr>
             </thead>
             <tbody>
@@ -233,28 +233,28 @@ export function AusgabenManager() {
                   <td>{expense.title}</td>
                   <td>{formatDate(expense.date)}</td>
                   <td>{formatCurrency(expense.amount)}</td>
-                  {canWrite ? (
+                  {can("expenses.edit") || can("expenses.delete") ? (
                     <td>
                       {isSavingsGeneratedExpense(expense) ? (
                         <span className="table-note">{t("savings.manageOnlyInSavings")}</span>
                       ) : (
                         <div className="table-actions">
-                          <button
+                          {can("expenses.edit") ? <button
                             className="icon-button"
                             type="button"
                             onClick={() => openEditModal(expense)}
                             aria-label={`${expense.title} ${t("common.edit")}`}
                           >
                             <Pencil size={16} aria-hidden="true" />
-                          </button>
-                          <button
+                          </button> : null}
+                          {can("expenses.delete") ? <button
                             className="icon-button danger"
                             type="button"
                             onClick={() => setExpenseToDelete(expense)}
                             aria-label={`${expense.title} ${t("common.delete")}`}
                           >
                             <Trash2 size={16} aria-hidden="true" />
-                          </button>
+                          </button> : null}
                         </div>
                       )}
                     </td>

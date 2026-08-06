@@ -3,15 +3,18 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import { requestJson } from "@/lib/requestJson";
+import type { ActionPermission } from "@/lib/actionPermissions";
 
 type CurrentUser = {
   accessLevel: "owner" | "readonly" | "readwrite";
   ownerId: string;
   username: string;
+  permissions: ActionPermission[];
 };
 
 type AuthContextValue = {
   canWrite: boolean;
+  can: (permission: ActionPermission) => boolean;
   user: CurrentUser | null;
 };
 
@@ -34,7 +37,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo(
     () => ({
-      canWrite: user?.accessLevel === "owner" || user?.accessLevel === "readwrite",
+      can: (permission: ActionPermission) => user?.accessLevel === "owner" || Boolean(user?.permissions.includes(permission)),
+      canWrite: user?.accessLevel === "owner" || Boolean(user?.permissions.length),
       user
     }),
     [user]

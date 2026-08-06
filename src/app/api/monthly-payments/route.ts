@@ -3,7 +3,7 @@ import { requireWriteAccess } from "@/lib/auth";
 import { updateMonthlyPayment } from "@/lib/serverDb";
 
 export async function PATCH(request: NextRequest) {
-  const auth = requireWriteAccess(request);
+  const auth = await requireWriteAccess(request);
 
   if (auth.error) {
     return auth.error;

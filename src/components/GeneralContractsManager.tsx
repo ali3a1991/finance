@@ -89,7 +89,7 @@ function getStatusLabel(status: string, t: (path: string) => string) {
 }
 
 export function GeneralContractsManager() {
-  const { canWrite } = useAuth();
+  const { can } = useAuth();
   const { t } = useLanguage();
   const [contracts, setContracts] = useState<GeneralContract[]>([]);
   const [contractToDelete, setContractToDelete] = useState<GeneralContract | null>(null);
@@ -187,7 +187,7 @@ export function GeneralContractsManager() {
 
   return (
     <>
-      {canWrite ? (
+      {can("contracts.create") ? (
         <div className="action-row">
           <button className="button primary" type="button" onClick={() => setIsOpen(true)}>
             <PlusCircle size={18} aria-hidden="true" />
@@ -210,7 +210,7 @@ export function GeneralContractsManager() {
                 <th>{t("contracts.startDate")}</th>
                 <th>{t("contracts.endDate")}</th>
                 <th>{t("contracts.status")}</th>
-                {canWrite ? <th>{t("common.actions")}</th> : null}
+                {can("contracts.edit") || can("contracts.delete") ? <th>{t("common.actions")}</th> : null}
               </tr>
             </thead>
             <tbody>
@@ -228,25 +228,25 @@ export function GeneralContractsManager() {
                   <td>{formatDate(contract.startDate)}</td>
                   <td>{contract.endDate ? formatDate(contract.endDate) : "-"}</td>
                   <td>{getStatusLabel(contract.status, t)}</td>
-                  {canWrite ? (
+                  {can("contracts.edit") || can("contracts.delete") ? (
                     <td>
                       <div className="table-actions">
-                        <button
+                        {can("contracts.edit") ? <button
                           className="icon-button"
                           type="button"
                           onClick={() => openEditModal(contract)}
                           aria-label={`${contract.title} ${t("common.edit")}`}
                         >
                           <Pencil size={16} aria-hidden="true" />
-                        </button>
-                        <button
+                        </button> : null}
+                        {can("contracts.delete") ? <button
                           className="icon-button danger"
                           type="button"
                           onClick={() => setContractToDelete(contract)}
                           aria-label={`${contract.title} ${t("common.delete")}`}
                         >
                           <Trash2 size={16} aria-hidden="true" />
-                        </button>
+                        </button> : null}
                       </div>
                     </td>
                   ) : null}
