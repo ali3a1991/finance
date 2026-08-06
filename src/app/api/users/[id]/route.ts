@@ -1,15 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireOwnerAccess } from "@/lib/auth";
 import { deleteSharedUser, updateSharedUser } from "@/lib/serverDb";
-import type { AccessLevel } from "@/lib/types";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
 };
-
-function isAccessLevel(value: unknown): value is AccessLevel {
-  return value === "readonly" || value === "readwrite";
-}
 
 export async function PUT(request: NextRequest, context: RouteContext) {
   const auth = requireOwnerAccess(request);
@@ -20,12 +15,11 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
   const { id } = await context.params;
   const body = (await request.json()) as {
-    accessLevel?: unknown;
     password?: string;
     username?: string;
   };
 
-  if (!body.username?.trim() || !isAccessLevel(body.accessLevel) || (body.password && body.password.length < 6)) {
+  if (!body.username?.trim() || (body.password && body.password.length < 6)) {
     return NextResponse.json({ message: "Ungultige Benutzerdaten." }, { status: 400 });
   }
 
@@ -35,7 +29,6 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
   try {
     const user = await updateSharedUser(auth.payload.ownerId, id, {
-      accessLevel: body.accessLevel,
       password: body.password || undefined,
       username: body.username.trim()
     });

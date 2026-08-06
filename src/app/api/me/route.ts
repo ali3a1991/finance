@@ -8,10 +8,12 @@ export async function GET(request: NextRequest) {
     return auth.error;
   }
 
+  const permissions = await getUserActionPermissions(auth.payload);
+
   return NextResponse.json({
-    accessLevel: auth.payload.accessLevel,
+    accessLevel: auth.payload.accessLevel === "owner" ? "owner" : permissions.length > 0 ? "readwrite" : "readonly",
     ownerId: auth.payload.ownerId,
     username: auth.payload.sub,
-    permissions: await getUserActionPermissions(auth.payload)
+    permissions
   });
 }

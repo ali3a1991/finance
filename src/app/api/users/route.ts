@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireOwnerAccess } from "@/lib/auth";
 import { createSharedUser, listSharedUsers } from "@/lib/serverDb";
-import type { AccessLevel } from "@/lib/types";
-
-function isAccessLevel(value: unknown): value is AccessLevel {
-  return value === "readonly" || value === "readwrite";
-}
 
 export async function GET(request: NextRequest) {
   const auth = requireOwnerAccess(request);
@@ -25,12 +20,11 @@ export async function POST(request: NextRequest) {
   }
 
   const body = (await request.json()) as {
-    accessLevel?: unknown;
     password?: string;
     username?: string;
   };
 
-  if (!body.username?.trim() || !body.password || body.password.length < 6 || !isAccessLevel(body.accessLevel)) {
+  if (!body.username?.trim() || !body.password || body.password.length < 6) {
     return NextResponse.json({ message: "Ungultige Benutzerdaten." }, { status: 400 });
   }
 
@@ -40,7 +34,6 @@ export async function POST(request: NextRequest) {
 
   try {
     const user = await createSharedUser({
-      accessLevel: body.accessLevel,
       ownerId: auth.payload.ownerId,
       password: body.password,
       username: body.username.trim()

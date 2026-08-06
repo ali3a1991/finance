@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { KeyRound, Pencil, PlusCircle, Save, Trash2, UserRound, X } from "lucide-react";
 import { useLanguage } from "@/components/LanguageProvider";
 import { requestJson } from "@/lib/requestJson";
-import type { AccessLevel, SharedUser } from "@/lib/types";
+import type { SharedUser } from "@/lib/types";
 import { ACTION_PERMISSION_GROUPS, ALL_ACTION_PERMISSIONS, permissionActionName, type ActionPermission } from "@/lib/actionPermissions";
 
 type MeResponse = {
@@ -16,11 +16,9 @@ type MeResponse = {
 type UserForm = {
   username: string;
   password: string;
-  accessLevel: AccessLevel;
 };
 
 const emptyForm: UserForm = {
-  accessLevel: "readonly",
   password: "",
   username: ""
 };
@@ -74,7 +72,6 @@ export function AccessSettings() {
   function openEditModal(user: SharedUser) {
     setEditingUserId(user.id);
     setEditForm({
-      accessLevel: user.accessLevel,
       password: "",
       username: user.username
     });
@@ -108,7 +105,6 @@ export function AccessSettings() {
     try {
       const body = await requestJson<{ user: SharedUser }>(`/api/users/${editingUserId}`, {
         body: JSON.stringify({
-          accessLevel: editForm.accessLevel,
           password: editForm.password || undefined,
           username: editForm.username
         }),
@@ -184,7 +180,7 @@ export function AccessSettings() {
           <thead>
             <tr>
               <th>{t("settings.username")}</th>
-              <th>{t("settings.permission")}</th>
+              <th>{t("settings.allowedActions")}</th>
               <th>{t("common.actions")}</th>
             </tr>
           </thead>
@@ -196,7 +192,7 @@ export function AccessSettings() {
                   {currentUser.username}
                 </span>
               </td>
-              <td>{t("nav.owner")}</td>
+              <td>{t("settings.allActions")}</td>
               <td>
                 <span className="table-muted">-</span>
               </td>
@@ -209,7 +205,7 @@ export function AccessSettings() {
                     {user.username}
                   </span>
                 </td>
-                <td>{user.accessLevel === "readonly" ? t("settings.readonly") : t("settings.readwrite")}</td>
+                <td>{user.permissions.length} {t("settings.actionsAllowed")}</td>
                 <td>
                   <div className="table-actions">
                     <button
@@ -392,18 +388,6 @@ function UserModal({
               onChange={(event) => onUpdate("password", event.target.value)}
               placeholder={isEditing ? t("settings.passwordUnchanged") : ""}
             />
-          </label>
-          <label>
-            <span>{t("settings.permission")}</span>
-            <select
-              autoComplete="off"
-              required
-              value={form.accessLevel}
-              onChange={(event) => onUpdate("accessLevel", event.target.value as AccessLevel)}
-            >
-              <option value="readonly">{t("settings.readonly")}</option>
-              <option value="readwrite">{t("settings.readwrite")}</option>
-            </select>
           </label>
           <div className="modal-actions">
             <button className="button secondary" type="button" onClick={onClose}>

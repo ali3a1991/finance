@@ -3,7 +3,6 @@ import { randomUUID } from "crypto";
 import { getPasswordHash } from "@/lib/auth";
 import { ALL_ACTION_PERMISSIONS, isActionPermission, type ActionPermission } from "@/lib/actionPermissions";
 import type {
-  AccessLevel,
   Expense,
   ExpenseProject,
   ExpenseProjectDetail,
@@ -2226,12 +2225,10 @@ export async function listSharedUsers(ownerId: string): Promise<SharedUser[]> {
 }
 
 export async function createSharedUser({
-  accessLevel,
   ownerId,
   password,
   username
 }: {
-  accessLevel: AccessLevel;
   ownerId: string;
   password: string;
   username: string;
@@ -2239,10 +2236,10 @@ export async function createSharedUser({
   await ensureSharedUserPermissionsColumn();
   const user = await prisma.appUser.create({
     data: {
-      accessLevel,
+      accessLevel: "readonly",
       ownerId,
       passwordHash: getPasswordHash(password),
-      permissions: accessLevel === "readwrite" ? ALL_ACTION_PERMISSIONS : [],
+      permissions: [],
       username
     }
   });
@@ -2254,7 +2251,6 @@ export async function updateSharedUser(
   ownerId: string,
   id: string,
   patch: {
-    accessLevel: AccessLevel;
     password?: string;
     username: string;
   }
@@ -2262,11 +2258,8 @@ export async function updateSharedUser(
   await ensureSharedUserPermissionsColumn();
   const existingUser = await prisma.appUser.findFirst({ where: { accessLevel: { not: "owner" }, id, ownerId } });
   if (!existingUser) return null;
-  const accessLevelChanged = existingUser.accessLevel !== patch.accessLevel;
   const result = await prisma.appUser.updateMany({
     data: {
-      accessLevel: patch.accessLevel,
-      permissions: accessLevelChanged ? (patch.accessLevel === "readwrite" ? ALL_ACTION_PERMISSIONS : []) : undefined,
       passwordHash: patch.password ? getPasswordHash(patch.password) : undefined,
       username: patch.username
     },

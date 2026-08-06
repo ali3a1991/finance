@@ -35,8 +35,8 @@ const translations = {
       version: "Version",
       initialVersion: "Erste stabile Version",
       owner: "Inhaber",
-      readonly: "Nebenbenutzer · Readonly",
-      readwrite: "Nebenbenutzer · Read & Write"
+      readonly: "Nebenbenutzer",
+      readwrite: "Nebenbenutzer"
     },
     pages: {
       home: {
@@ -480,7 +480,7 @@ const translations = {
       english: "Englisch",
       accessLabel: "Zugriff",
       accessTitle: "Benutzer und Berechtigungen",
-      accessDescription: "Erstelle Benutzer, die deine Daten sehen durfen. Readonly darf nur lesen, Read & Write darf auch speichern.",
+      accessDescription: "Erstelle Benutzer und lege anschließend für jede Aktion eine eigene Berechtigung fest.",
       addUser: "Benutzer hinzufugen",
       addUserTitle: "Neuen Benutzer hinzufugen",
       editUserTitle: "Benutzer bearbeiten",
@@ -488,6 +488,9 @@ const translations = {
       password: "Passwort",
       passwordUnchanged: "Leer lassen, wenn unverandert",
       permission: "Berechtigung",
+      allowedActions: "Erlaubte Aktionen",
+      actionsAllowed: "Aktionen erlaubt",
+      allActions: "Alle Aktionen",
       readonly: "Readonly",
       readwrite: "Read & Write",
       managePermissions: "Aktionen verwalten",
@@ -560,8 +563,8 @@ const translations = {
       version: "Version",
       initialVersion: "First stable version",
       owner: "Owner",
-      readonly: "Shared user · Readonly",
-      readwrite: "Shared user · Read & Write"
+      readonly: "Shared user",
+      readwrite: "Shared user"
     },
     pages: {
       home: {
@@ -1005,7 +1008,7 @@ const translations = {
       english: "English",
       accessLabel: "Access",
       accessTitle: "Users and permissions",
-      accessDescription: "Create users who may see your data. Readonly can only view, Read & Write can also save changes.",
+      accessDescription: "Create users, then grant permission for each action individually.",
       addUser: "Add user",
       addUserTitle: "Add new user",
       editUserTitle: "Edit user",
@@ -1013,6 +1016,9 @@ const translations = {
       password: "Password",
       passwordUnchanged: "Leave empty to keep unchanged",
       permission: "Permission",
+      allowedActions: "Allowed actions",
+      actionsAllowed: "actions allowed",
+      allActions: "All actions",
       readonly: "Readonly",
       readwrite: "Read & Write",
       managePermissions: "Manage actions",
