@@ -938,7 +938,7 @@ th {
   margin-top: 12px;
   border: 1px solid color-mix(in srgb, var(--primary) 28%, var(--line));
   border-radius: 8px;
-  padding: 10px 8px;
+  padding: 12px;
   background: color-mix(in srgb, var(--primary) 8%, var(--surface));
   text-align: center;
 }
@@ -2962,6 +2962,10 @@ th {
     top: 14px;
     right: 14px;
     left: 14px;
+  }
+
+  .gauge-free-amount {
+    padding: 10px 8px;
   }
 
   .public-preference-group {
