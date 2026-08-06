@@ -273,7 +273,7 @@ export function HomeDashboard() {
             </div>
             <div className="gauge-needle" style={{ transform: `rotate(${needleRotation}deg)` }} />
             <div className="gauge-center">
-              <span>{Math.round(pressureRatio * 100)}%</span>
+              <span>{Math.round(pressureRatio * 100)} %</span>
             </div>
           </div>
           <div className="gauge-status">
