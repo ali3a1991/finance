@@ -172,10 +172,6 @@ export function HomeDashboard() {
         </div>
         <div className="investment-summary-grid">
           <div>
-            <span>{t("dashboard.investedTotal")}</span>
-            <strong>{formatCurrency(summary.investmentInvestedTotal)}</strong>
-          </div>
-          <div>
             <span>{t("dashboard.currentInvestmentValue")}</span>
             <strong>{formatCurrency(summary.investmentCurrentTotal)}</strong>
           </div>
