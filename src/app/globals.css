@@ -930,10 +930,6 @@ th {
   gap: 2px;
 }
 
-.gauge-status strong {
-  font-size: 0.8rem;
-}
-
 .gauge-status span,
 .gauge-value span,
 .gauge-free-amount span,
