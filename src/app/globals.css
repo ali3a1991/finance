@@ -933,7 +933,7 @@ th {
 .gauge-free-amount {
   display: grid;
   justify-items: center;
-  gap: 3px;
+  gap: 5px;
   min-width: min(220px, 100%);
   margin-top: 12px;
   border: 1px solid color-mix(in srgb, var(--primary) 28%, var(--line));
@@ -972,7 +972,7 @@ th {
 
 .gauge-value {
   display: grid;
-  gap: 4px;
+  gap: 5px;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 12px;
@@ -3124,7 +3124,6 @@ th {
 
   .gauge-value span {
     font-size: 0.72rem;
-    margin-bottom: 5px;
   }
 
   .gauge-value strong {
