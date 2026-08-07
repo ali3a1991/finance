@@ -300,11 +300,13 @@ export function ShoppingListManager() {
 
       {!isLoading ? (
         <section className="shopping-panel">
-          <div className="shopping-section-heading"><ShoppingBasket size={20} aria-hidden="true" /><span>{t("shoppingList.openItems")}</span><div className="shopping-heading-actions"><strong>{openItems.length}</strong>{openItems.length > 0 && !isShareMode ? <button className="button secondary compact shopping-share-start" type="button" onClick={startSharing}><Share2 size={17} aria-hidden="true" />{t("shoppingList.share")}</button> : null}</div></div>
+          <div className="shopping-section-heading"><ShoppingBasket size={20} aria-hidden="true" /><span>{t("shoppingList.openItems")}</span><div className="shopping-heading-actions"><strong>{openItems.length}</strong>{openItems.length > 0 && !isShareMode ? <button className="icon-button shopping-share-start" type="button" onClick={startSharing} aria-label={t("shoppingList.share")} title={t("shoppingList.share")}><Share2 size={18} aria-hidden="true" /></button> : null}</div></div>
           {isShareMode ? (
             <div className="shopping-share-toolbar">
-              <div><strong>{t("shoppingList.selectItemsToShare")}</strong><span>{selectedShareIds.size.toLocaleString(locale)} {t("shoppingList.selected")}</span></div>
-              <div className="shopping-share-actions"><button className="button secondary compact" type="button" onClick={toggleSelectAll}>{selectedShareIds.size === openItems.length ? t("shoppingList.clearSelection") : t("shoppingList.selectAll")}</button><button className="button secondary compact" type="button" onClick={cancelSharing}>{t("common.cancel")}</button><button className="button primary compact" type="button" disabled={selectedShareIds.size === 0} onClick={shareSelectedItems}><Send size={17} aria-hidden="true" />{t("shoppingList.shareSelected")}</button></div>
+              <label className="shopping-select-all"><input type="checkbox" checked={selectedShareIds.size === openItems.length} onChange={toggleSelectAll} aria-label={selectedShareIds.size === openItems.length ? t("shoppingList.clearSelection") : t("shoppingList.selectAll")} /></label>
+              <span className="shopping-selected-count">{selectedShareIds.size.toLocaleString(locale)} {t("shoppingList.selected")}</span>
+              <button className="icon-button shopping-share-cancel" type="button" onClick={cancelSharing} aria-label={t("common.cancel")} title={t("common.cancel")}><X size={19} aria-hidden="true" /></button>
+              <button className="icon-button shopping-share-send" type="button" disabled={selectedShareIds.size === 0} onClick={shareSelectedItems} aria-label={t("shoppingList.shareSelected")} title={t("shoppingList.shareSelected")}><Send size={18} aria-hidden="true" /></button>
             </div>
           ) : null}
           <div className="shopping-list">
