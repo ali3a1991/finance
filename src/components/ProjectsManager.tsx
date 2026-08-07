@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import {
-  ArrowLeft,
   ArrowRight,
   CalendarDays,
   FolderKanban,
@@ -13,6 +12,7 @@ import {
   ReceiptText,
   Save,
   Scale,
+  Share2,
   Trash2,
   Users,
   X
@@ -95,6 +95,8 @@ export function ProjectsManager() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [sharingProjectId, setSharingProjectId] = useState<string | null>(null);
+  const [shareNotice, setShareNotice] = useState("");
   const [error, setError] = useState("");
 
   const loadProjects = useCallback(async () => {
@@ -166,6 +168,52 @@ export function ProjectsManager() {
     }
   }
 
+  async function shareProject(project: ExpenseProject) {
+    setSharingProjectId(project.id);
+    setShareNotice("");
+    setError("");
+    try {
+      const body = await requestJson<{ project: ExpenseProjectDetail }>(`/api/projects/${project.id}`);
+      const detail = body.project;
+      const activeMembers = detail.members.filter((member) => member.active);
+      const lines = [
+        `📁 ${detail.title}`,
+        `📅 ${t("projects.startDate")}: ${formatDate(detail.startDate)}`,
+        ...(detail.description ? [`📝 ${detail.description}`] : []),
+        "",
+        `💶 ${t("projects.totalExpenses")}: ${formatCurrency(detail.totalExpense)}`,
+        `🧾 ${t("projects.expenseCount")}: ${detail.expenseCount}`,
+        `👥 ${t("projects.members")}: ${activeMembers.map((member) => member.name).join(", ")}`,
+        ...(detail.categoryTotals.length ? [
+          "",
+          `📊 ${t("projects.categorySpending")}`,
+          ...detail.categoryTotals.map((category) => `• ${category.categoryName}: ${formatCurrency(category.amount)}`)
+        ] : []),
+        ...(detail.memberBalances.length ? [
+          "",
+          `⚖️ ${t("projects.memberBalances")}`,
+          ...detail.memberBalances.map((member) => {
+            const balance = `${member.balance > 0 ? "+" : ""}${formatCurrency(member.balance)}`;
+            return `• ${member.memberName}: ${t("projects.paid")} ${formatCurrency(member.paid)} · ${t("projects.expected")} ${formatCurrency(member.expected)} · ${t("projects.balance")} ${balance}`;
+          })
+        ] : [])
+      ];
+      const text = lines.join("\n");
+
+      if (navigator.share) {
+        await navigator.share({ text, title: detail.title });
+      } else {
+        await navigator.clipboard.writeText(text);
+        setShareNotice(t("projects.copiedToClipboard"));
+      }
+    } catch (shareError) {
+      if (shareError instanceof DOMException && shareError.name === "AbortError") return;
+      setError(t("projects.shareFailed"));
+    } finally {
+      setSharingProjectId(null);
+    }
+  }
+
   return (
     <>
       {can("projects.create") ? (
@@ -177,6 +225,7 @@ export function ProjectsManager() {
         </div>
       ) : null}
 
+      {shareNotice ? <p className="form-info" role="status">{shareNotice}</p> : null}
       {error ? <p className="form-error" role="alert">{error}</p> : null}
       {isLoading ? <p className="muted-text">{t("projects.loading")}</p> : null}
 
@@ -197,7 +246,7 @@ export function ProjectsManager() {
                 <span><CalendarDays size={15} aria-hidden="true" /> {formatDate(project.startDate)}</span>
               </div>
             </div>
-            <p>{project.description || t("projects.noDescription")}</p>
+            {project.description ? <p>{project.description}</p> : null}
             <div className="project-card-metrics">
               <div><span>{t("projects.totalExpenses")}</span><strong>{formatCurrency(project.totalExpense)}</strong></div>
               <div><span>{t("projects.expenseCount")}</span><strong>{project.expenseCount}</strong></div>
@@ -207,16 +256,17 @@ export function ProjectsManager() {
               <Link className="button secondary" href={`/projects/${project.id}`}>
                 {t("projects.openProject")} <ArrowRight size={17} aria-hidden="true" />
               </Link>
-              {can("projects.edit") || can("projects.delete") ? (
-                <div className="table-actions">
+              <div className="table-actions">
+                  <button className="icon-button project-share-button" type="button" disabled={sharingProjectId === project.id} onClick={() => shareProject(project)} aria-label={t("projects.shareProject")} title={t("projects.shareProject")}>
+                    <Share2 size={17} aria-hidden="true" />
+                  </button>
                   {can("projects.edit") ? <button className="icon-button" type="button" onClick={() => openEdit(project)} aria-label={t("projects.editProject")}>
                     <Pencil size={16} aria-hidden="true" />
                   </button> : null}
                   {can("projects.delete") ? <button className="icon-button danger" type="button" onClick={() => setDeletingProject(project)} aria-label={t("projects.deleteProject")}>
                     <Trash2 size={16} aria-hidden="true" />
                   </button> : null}
-                </div>
-              ) : null}
+              </div>
             </div>
           </article>
         ))}
@@ -352,14 +402,13 @@ export function ProjectDetailManager({ projectId }: { projectId: string }) {
 
   return (
     <>
-      <div className="project-detail-nav">
-        <Link className="button secondary" href="/projects"><ArrowLeft size={17} aria-hidden="true" /> {t("nav.projects")}</Link>
-        {can("projects.expenses.create") ? (
+      {can("projects.expenses.create") ? (
+        <div className="project-detail-nav">
           <button className="button primary" type="button" onClick={openAddExpense} disabled={!activeCategories.length || !activeMembers.length}>
             <PlusCircle size={18} aria-hidden="true" /> {t("projects.addExpense")}
           </button>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
       {error ? <p className="form-error" role="alert">{error}</p> : null}
 
       <section className="project-detail-hero">
@@ -367,7 +416,7 @@ export function ProjectDetailManager({ projectId }: { projectId: string }) {
         <div>
           <span>{t("projects.projectDetails")}</span>
           <h1>{project.title}</h1>
-          <p>{project.description || t("projects.noDescription")}</p>
+          {project.description ? <p>{project.description}</p> : null}
         </div>
         <div className="project-start-date"><CalendarDays size={17} aria-hidden="true" /><span>{t("projects.startDate")}</span><strong>{formatDate(project.startDate)}</strong></div>
       </section>
