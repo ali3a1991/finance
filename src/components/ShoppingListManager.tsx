@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { CalendarDays, Check, Pencil, PlusCircle, Save, ShoppingBasket, Trash2, X } from "lucide-react";
+import { CalendarDays, Check, Pencil, PlusCircle, Save, Send, Share2, ShoppingBasket, Trash2, X } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
 import { requestJson } from "@/lib/requestJson";
@@ -35,6 +35,9 @@ export function ShoppingListManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isShareMode, setIsShareMode] = useState(false);
+  const [selectedShareIds, setSelectedShareIds] = useState<Set<string>>(new Set());
+  const [shareNotice, setShareNotice] = useState("");
   const [error, setError] = useState("");
   const suggestionsLoaded = useRef(false);
 
@@ -188,18 +191,76 @@ export function ShoppingListManager() {
     }
   }
 
+  function startSharing() {
+    setSelectedShareIds(new Set());
+    setShareNotice("");
+    setIsShareMode(true);
+  }
+
+  function cancelSharing() {
+    setSelectedShareIds(new Set());
+    setIsShareMode(false);
+  }
+
+  function toggleShareSelection(id: string) {
+    setSelectedShareIds((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAll() {
+    setSelectedShareIds((current) => current.size === openItems.length
+      ? new Set()
+      : new Set(openItems.map((item) => item.id))
+    );
+  }
+
+  async function shareSelectedItems() {
+    const selectedItems = openItems.filter((item) => selectedShareIds.has(item.id));
+    if (selectedItems.length === 0) return;
+
+    const text = [
+      `🛒 ${t("shoppingList.shareTitle")}`,
+      "",
+      ...selectedItems.map((item) => `☐ ${item.name} — ${item.quantity.toLocaleString(locale)} ${unitLabel(item.unit)}${item.deadline ? ` · 📅 ${formatDay(item.deadline)}` : ""}`),
+      "",
+      `${t("shoppingList.totalItems")}: ${selectedItems.length.toLocaleString(locale)}`
+    ].join("\n");
+
+    try {
+      if (navigator.share) {
+        await navigator.share({ text, title: t("shoppingList.shareTitle") });
+        cancelSharing();
+        return;
+      }
+
+      await navigator.clipboard.writeText(text);
+      setShareNotice(t("shoppingList.copiedToClipboard"));
+      cancelSharing();
+    } catch (shareError) {
+      if (shareError instanceof DOMException && shareError.name === "AbortError") return;
+      setError(t("shoppingList.shareError"));
+    }
+  }
+
   function renderItem(item: ShoppingItem) {
     const completed = Boolean(item.completedAt);
+    const isSelectable = isShareMode && !completed;
+    const isSelected = selectedShareIds.has(item.id);
     return (
-      <article className={`shopping-item ${completed ? "completed" : ""}`} key={item.id}>
+      <article className={`shopping-item ${completed ? "completed" : ""} ${isSelected ? "share-selected" : ""}`} key={item.id}>
         <button
-          className="shopping-check"
+          className={`shopping-check ${isSelectable ? "share-check" : ""}`}
           type="button"
-          disabled={!can("shopping.complete") || busyId === item.id}
-          onClick={() => toggleItem(item)}
-          aria-label={completed ? t("shoppingList.markOpen") : t("shoppingList.markDone")}
+          disabled={isSelectable ? false : !can("shopping.complete") || busyId === item.id}
+          onClick={() => isSelectable ? toggleShareSelection(item.id) : toggleItem(item)}
+          aria-label={isSelectable ? (isSelected ? t("shoppingList.deselectForShare") : t("shoppingList.selectForShare")) : (completed ? t("shoppingList.markOpen") : t("shoppingList.markDone"))}
+          aria-pressed={isSelectable ? isSelected : undefined}
         >
-          {completed ? <Check size={18} aria-hidden="true" /> : null}
+          {completed || isSelected ? <Check size={18} aria-hidden="true" /> : null}
         </button>
         <div className="shopping-item-copy">
           <strong>{item.name}</strong>
@@ -208,7 +269,7 @@ export function ShoppingListManager() {
         {item.deadline ? (
           <span className="shopping-deadline"><CalendarDays size={15} aria-hidden="true" />{formatDay(item.deadline)}</span>
         ) : null}
-        {can("shopping.edit") || can("shopping.delete") ? (
+        {!isShareMode && (can("shopping.edit") || can("shopping.delete")) ? (
           <div className="shopping-actions">
             {!completed && can("shopping.edit") ? <button className="icon-button" type="button" disabled={busyId === item.id} onClick={() => openEditModal(item)} aria-label={t("shoppingList.edit")}><Pencil size={17} aria-hidden="true" /></button> : null}
             {can("shopping.delete") ? <button className="icon-button danger" type="button" disabled={busyId === item.id} onClick={() => deleteItem(item)} aria-label={t("shoppingList.delete")}><Trash2 size={17} aria-hidden="true" /></button> : null}
@@ -226,19 +287,26 @@ export function ShoppingListManager() {
           <form className="shopping-inline-form" onSubmit={createItem}>
             <label className="shopping-name-field"><span>{t("shoppingList.name")}</span><input required list="shopping-add-suggestions" autoComplete="off" value={addForm.name} onChange={(event) => updateItemName(addForm, setAddForm, event.target.value)} /><datalist id="shopping-add-suggestions">{suggestions.map((suggestion) => <option key={suggestion.name.toLocaleLowerCase()} value={suggestion.name} label={`${suggestion.name} · ${unitLabel(suggestion.unit)}`} />)}</datalist>{areSuggestionsLoading ? <small className="shopping-suggestions-status">{t("shoppingList.loadingSuggestions")}</small> : null}</label>
             <label className="shopping-quantity-field"><span>{t("shoppingList.quantity")}</span><input required min="0.01" step="any" type="number" value={addForm.quantity} onChange={(event) => setAddForm((current) => ({ ...current, quantity: event.target.value }))} /></label>
-            <label className="shopping-unit-field"><span>{t("shoppingList.unit")}</span><select value={addForm.unit} onChange={(event) => setAddForm((current) => ({ ...current, unit: event.target.value as ShoppingUnit }))}><option value="kg">{unitLabel("kg")}</option><option value="package">{unitLabel("package")}</option><option value="piece">{unitLabel("piece")}</option></select></label>
+            <label className="shopping-unit-field"><span>{t("shoppingList.unit")}</span><select value={addForm.unit} onChange={(event) => setAddForm((current) => ({ ...current, unit: event.target.value as ShoppingUnit }))}><option value="kg">{unitLabel("kg")}</option><option value="package">{unitLabel("package")}</option><option value="piece">{unitLabel("piece")}</option><option value="bottle">{unitLabel("bottle")}</option></select></label>
             <label className="checkbox-row shopping-deadline-toggle"><input type="checkbox" checked={addForm.hasDeadline} onChange={(event) => setAddForm((current) => ({ ...current, hasDeadline: event.target.checked, deadline: event.target.checked ? current.deadline : "" }))} /><span>{t("shoppingList.hasDeadline")}</span></label>
             {addForm.hasDeadline ? <label className="shopping-date-field"><span>{t("shoppingList.deadline")}</span><input required type="date" value={addForm.deadline} onChange={(event) => setAddForm((current) => ({ ...current, deadline: event.target.value }))} /></label> : null}
             <button className="button primary shopping-add-submit" type="submit" disabled={isSaving}><PlusCircle size={18} aria-hidden="true" />{isSaving ? t("common.saving") : t("shoppingList.add")}</button>
           </form>
         </section>
       ) : null}
+      {shareNotice ? <p className="form-info" role="status">{shareNotice}</p> : null}
       {error ? <p className="form-error" role="alert">{error}</p> : null}
       {isLoading ? <p className="muted-text">{t("shoppingList.loading")}</p> : null}
 
       {!isLoading ? (
         <section className="shopping-panel">
-          <div className="shopping-section-heading"><ShoppingBasket size={20} aria-hidden="true" /><span>{t("shoppingList.openItems")}</span><strong>{openItems.length}</strong></div>
+          <div className="shopping-section-heading"><ShoppingBasket size={20} aria-hidden="true" /><span>{t("shoppingList.openItems")}</span><div className="shopping-heading-actions"><strong>{openItems.length}</strong>{openItems.length > 0 && !isShareMode ? <button className="button secondary compact shopping-share-start" type="button" onClick={startSharing}><Share2 size={17} aria-hidden="true" />{t("shoppingList.share")}</button> : null}</div></div>
+          {isShareMode ? (
+            <div className="shopping-share-toolbar">
+              <div><strong>{t("shoppingList.selectItemsToShare")}</strong><span>{selectedShareIds.size.toLocaleString(locale)} {t("shoppingList.selected")}</span></div>
+              <div className="shopping-share-actions"><button className="button secondary compact" type="button" onClick={toggleSelectAll}>{selectedShareIds.size === openItems.length ? t("shoppingList.clearSelection") : t("shoppingList.selectAll")}</button><button className="button secondary compact" type="button" onClick={cancelSharing}>{t("common.cancel")}</button><button className="button primary compact" type="button" disabled={selectedShareIds.size === 0} onClick={shareSelectedItems}><Send size={17} aria-hidden="true" />{t("shoppingList.shareSelected")}</button></div>
+            </div>
+          ) : null}
           <div className="shopping-list">
             {openItems.map(renderItem)}
             {openItems.length === 0 ? <p className="shopping-empty">{t("shoppingList.empty")}</p> : null}
@@ -260,7 +328,7 @@ export function ShoppingListManager() {
             <form className="modal-form" onSubmit={saveEditedItem}>
               <label className="form-field-full"><span>{t("shoppingList.name")}</span><input autoFocus required list="shopping-edit-suggestions" autoComplete="off" value={editForm.name} onChange={(event) => updateItemName(editForm, setEditForm, event.target.value)} /><datalist id="shopping-edit-suggestions">{suggestions.map((suggestion) => <option key={suggestion.name.toLocaleLowerCase()} value={suggestion.name} label={`${suggestion.name} · ${unitLabel(suggestion.unit)}`} />)}</datalist>{areSuggestionsLoading ? <small className="shopping-suggestions-status">{t("shoppingList.loadingSuggestions")}</small> : null}</label>
               <label><span>{t("shoppingList.quantity")}</span><input required min="0.01" step="any" type="number" value={editForm.quantity} onChange={(event) => setEditForm((current) => ({ ...current, quantity: event.target.value }))} /></label>
-              <label><span>{t("shoppingList.unit")}</span><select value={editForm.unit} onChange={(event) => setEditForm((current) => ({ ...current, unit: event.target.value as ShoppingUnit }))}><option value="kg">{unitLabel("kg")}</option><option value="package">{unitLabel("package")}</option><option value="piece">{unitLabel("piece")}</option></select></label>
+              <label><span>{t("shoppingList.unit")}</span><select value={editForm.unit} onChange={(event) => setEditForm((current) => ({ ...current, unit: event.target.value as ShoppingUnit }))}><option value="kg">{unitLabel("kg")}</option><option value="package">{unitLabel("package")}</option><option value="piece">{unitLabel("piece")}</option><option value="bottle">{unitLabel("bottle")}</option></select></label>
               <label className="checkbox-row form-field-full"><input type="checkbox" checked={editForm.hasDeadline} onChange={(event) => setEditForm((current) => ({ ...current, hasDeadline: event.target.checked, deadline: event.target.checked ? current.deadline : "" }))} /><span>{t("shoppingList.hasDeadline")}</span></label>
               {editForm.hasDeadline ? <label className="form-field-full"><span>{t("shoppingList.deadline")}</span><input required type="date" value={editForm.deadline} onChange={(event) => setEditForm((current) => ({ ...current, deadline: event.target.value }))} /></label> : null}
               <div className="modal-actions"><button className="button secondary" type="button" onClick={closeModal}>{t("common.cancel")}</button><button className="button primary" type="submit" disabled={isSaving}><Save size={18} aria-hidden="true" />{isSaving ? t("common.saving") : t("common.save")}</button></div>

@@ -2154,6 +2154,43 @@ th {
   font-size: 0.84rem;
 }
 
+.shopping-heading-actions,
+.shopping-share-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.shopping-share-start {
+  min-height: 36px;
+}
+
+.shopping-share-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-soft);
+}
+
+.shopping-share-toolbar > div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.shopping-share-toolbar span {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.shopping-share-actions .button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .shopping-list {
   display: grid;
 }
@@ -2170,6 +2207,10 @@ th {
 
 .shopping-item:last-child {
   border-bottom: 0;
+}
+
+.shopping-item.share-selected {
+  background: var(--surface-soft);
 }
 
 .shopping-check {
@@ -2194,6 +2235,15 @@ th {
 }
 
 .shopping-item.completed .shopping-check {
+  border-color: var(--primary);
+  background: var(--primary);
+}
+
+.shopping-check.share-check {
+  cursor: pointer;
+}
+
+.shopping-check.share-check[aria-pressed="true"] {
   border-color: var(--primary);
   background: var(--primary);
 }
@@ -2290,6 +2340,25 @@ th {
   .shopping-inline-form:has(.shopping-date-field) .shopping-add-submit {
     grid-column: 1 / -1;
     grid-row: auto;
+  }
+
+  .shopping-section-heading {
+    padding-inline: 14px;
+  }
+
+  .shopping-heading-actions {
+    align-items: flex-end;
+    flex-direction: column;
+  }
+
+  .shopping-share-toolbar,
+  .shopping-share-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .shopping-share-actions .button {
+    width: 100%;
   }
 
   .shopping-item {

@@ -381,8 +381,20 @@ const translations = {
       markDone: "Als erledigt markieren",
       markOpen: "Wieder öffnen",
       delete: "Eintrag löschen",
+      share: "Teilen",
+      shareTitle: "Einkaufsliste",
+      selectItemsToShare: "Einträge zum Teilen auswählen",
+      selectForShare: "Zum Teilen auswählen",
+      deselectForShare: "Auswahl aufheben",
+      selected: "ausgewählt",
+      selectAll: "Alle auswählen",
+      clearSelection: "Auswahl aufheben",
+      shareSelected: "Auswahl senden",
+      totalItems: "Einträge insgesamt",
+      copiedToClipboard: "Die Einkaufsliste wurde in die Zwischenablage kopiert.",
+      shareError: "Die Einkaufsliste konnte nicht geteilt werden.",
       error: "Die Aktion konnte nicht abgeschlossen werden.",
-      units: { kg: "Kilo", package: "Packung", piece: "Stück" }
+      units: { kg: "Kilo", package: "Packung", piece: "Stück", bottle: "Flasche" }
     },
     savings: {
       add: "Spartopf hinzufugen",
@@ -903,8 +915,20 @@ const translations = {
       markDone: "Mark as completed",
       markOpen: "Reopen item",
       delete: "Delete item",
+      share: "Share",
+      shareTitle: "Shopping list",
+      selectItemsToShare: "Select items to share",
+      selectForShare: "Select for sharing",
+      deselectForShare: "Remove from selection",
+      selected: "selected",
+      selectAll: "Select all",
+      clearSelection: "Clear selection",
+      shareSelected: "Send selection",
+      totalItems: "Total items",
+      copiedToClipboard: "The shopping list was copied to the clipboard.",
+      shareError: "The shopping list could not be shared.",
       error: "The action could not be completed.",
-      units: { kg: "kg", package: "package", piece: "piece" }
+      units: { kg: "kg", package: "package", piece: "piece", bottle: "bottle" }
     },
     savings: {
       add: "Add savings fund",

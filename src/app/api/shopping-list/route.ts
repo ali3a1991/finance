@@ -3,7 +3,7 @@ import { requireApiAuth, requireWriteAccess } from "@/lib/auth";
 import { createShoppingItem, listShoppingItems } from "@/lib/serverDb";
 import type { ShoppingItem, ShoppingUnit } from "@/lib/types";
 
-const units: ShoppingUnit[] = ["kg", "package", "piece"];
+const units: ShoppingUnit[] = ["kg", "package", "piece", "bottle"];
 
 export async function GET(request: NextRequest) {
   const auth = requireApiAuth(request);

@@ -128,7 +128,7 @@ export type MonthlyPayment = {
   lockedBySavings?: boolean;
 };
 
-export type ShoppingUnit = "kg" | "package" | "piece";
+export type ShoppingUnit = "kg" | "package" | "piece" | "bottle";
 
 export type ShoppingItem = {
   id: string;

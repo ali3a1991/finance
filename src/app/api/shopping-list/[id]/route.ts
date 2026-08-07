@@ -4,7 +4,7 @@ import { deleteShoppingItem, setShoppingItemCompleted, updateOpenShoppingItem } 
 import type { ShoppingItem, ShoppingUnit } from "@/lib/types";
 
 type RouteContext = { params: Promise<{ id: string }> };
-const units: ShoppingUnit[] = ["kg", "package", "piece"];
+const units: ShoppingUnit[] = ["kg", "package", "piece", "bottle"];
 
 export async function PATCH(request: NextRequest, context: RouteContext) {
   const body = (await request.json()) as Partial<Pick<ShoppingItem, "name" | "quantity" | "unit" | "deadline">> & { completed?: boolean };
