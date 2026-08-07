@@ -419,7 +419,8 @@ export function ProjectDetailManager({ projectId }: { projectId: string }) {
   if (isLoading) return <p className="muted-text">{t("projects.loading")}</p>;
   if (!project) return <p className="form-error">{error || t("projects.operationFailed")}</p>;
 
-  const maxCategoryAmount = Math.max(...project.categoryTotals.map((category) => category.amount), 1);
+  const visibleCategoryTotals = project.categoryTotals.filter((category) => Math.abs(category.amount) >= 0.005);
+  const maxCategoryAmount = Math.max(...visibleCategoryTotals.map((category) => category.amount), 1);
 
   return (
     <>
@@ -432,25 +433,27 @@ export function ProjectDetailManager({ projectId }: { projectId: string }) {
       ) : null}
       {error ? <p className="form-error" role="alert">{error}</p> : null}
 
-      <section className="project-detail-hero">
-        <div className="project-card-icon"><FolderKanban size={24} aria-hidden="true" /></div>
-        <div>
-          <span>{t("projects.projectDetails")}</span>
-          <h1>{project.title}</h1>
-          {project.description ? <p>{project.description}</p> : null}
-        </div>
-        <div className="project-start-date"><CalendarDays size={17} aria-hidden="true" /><span>{t("projects.startDate")}</span><strong>{formatDate(project.startDate)}</strong></div>
-      </section>
+      <div className="project-overview-card">
+        <section className="project-detail-hero">
+          <div className="project-card-icon"><FolderKanban size={24} aria-hidden="true" /></div>
+          <div>
+            <span>{t("projects.projectDetails")}</span>
+            <h1>{project.title}</h1>
+            {project.description ? <p>{project.description}</p> : null}
+          </div>
+          <div className="project-start-date"><CalendarDays size={17} aria-hidden="true" /><span>{t("projects.startDate")}</span><strong>{formatDate(project.startDate)}</strong></div>
+        </section>
 
-      <section className="project-summary-grid" aria-label={t("projects.overview")}>
-        <div><ReceiptText size={20} aria-hidden="true" /><span>{t("projects.totalExpenses")}</span><strong>{formatCurrency(project.totalExpense)}</strong></div>
-        <div><Scale size={20} aria-hidden="true" /><span>{t("projects.expenseCount")}</span><strong>{project.expenseCount}</strong></div>
-        <div><Users size={20} aria-hidden="true" /><span>{t("projects.members")}</span><strong>{activeMembers.length}</strong></div>
-      </section>
+        <section className="project-summary-grid" aria-label={t("projects.overview")}>
+          <div><ReceiptText size={20} aria-hidden="true" /><span>{t("projects.totalExpenses")}</span><strong>{formatCurrency(project.totalExpense)}</strong></div>
+          <div><Scale size={20} aria-hidden="true" /><span>{t("projects.expenseCount")}</span><strong>{project.expenseCount}</strong></div>
+          <div><Users size={20} aria-hidden="true" /><span>{t("projects.members")}</span><strong>{activeMembers.length}</strong></div>
+        </section>
+      </div>
 
       <section className="table-panel project-dashboard-panel">
         <div className="section-title"><span>{t("projects.memberBalances")}</span></div>
-        <div className="responsive-table">
+        <div className="responsive-table project-desktop-table">
           <table>
             <thead><tr><th>{t("projects.memberName")}</th><th>{t("projects.shareWeight")}</th><th>{t("projects.paid")}</th><th>{t("projects.expected")}</th><th>{t("projects.balance")}</th></tr></thead>
             <tbody>
@@ -466,23 +469,33 @@ export function ProjectDetailManager({ projectId }: { projectId: string }) {
             </tbody>
           </table>
         </div>
-      </section>
-
-      <section className="project-dashboard-panel category-dashboard-panel">
-        <div className="section-title"><span>{t("projects.categorySpending")}</span></div>
-        <div className="project-category-totals">
-          {project.categoryTotals.map((category) => (
-            <div className="project-category-total" key={category.categoryId}>
-              <div><strong>{category.categoryName}</strong><span>{formatCurrency(category.amount)}</span></div>
-              <div className="project-category-track"><span style={{ width: `${(category.amount / maxCategoryAmount) * 100}%` }} /></div>
-            </div>
+        <div className="project-mobile-member-list">
+          {project.memberBalances.map((member) => (
+            <article className="project-mobile-member-card" key={member.memberId}>
+              <div className="project-mobile-card-heading"><strong><Users size={16} aria-hidden="true" />{member.memberName}</strong><b className={member.balance >= 0 ? "positive" : "negative"}>{member.balance > 0 ? "+" : ""}{formatCurrency(member.balance)}</b></div>
+              <div className="project-mobile-member-metrics"><div><span>{t("projects.paid")}</span><strong>{formatCurrency(member.paid)}</strong></div><div><span>{t("projects.expected")}</span><strong>{formatCurrency(member.expected)}</strong></div></div>
+            </article>
           ))}
         </div>
       </section>
 
+      {visibleCategoryTotals.length ? (
+        <section className="project-dashboard-panel category-dashboard-panel">
+          <div className="section-title"><span>{t("projects.categorySpending")}</span></div>
+          <div className="project-category-totals">
+            {visibleCategoryTotals.map((category) => (
+              <div className="project-category-total" key={category.categoryId}>
+                <div><strong>{category.categoryName}</strong><span>{formatCurrency(category.amount)}</span></div>
+                <div className="project-category-track"><span style={{ width: `${(category.amount / maxCategoryAmount) * 100}%` }} /></div>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <section className="table-panel project-dashboard-panel">
         <div className="section-title"><span>{t("projects.expenseHistory")}</span></div>
-        <div className="responsive-table">
+        <div className="responsive-table project-desktop-table">
           <table>
             <thead><tr><th>{t("projects.date")}</th><th>{t("projects.expenseDescription")}</th><th>{t("projects.category")}</th><th>{t("projects.paidBy")}</th><th>{t("projects.amount")}</th>{can("projects.expenses.edit") || can("projects.expenses.delete") ? <th>{t("common.actions")}</th> : null}</tr></thead>
             <tbody>
@@ -498,6 +511,19 @@ export function ProjectDetailManager({ projectId }: { projectId: string }) {
               ))}
             </tbody>
           </table>
+        </div>
+        <div className="project-mobile-expense-list">
+          {project.expenses.map((expense) => (
+            <article className="project-mobile-expense-card" key={expense.id}>
+              <div className="project-mobile-card-heading"><span>{formatDate(expense.date)}</span><span className="project-category-chip">{expense.categoryName}</span></div>
+              <p>{expense.description || t("projects.noDescription")}</p>
+              <div className="project-mobile-expense-footer">
+                <div><span>{t("projects.paidBy")}</span><strong>{expense.paidByMemberName}</strong></div>
+                <strong className="project-mobile-expense-amount">{formatCurrency(expense.amount)}</strong>
+                {can("projects.expenses.edit") || can("projects.expenses.delete") ? <div className="table-actions">{can("projects.expenses.edit") ? <button className="icon-button" type="button" onClick={() => openEditExpense(expense)} aria-label={t("projects.editExpense")}><Pencil size={16} aria-hidden="true" /></button> : null}{can("projects.expenses.delete") ? <button className="icon-button danger" type="button" onClick={() => setDeletingExpense(expense)} aria-label={t("projects.deleteExpense")}><Trash2 size={16} aria-hidden="true" /></button> : null}</div> : null}
+              </div>
+            </article>
+          ))}
         </div>
         {!project.expenses.length ? <p className="empty-table-text">{t("projects.noExpenses")}</p> : null}
       </section>
