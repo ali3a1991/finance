@@ -85,6 +85,10 @@ function errorMessage(error: unknown, fallback: string) {
   return error instanceof Error && error.message ? error.message : fallback;
 }
 
+function isolateText(value: string | number) {
+  return `\u2068${value}\u2069`;
+}
+
 export function ProjectsManager() {
   const { can } = useAuth();
   const { t } = useLanguage();
@@ -176,25 +180,42 @@ export function ProjectsManager() {
       const body = await requestJson<{ project: ExpenseProjectDetail }>(`/api/projects/${project.id}`);
       const detail = body.project;
       const activeMembers = detail.members.filter((member) => member.active);
+      const categoryTotals = detail.categoryTotals.filter((category) => Math.abs(category.amount) >= 0.005);
+      const divider = "──────────────";
       const lines = [
-        `📁 ${detail.title}`,
-        `📅 ${t("projects.startDate")}: ${formatDate(detail.startDate)}`,
-        ...(detail.description ? [`📝 ${detail.description}`] : []),
+        `📁 ${isolateText(detail.title)}`,
+        `📅 ${isolateText(formatDate(detail.startDate))}`,
+        ...(detail.description ? [`📝 ${isolateText(detail.description)}`] : []),
         "",
-        `💶 ${t("projects.totalExpenses")}: ${formatCurrency(detail.totalExpense)}`,
-        `🧾 ${t("projects.expenseCount")}: ${detail.expenseCount}`,
-        `👥 ${t("projects.members")}: ${activeMembers.map((member) => member.name).join(", ")}`,
-        ...(detail.categoryTotals.length ? [
+        divider,
+        `💶 ${t("projects.totalExpenses")}`,
+        isolateText(formatCurrency(detail.totalExpense)),
+        `🧾 ${isolateText(detail.expenseCount)} ${t("projects.expenseCount")}  ·  👥 ${isolateText(activeMembers.length)} ${t("projects.members")}`,
+        ...(categoryTotals.length ? [
           "",
+          divider,
           `📊 ${t("projects.categorySpending")}`,
-          ...detail.categoryTotals.map((category) => `• ${category.categoryName}: ${formatCurrency(category.amount)}`)
+          "",
+          ...categoryTotals.flatMap((category) => [
+            `• ${isolateText(category.categoryName)}`,
+            `  ${isolateText(formatCurrency(category.amount))}`
+          ])
         ] : []),
         ...(detail.memberBalances.length ? [
           "",
+          divider,
           `⚖️ ${t("projects.memberBalances")}`,
-          ...detail.memberBalances.map((member) => {
+          "",
+          ...detail.memberBalances.flatMap((member, index) => {
             const balance = `${member.balance > 0 ? "+" : ""}${formatCurrency(member.balance)}`;
-            return `• ${member.memberName}: ${t("projects.paid")} ${formatCurrency(member.paid)} · ${t("projects.expected")} ${formatCurrency(member.expected)} · ${t("projects.balance")} ${balance}`;
+            const balanceIcon = member.balance > 0.005 ? "🟢" : member.balance < -0.005 ? "🔴" : "⚪";
+            return [
+              `👤 ${isolateText(member.memberName)}`,
+              `${t("projects.paid")}: ${isolateText(formatCurrency(member.paid))}`,
+              `${t("projects.expected")}: ${isolateText(formatCurrency(member.expected))}`,
+              `${balanceIcon} ${t("projects.balance")}: ${isolateText(balance)}`,
+              ...(index < detail.memberBalances.length - 1 ? [""] : [])
+            ];
           })
         ] : [])
       ];
