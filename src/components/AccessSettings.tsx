@@ -165,7 +165,6 @@ export function AccessSettings() {
       <div className="settings-copy">
         <span>{t("settings.accessLabel")}</span>
         <h2 id="access-title">{t("settings.accessTitle")}</h2>
-        <p>{t("settings.accessDescription")}</p>
       </div>
 
       <div className="action-row">

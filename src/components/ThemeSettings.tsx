@@ -30,7 +30,6 @@ export function ThemeSettings() {
         <div className="settings-copy">
           <span>{t("settings.themeLabel")}</span>
           <h2 id="theme-title">{t("settings.themeTitle")}</h2>
-          <p>{t("settings.themeDescription")}</p>
         </div>
         <div className="theme-switcher" role="group" aria-label={t("settings.themeGroup")}>
           <button
@@ -58,7 +57,6 @@ export function ThemeSettings() {
         <div className="settings-copy">
           <span>{t("settings.languageLabel")}</span>
           <h2 id="language-title">{t("settings.languageTitle")}</h2>
-          <p>{t("settings.languageDescription")}</p>
         </div>
         <div className="theme-switcher" role="group" aria-label={t("settings.languageGroup")}>
           <button
