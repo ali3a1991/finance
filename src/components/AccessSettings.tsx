@@ -191,8 +191,8 @@ export function AccessSettings() {
                   {currentUser.username}
                 </span>
               </td>
-              <td>{t("settings.allActions")}</td>
-              <td>
+              <td className="access-permission-cell">{t("settings.allActions")}</td>
+              <td className="access-actions-cell">
                 <span className="table-muted">-</span>
               </td>
             </tr>
@@ -204,8 +204,8 @@ export function AccessSettings() {
                     {user.username}
                   </span>
                 </td>
-                <td>{user.permissions.length} {t("settings.actionsAllowed")}</td>
-                <td>
+                <td className="access-permission-cell">{user.permissions.length} {t("settings.actionsAllowed")}</td>
+                <td className="access-actions-cell">
                   <div className="table-actions">
                     <button
                       className="icon-button"

@@ -2258,6 +2258,14 @@ th {
   min-width: 100%;
 }
 
+.access-table th:first-child {
+  width: 42%;
+}
+
+.access-table th:last-child {
+  width: 142px;
+}
+
 .owner-access-row {
   background: color-mix(in srgb, var(--accent) 8%, transparent);
 }
@@ -2331,6 +2339,81 @@ th {
 }
 
 @media (max-width: 700px) {
+  .access-table {
+    overflow-x: visible;
+  }
+
+  .access-table table,
+  .access-table tbody {
+    display: block;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .access-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .access-table tbody {
+    display: grid;
+    gap: 10px;
+  }
+
+  .access-table tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px;
+    background: var(--surface);
+  }
+
+  .access-table td {
+    min-width: 0;
+    border: 0;
+    padding: 0;
+  }
+
+  .access-table td:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .access-table .table-title {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .access-permission-cell {
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  .access-actions-cell {
+    justify-self: end;
+  }
+
+  .access-table .table-actions {
+    gap: 6px;
+  }
+
+  .access-table .icon-button {
+    width: 38px;
+    height: 38px;
+  }
+
+  .access-table .owner-access-row .access-actions-cell {
+    display: none;
+  }
+
   .permissions-toolbar {
     align-items: stretch;
     flex-direction: column;
