@@ -324,7 +324,7 @@ export function SparenManager() {
       {isLoading ? <p className="muted-text">{t("savings.loading")}</p> : null}
 
       <section className="table-panel">
-        <div className="responsive-table">
+        <div className="responsive-table desktop-data-table">
           <table>
             <thead>
               <tr>
@@ -414,6 +414,19 @@ export function SparenManager() {
               })}
             </tbody>
           </table>
+        </div>
+        <div className="mobile-data-list">
+          {goals.map((goal) => {
+            const progress = getProgress(goal);
+            const nextMilestone = getNextSavingsMilestone(goal.currentAmount);
+            return (
+              <article className="mobile-data-card" key={goal.id}>
+                <div className="mobile-data-card-heading"><span className="mobile-data-title"><PiggyBank size={17} aria-hidden="true" /><strong>{goal.name}</strong></span><strong>{formatCurrency(goal.currentAmount)}</strong></div>
+                <div className="savings-progress"><div className="savings-progress-line"><span style={{ width: `${progress * 100}%` }} /></div><small>{formatCurrency(goal.currentAmount)} / {formatCurrency(nextMilestone)}</small></div>
+                <div className="mobile-data-card-footer savings-mobile-actions"><div className="table-actions">{can("savings.deposit") ? <button className="button secondary compact-action" type="button" onClick={() => openTransactionModal(goal, "deposit")}><ArrowDownToLine size={16} aria-hidden="true" />{t("savings.deposit")}</button> : null}{can("savings.withdraw") ? <button className="button secondary compact-action" type="button" onClick={() => openTransactionModal(goal, "withdrawal")}><ArrowUpFromLine size={16} aria-hidden="true" />{t("savings.withdraw")}</button> : null}</div><div className="table-actions"><button className="icon-button" type="button" onClick={() => openDetailsModal(goal)} aria-label={`${goal.name} ${t("savings.details")}`}><List size={16} aria-hidden="true" /></button>{can("savings.goals.edit") ? <button className="icon-button" type="button" onClick={() => openEditModal(goal)} aria-label={`${goal.name} ${t("common.edit")}`}><Pencil size={16} aria-hidden="true" /></button> : null}{can("savings.goals.delete") ? <button className="icon-button danger" type="button" onClick={() => setGoalToDelete(goal)} aria-label={`${goal.name} ${t("common.delete")}`}><Trash2 size={16} aria-hidden="true" /></button> : null}</div></div>
+              </article>
+            );
+          })}
         </div>
         {!isLoading && goals.length === 0 ? <p className="empty-table-text">{t("savings.empty")}</p> : null}
         <div className="table-total-row">
@@ -719,7 +732,7 @@ function SavingsDetailsModal({
 
         {isLoading ? <p className="muted-text">{t("savings.loadingTransactions")}</p> : null}
 
-        <div className="responsive-table">
+        <div className="responsive-table desktop-data-table">
           <table>
             <thead>
               <tr>
@@ -763,6 +776,15 @@ function SavingsDetailsModal({
               ))}
             </tbody>
           </table>
+        </div>
+        <div className="mobile-data-list modal-mobile-data-list">
+          {transactions.map((transaction) => (
+            <article className="mobile-data-card" key={transaction.id}>
+              <div className="mobile-data-card-heading"><span className={`mobile-data-chip ${transaction.type}`}>{transaction.type === "deposit" ? t("savings.deposit") : t("savings.withdraw")}</span><strong className={transaction.type === "deposit" ? "positive" : "negative"}>{formatCurrency(transaction.amount)}</strong></div>
+              <div className="mobile-data-card-footer"><span>{formatDate(transaction.date)}</span>{canEdit || canDelete ? <div className="table-actions">{canEdit ? <button className="icon-button" type="button" onClick={() => onEdit(transaction)} aria-label={`${formatCurrency(transaction.amount)} ${t("common.edit")}`}><Pencil size={16} aria-hidden="true" /></button> : null}{canDelete ? <button className="icon-button danger" type="button" onClick={() => onDelete(transaction)} aria-label={`${formatCurrency(transaction.amount)} ${t("common.delete")}`}><Trash2 size={16} aria-hidden="true" /></button> : null}</div> : null}</div>
+              {transaction.note ? <p className="mobile-data-description">{transaction.note}</p> : null}
+            </article>
+          ))}
         </div>
 
         {!isLoading && transactions.length === 0 ? <p className="empty-table-text">{t("savings.noTransactions")}</p> : null}

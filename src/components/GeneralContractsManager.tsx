@@ -199,7 +199,7 @@ export function GeneralContractsManager() {
       {isLoading ? <p className="muted-text">{t("contracts.loading")}</p> : null}
 
       <section className="table-panel">
-        <div className="responsive-table">
+        <div className="responsive-table desktop-data-table">
           <table>
             <thead>
               <tr>
@@ -254,6 +254,15 @@ export function GeneralContractsManager() {
               ))}
             </tbody>
           </table>
+        </div>
+        <div className="mobile-data-list">
+          {contracts.map((contract) => (
+            <article className="mobile-data-card" key={contract.id}>
+              <div className="mobile-data-card-heading"><span className="mobile-data-title"><FileText size={17} aria-hidden="true" /><strong>{contract.title}</strong></span><strong>{formatCurrency(contract.monthlyAmount)}</strong></div>
+              <div className="mobile-data-grid"><div><span>{t("common.paymentInterval")}</span><strong>{t(`common.paymentInterval${contract.paymentIntervalMonths}`)}</strong></div><div><span>{t("contracts.debitDay")}</span><strong>{contract.debitDay}. {t("common.day")}</strong></div><div><span>{t("contracts.startDate")}</span><strong>{formatDate(contract.startDate)}</strong></div><div><span>{t("contracts.endDate")}</span><strong>{contract.endDate ? formatDate(contract.endDate) : "-"}</strong></div></div>
+              <div className="mobile-data-card-footer"><span className="mobile-data-chip">{getStatusLabel(contract.status, t)}</span>{can("contracts.edit") || can("contracts.delete") ? <div className="table-actions">{can("contracts.edit") ? <button className="icon-button" type="button" onClick={() => openEditModal(contract)} aria-label={`${contract.title} ${t("common.edit")}`}><Pencil size={16} aria-hidden="true" /></button> : null}{can("contracts.delete") ? <button className="icon-button danger" type="button" onClick={() => setContractToDelete(contract)} aria-label={`${contract.title} ${t("common.delete")}`}><Trash2 size={16} aria-hidden="true" /></button> : null}</div> : null}</div>
+            </article>
+          ))}
         </div>
         {!isLoading && contracts.length === 0 ? <p className="empty-table-text">{t("contracts.empty")}</p> : null}
       </section>

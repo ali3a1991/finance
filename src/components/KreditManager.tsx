@@ -213,7 +213,7 @@ export function KreditManager() {
       {isLoading ? <p className="muted-text">{t("loans.loading")}</p> : null}
 
       <section className="table-panel">
-        <div className="responsive-table">
+        <div className="responsive-table desktop-data-table">
           <table>
             <thead>
               <tr>
@@ -276,6 +276,15 @@ export function KreditManager() {
               ))}
             </tbody>
           </table>
+        </div>
+        <div className="mobile-data-list">
+          {loans.map((loan) => (
+            <article className="mobile-data-card" key={loan.id}>
+              <div className="mobile-data-card-heading"><span className="mobile-data-title"><Landmark size={17} aria-hidden="true" /><strong>{loan.name}</strong></span><span className="mobile-data-chip">{loan.status}</span></div>
+              <div className="mobile-data-grid"><div><span>{t("loans.amount")}</span><strong>{formatCurrency(loan.balance)}</strong></div><div><span>{t("loans.rate")}</span><strong>{formatCurrency(loan.monthlyRate)}</strong></div><div><span>{t("loans.bank")}</span><strong>{loan.bank}</strong></div><div><span>{t("loans.firstPayment")}</span><strong>{formatDate(loan.nextPayment)}</strong></div></div>
+              <div className="mobile-data-card-footer actions-only"><div className="table-actions"><button className="icon-button" type="button" onClick={() => setDetailLoan(loan)} aria-label={`${loan.name} ${t("loans.details")}`}><ListOrdered size={16} aria-hidden="true" /></button>{can("loans.edit") ? <button className="icon-button" type="button" onClick={() => openEditModal(loan)} aria-label={`${loan.name} ${t("common.edit")}`}><Pencil size={16} aria-hidden="true" /></button> : null}{can("loans.delete") ? <button className="icon-button danger" type="button" onClick={() => setLoanToDelete(loan)} aria-label={`${loan.name} ${t("common.delete")}`}><Trash2 size={16} aria-hidden="true" /></button> : null}</div></div>
+            </article>
+          ))}
         </div>
       </section>
 
@@ -415,7 +424,7 @@ export function KreditManager() {
               </div>
             </div>
 
-            <div className="detail-table-wrap">
+            <div className="detail-table-wrap desktop-data-table">
               <table className="detail-table">
                 <thead>
                   <tr>
@@ -436,6 +445,14 @@ export function KreditManager() {
                   ))}
                 </tbody>
               </table>
+            </div>
+            <div className="mobile-data-list modal-mobile-data-list">
+              {detailInstallments.map((installment) => (
+                <article className={`mobile-data-card installment-mobile-card ${isCurrentMonth(installment.date) ? "current" : ""}`} key={installment.number}>
+                  <div className="mobile-data-card-heading"><strong>#{installment.number}</strong><strong>{formatCurrency(installment.amount)}</strong></div>
+                  <div className="mobile-data-grid"><div><span>{t("loans.date")}</span><strong>{formatDate(installment.date)}</strong></div><div><span>{t("loans.remainingAfter")}</span><strong>{formatCurrency(installment.remainingAfterPayment)}</strong></div></div>
+                </article>
+              ))}
             </div>
           </section>
         </div>

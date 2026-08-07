@@ -174,7 +174,7 @@ export function AccessSettings() {
         </button>
       </div>
 
-      <div className="responsive-table access-table">
+      <div className="responsive-table access-table desktop-data-table">
         <table>
           <thead>
             <tr>
@@ -237,6 +237,18 @@ export function AccessSettings() {
             ))}
           </tbody>
         </table>
+      </div>
+      <div className="mobile-data-list access-mobile-list">
+        <article className="mobile-data-card owner-mobile-card">
+          <div className="mobile-data-card-heading"><span className="mobile-data-title"><UserRound size={17} aria-hidden="true" /><strong>{currentUser.username}</strong></span><span className="mobile-data-chip">{t("nav.owner")}</span></div>
+          <div className="mobile-data-card-footer"><span>{t("settings.allowedActions")}</span><strong>{t("settings.allActions")}</strong></div>
+        </article>
+        {visibleUsers.map((user) => (
+          <article className="mobile-data-card" key={user.id}>
+            <div className="mobile-data-card-heading"><span className="mobile-data-title"><UserRound size={17} aria-hidden="true" /><strong>{user.username}</strong></span><strong>{user.permissions.length} {t("settings.actionsAllowed")}</strong></div>
+            <div className="mobile-data-card-footer actions-only"><div className="table-actions"><button className="icon-button" type="button" onClick={() => openPermissionsModal(user)} aria-label={`${user.username} ${t("settings.managePermissions")}`}><KeyRound size={16} aria-hidden="true" /></button><button className="icon-button" type="button" onClick={() => openEditModal(user)} aria-label={`${user.username} ${t("common.edit")}`}><Pencil size={16} aria-hidden="true" /></button><button className="icon-button danger" type="button" onClick={() => setUserToDelete(user)} aria-label={`${user.username} ${t("common.delete")}`}><Trash2 size={16} aria-hidden="true" /></button></div></div>
+          </article>
+        ))}
       </div>
 
       {visibleUsers.length === 0 ? <p className="empty-table-text">{t("settings.noUsers")}</p> : null}

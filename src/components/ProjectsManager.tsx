@@ -355,11 +355,11 @@ export function ProjectsManager() {
             <div className="project-card-heading">
               <div className="project-card-icon"><FolderKanban size={22} aria-hidden="true" /></div>
               <div>
-                <h2 dir="auto">{project.title}</h2>
+                <h2>{project.title}</h2>
                 <span><CalendarDays size={15} aria-hidden="true" /> {formatDate(project.startDate)}</span>
               </div>
             </div>
-            {project.description ? <p dir="auto">{project.description}</p> : null}
+            {project.description ? <p>{project.description}</p> : null}
             <div className="project-card-metrics">
               <div><span>{t("projects.totalExpenses")}</span><strong>{formatCurrency(project.totalExpense)}</strong></div>
               <div><span>{t("projects.expenseCount")}</span><strong>{project.expenseCount}</strong></div>
@@ -434,7 +434,7 @@ function SettlementModal({ notice, onClose, onShare, project, transfers }: {
     <div className="modal-backdrop" role="presentation">
       <section className="modal-panel settlement-modal" role="dialog" aria-modal="true" aria-labelledby="settlement-modal-title">
         <div className="modal-header">
-          <div><span dir="auto">{project.title}</span><h2 id="settlement-modal-title">{t("projects.settlementTitle")}</h2></div>
+          <div><span>{project.title}</span><h2 id="settlement-modal-title">{t("projects.settlementTitle")}</h2></div>
           <button className="icon-button" type="button" onClick={onClose} aria-label={t("common.closeDialog")}><X size={20} aria-hidden="true" /></button>
         </div>
         <div className="settlement-modal-body">
@@ -444,7 +444,7 @@ function SettlementModal({ notice, onClose, onShare, project, transfers }: {
               {transfers.map((transfer, index) => (
                 <article className="settlement-transfer" key={`${transfer.from}-${transfer.to}-${index}`}>
                   <span className="settlement-transfer-index">{String(index + 1).padStart(2, "0")}</span>
-                  <div className="settlement-parties"><strong dir="auto">{transfer.from}</strong><span>{t("projects.paysTo")} <ArrowRight size={15} aria-hidden="true" /></span><strong dir="auto">{transfer.to}</strong></div>
+                  <div className="settlement-parties"><strong>{transfer.from}</strong><span>{t("projects.paysTo")} <ArrowRight size={15} aria-hidden="true" /></span><strong>{transfer.to}</strong></div>
                   <b>{formatCurrency(transfer.amount)}</b>
                 </article>
               ))}
@@ -581,8 +581,8 @@ export function ProjectDetailManager({ projectId }: { projectId: string }) {
           <div className="project-card-icon"><FolderKanban size={24} aria-hidden="true" /></div>
           <div>
             <span>{t("projects.projectDetails")}</span>
-            <h1 dir="auto">{project.title}</h1>
-            {project.description ? <p dir="auto">{project.description}</p> : null}
+            <h1>{project.title}</h1>
+            {project.description ? <p>{project.description}</p> : null}
           </div>
           <div className="project-start-date"><CalendarDays size={17} aria-hidden="true" /><span>{t("projects.startDate")}</span><strong>{formatDate(project.startDate)}</strong></div>
         </section>
@@ -602,7 +602,7 @@ export function ProjectDetailManager({ projectId }: { projectId: string }) {
             <tbody>
               {project.memberBalances.map((member) => (
                 <tr key={member.memberId}>
-                  <td><span className="table-title"><Users size={15} aria-hidden="true" /><span dir="auto">{member.memberName}</span></span></td>
+                  <td><span className="table-title"><Users size={15} aria-hidden="true" /><span>{member.memberName}</span></span></td>
                   <td>{member.shareWeight}</td>
                   <td>{formatCurrency(member.paid)}</td>
                   <td>{formatCurrency(member.expected)}</td>
@@ -615,7 +615,7 @@ export function ProjectDetailManager({ projectId }: { projectId: string }) {
         <div className="project-mobile-member-list">
           {project.memberBalances.map((member) => (
             <article className="project-mobile-member-card" key={member.memberId}>
-              <div className="project-mobile-card-heading"><strong><Users size={16} aria-hidden="true" /><span dir="auto">{member.memberName}</span></strong><b className={member.balance >= 0 ? "positive" : "negative"}>{member.balance > 0 ? "+" : ""}{formatCurrency(member.balance)}</b></div>
+              <div className="project-mobile-card-heading"><strong><Users size={16} aria-hidden="true" /><span>{member.memberName}</span></strong><b className={member.balance >= 0 ? "positive" : "negative"}>{member.balance > 0 ? "+" : ""}{formatCurrency(member.balance)}</b></div>
               <div className="project-mobile-member-metrics"><div><span>{t("projects.paid")}</span><strong>{formatCurrency(member.paid)}</strong></div><div><span>{t("projects.expected")}</span><strong>{formatCurrency(member.expected)}</strong></div></div>
             </article>
           ))}
@@ -628,7 +628,7 @@ export function ProjectDetailManager({ projectId }: { projectId: string }) {
           <div className="project-category-totals">
             {visibleCategoryTotals.map((category) => (
               <div className="project-category-total" key={category.categoryId}>
-                <div><strong dir="auto">{category.categoryName}</strong><span>{formatCurrency(category.amount)}</span></div>
+                <div><strong>{category.categoryName}</strong><span>{formatCurrency(category.amount)}</span></div>
                 <div className="project-category-track"><span style={{ width: `${(category.amount / maxCategoryAmount) * 100}%` }} /></div>
               </div>
             ))}
@@ -645,9 +645,9 @@ export function ProjectDetailManager({ projectId }: { projectId: string }) {
               {project.expenses.map((expense) => (
                 <tr key={expense.id}>
                   <td>{formatDate(expense.date)}</td>
-                  <td dir="auto">{expense.description ?? ""}</td>
-                  <td><span className="project-category-chip" dir="auto">{expense.categoryName}</span></td>
-                  <td dir="auto">{expense.paidByMemberName}</td>
+                  <td>{expense.description ?? ""}</td>
+                  <td><span className="project-category-chip">{expense.categoryName}</span></td>
+                  <td>{expense.paidByMemberName}</td>
                   <td><strong>{formatCurrency(expense.amount)}</strong></td>
                   {can("projects.expenses.edit") || can("projects.expenses.delete") ? <td><div className="table-actions">{can("projects.expenses.edit") ? <button className="icon-button" type="button" onClick={() => openEditExpense(expense)} aria-label={t("projects.editExpense")}><Pencil size={16} aria-hidden="true" /></button> : null}{can("projects.expenses.delete") ? <button className="icon-button danger" type="button" onClick={() => setDeletingExpense(expense)} aria-label={t("projects.deleteExpense")}><Trash2 size={16} aria-hidden="true" /></button> : null}</div></td> : null}
                 </tr>
@@ -658,10 +658,10 @@ export function ProjectDetailManager({ projectId }: { projectId: string }) {
         <div className="project-mobile-expense-list">
           {project.expenses.map((expense) => (
             <article className="project-mobile-expense-card" key={expense.id}>
-              <div className="project-mobile-card-heading"><span>{formatDate(expense.date)}</span><span className="project-category-chip" dir="auto">{expense.categoryName}</span></div>
-              {expense.description ? <p dir="auto">{expense.description}</p> : null}
+              <div className="project-mobile-card-heading"><span>{formatDate(expense.date)}</span><span className="project-category-chip">{expense.categoryName}</span></div>
+              {expense.description ? <p>{expense.description}</p> : null}
               <div className="project-mobile-expense-footer">
-                <div><span>{t("projects.paidBy")}</span><strong dir="auto">{expense.paidByMemberName}</strong></div>
+                <div><span>{t("projects.paidBy")}</span><strong>{expense.paidByMemberName}</strong></div>
                 <strong className="project-mobile-expense-amount">{formatCurrency(expense.amount)}</strong>
                 {can("projects.expenses.edit") || can("projects.expenses.delete") ? <div className="table-actions">{can("projects.expenses.edit") ? <button className="icon-button" type="button" onClick={() => openEditExpense(expense)} aria-label={t("projects.editExpense")}><Pencil size={16} aria-hidden="true" /></button> : null}{can("projects.expenses.delete") ? <button className="icon-button danger" type="button" onClick={() => setDeletingExpense(expense)} aria-label={t("projects.deleteExpense")}><Trash2 size={16} aria-hidden="true" /></button> : null}</div> : null}
               </div>

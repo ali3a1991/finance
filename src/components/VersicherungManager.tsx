@@ -211,7 +211,7 @@ export function VersicherungManager() {
       {isLoading ? <p className="muted-text">{t("insurances.loading")}</p> : null}
 
       <section className="table-panel">
-        <div className="responsive-table">
+        <div className="responsive-table desktop-data-table">
           <table>
             <thead>
               <tr>
@@ -266,6 +266,16 @@ export function VersicherungManager() {
               ))}
             </tbody>
           </table>
+        </div>
+        <div className="mobile-data-list">
+          {insurances.map((insurance) => (
+            <article className="mobile-data-card" key={insurance.id}>
+              <div className="mobile-data-card-heading"><span className="mobile-data-title"><ShieldCheck size={17} aria-hidden="true" /><strong>{insurance.provider}</strong></span><strong>{formatCurrency(insurance.monthlyPremium)}</strong></div>
+              <p className="mobile-data-description">{insurance.coverage}</p>
+              <div className="mobile-data-grid"><div><span>{t("common.paymentInterval")}</span><strong>{t(`common.paymentInterval${insurance.paymentIntervalMonths}`)}</strong></div><div><span>{t("insurances.debitDay")}</span><strong>{insurance.debitDay}. {t("common.day")}</strong></div><div><span>{t("insurances.startDate")}</span><strong>{insurance.startDate ? formatDate(insurance.startDate) : "-"}</strong></div><div><span>{t("insurances.endDate")}</span><strong>{insurance.endDate ? formatDate(insurance.endDate) : "-"}</strong></div></div>
+              {can("insurances.edit") || can("insurances.delete") ? <div className="mobile-data-card-footer actions-only"><div className="table-actions">{can("insurances.edit") ? <button className="icon-button" type="button" onClick={() => openEditModal(insurance)} aria-label={`${insurance.provider} ${t("common.edit")}`}><Pencil size={16} aria-hidden="true" /></button> : null}{can("insurances.delete") ? <button className="icon-button danger" type="button" onClick={() => setInsuranceToDelete(insurance)} aria-label={`${insurance.provider} ${t("common.delete")}`}><Trash2 size={16} aria-hidden="true" /></button> : null}</div></div> : null}
+            </article>
+          ))}
         </div>
       </section>
 

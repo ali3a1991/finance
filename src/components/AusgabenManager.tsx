@@ -217,7 +217,7 @@ export function AusgabenManager() {
       {isLoading ? <p className="muted-text">{t("expenses.loading")}</p> : null}
 
       <section className="table-panel">
-        <div className="responsive-table">
+        <div className="responsive-table desktop-data-table">
           <table>
             <thead>
               <tr>
@@ -263,6 +263,14 @@ export function AusgabenManager() {
               ))}
             </tbody>
           </table>
+        </div>
+        <div className="mobile-data-list">
+          {visibleExpenses.map((expense) => (
+            <article className="mobile-data-card" key={expense.id}>
+              <div className="mobile-data-card-heading"><strong>{expense.title}</strong><strong className="negative">{formatCurrency(expense.amount)}</strong></div>
+              <div className="mobile-data-card-footer"><span>{formatDate(expense.date)}</span>{can("expenses.edit") || can("expenses.delete") ? (isSavingsGeneratedExpense(expense) ? <small className="table-note">{t("savings.manageOnlyInSavings")}</small> : <div className="table-actions">{can("expenses.edit") ? <button className="icon-button" type="button" onClick={() => openEditModal(expense)} aria-label={`${expense.title} ${t("common.edit")}`}><Pencil size={16} aria-hidden="true" /></button> : null}{can("expenses.delete") ? <button className="icon-button danger" type="button" onClick={() => setExpenseToDelete(expense)} aria-label={`${expense.title} ${t("common.delete")}`}><Trash2 size={16} aria-hidden="true" /></button> : null}</div>) : null}</div>
+            </article>
+          ))}
         </div>
         {!isLoading && visibleExpenses.length === 0 ? (
           <p className="empty-table-text">{t("expenses.empty")}</p>
