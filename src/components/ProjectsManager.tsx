@@ -5,6 +5,7 @@ import { FormEvent, useCallback, useEffect, useState } from "react";
 import {
   ArrowRight,
   CalendarDays,
+  Calculator,
   FolderKanban,
   Pencil,
   Plus,
@@ -43,6 +44,12 @@ type ExpenseFormState = {
   categoryId: string;
   paidByMemberId: string;
   description: string;
+};
+
+type SettlementTransfer = {
+  from: string;
+  to: string;
+  amount: number;
 };
 
 function emptyProjectForm(): ProjectFormState {
@@ -89,6 +96,45 @@ function isolateText(value: string | number) {
   return `\u2068${value}\u2069`;
 }
 
+function calculateSettlementTransfers(project: ExpenseProjectDetail): SettlementTransfer[] {
+  const creditors = project.memberBalances
+    .filter((member) => Math.round(member.balance * 100) > 0)
+    .map((member) => ({ name: member.memberName, cents: Math.round(member.balance * 100) }))
+    .sort((a, b) => b.cents - a.cents);
+  const debtors = project.memberBalances
+    .filter((member) => Math.round(member.balance * 100) < 0)
+    .map((member) => ({ name: member.memberName, cents: -Math.round(member.balance * 100) }))
+    .sort((a, b) => b.cents - a.cents);
+  const transfers: SettlementTransfer[] = [];
+
+  while (creditors.length && debtors.length) {
+    let creditorIndex = 0;
+    let debtorIndex = 0;
+    let exactMatchFound = false;
+    for (let currentCreditorIndex = 0; currentCreditorIndex < creditors.length && !exactMatchFound; currentCreditorIndex += 1) {
+      const exactDebtorIndex = debtors.findIndex((debtor) => debtor.cents === creditors[currentCreditorIndex].cents);
+      if (exactDebtorIndex >= 0) {
+        creditorIndex = currentCreditorIndex;
+        debtorIndex = exactDebtorIndex;
+        exactMatchFound = true;
+      }
+    }
+    const creditor = creditors[creditorIndex];
+    const debtor = debtors[debtorIndex];
+    const cents = Math.min(creditor.cents, debtor.cents);
+
+    transfers.push({ amount: cents / 100, from: debtor.name, to: creditor.name });
+    creditor.cents -= cents;
+    debtor.cents -= cents;
+    if (creditor.cents === 0) creditors.splice(creditorIndex, 1);
+    if (debtor.cents === 0) debtors.splice(debtorIndex, 1);
+    creditors.sort((a, b) => b.cents - a.cents);
+    debtors.sort((a, b) => b.cents - a.cents);
+  }
+
+  return transfers;
+}
+
 export function ProjectsManager() {
   const { can } = useAuth();
   const { t } = useLanguage();
@@ -101,6 +147,9 @@ export function ProjectsManager() {
   const [isSaving, setIsSaving] = useState(false);
   const [sharingProjectId, setSharingProjectId] = useState<string | null>(null);
   const [shareNotice, setShareNotice] = useState("");
+  const [settlementProject, setSettlementProject] = useState<ExpenseProjectDetail | null>(null);
+  const [settlementLoadingId, setSettlementLoadingId] = useState<string | null>(null);
+  const [settlementNotice, setSettlementNotice] = useState("");
   const [error, setError] = useState("");
 
   const loadProjects = useCallback(async () => {
@@ -235,6 +284,49 @@ export function ProjectsManager() {
     }
   }
 
+  async function openSettlement(project: ExpenseProject) {
+    setSettlementLoadingId(project.id);
+    setSettlementNotice("");
+    setError("");
+    try {
+      const body = await requestJson<{ project: ExpenseProjectDetail }>(`/api/projects/${project.id}`);
+      setSettlementProject(body.project);
+    } catch (loadError) {
+      setError(errorMessage(loadError, t("projects.operationFailed")));
+    } finally {
+      setSettlementLoadingId(null);
+    }
+  }
+
+  async function shareSettlement() {
+    if (!settlementProject) return;
+    const transfers = calculateSettlementTransfers(settlementProject);
+    const text = [
+      `🧮 ${t("projects.settlementTitle")}`,
+      `📁 ${isolateText(settlementProject.title)}`,
+      `${t("projects.transferCount")} · ${isolateText(transfers.length)}`,
+      "──────────────",
+      "",
+      ...(transfers.length ? transfers.flatMap((transfer, index) => [
+        `${String(index + 1).padStart(2, "0")}  ${isolateText(transfer.from)}  ➜  ${isolateText(transfer.to)}`,
+        `    ${isolateText(formatCurrency(transfer.amount))}`,
+        ...(index < transfers.length - 1 ? [""] : [])
+      ]) : [`✅ ${t("projects.alreadySettled")}`])
+    ].join("\n");
+
+    try {
+      if (navigator.share) {
+        await navigator.share({ text, title: t("projects.settlementTitle") });
+      } else {
+        await navigator.clipboard.writeText(text);
+        setSettlementNotice(t("projects.settlementCopied"));
+      }
+    } catch (shareError) {
+      if (shareError instanceof DOMException && shareError.name === "AbortError") return;
+      setSettlementNotice(t("projects.shareFailed"));
+    }
+  }
+
   return (
     <>
       {can("projects.create") ? (
@@ -263,11 +355,11 @@ export function ProjectsManager() {
             <div className="project-card-heading">
               <div className="project-card-icon"><FolderKanban size={22} aria-hidden="true" /></div>
               <div>
-                <h2>{project.title}</h2>
+                <h2 dir="auto">{project.title}</h2>
                 <span><CalendarDays size={15} aria-hidden="true" /> {formatDate(project.startDate)}</span>
               </div>
             </div>
-            {project.description ? <p>{project.description}</p> : null}
+            {project.description ? <p dir="auto">{project.description}</p> : null}
             <div className="project-card-metrics">
               <div><span>{t("projects.totalExpenses")}</span><strong>{formatCurrency(project.totalExpense)}</strong></div>
               <div><span>{t("projects.expenseCount")}</span><strong>{project.expenseCount}</strong></div>
@@ -278,6 +370,9 @@ export function ProjectsManager() {
                 {t("projects.openProject")} <ArrowRight size={17} aria-hidden="true" />
               </Link>
               <div className="table-actions">
+                  <button className="icon-button project-settlement-button" type="button" disabled={settlementLoadingId === project.id} onClick={() => openSettlement(project)} aria-label={t("projects.calculateSettlement")} title={t("projects.calculateSettlement")}>
+                    <Calculator size={17} aria-hidden="true" />
+                  </button>
                   <button className="icon-button project-share-button" type="button" disabled={sharingProjectId === project.id} onClick={() => shareProject(project)} aria-label={t("projects.shareProject")} title={t("projects.shareProject")}>
                     <Share2 size={17} aria-hidden="true" />
                   </button>
@@ -313,7 +408,55 @@ export function ProjectsManager() {
           title={t("projects.deleteProjectTitle")}
         />
       ) : null}
+
+      {settlementProject ? (
+        <SettlementModal
+          notice={settlementNotice}
+          onClose={() => { setSettlementProject(null); setSettlementNotice(""); }}
+          onShare={shareSettlement}
+          project={settlementProject}
+          transfers={calculateSettlementTransfers(settlementProject)}
+        />
+      ) : null}
     </>
+  );
+}
+
+function SettlementModal({ notice, onClose, onShare, project, transfers }: {
+  notice: string;
+  onClose: () => void;
+  onShare: () => void;
+  project: ExpenseProjectDetail;
+  transfers: SettlementTransfer[];
+}) {
+  const { t } = useLanguage();
+  return (
+    <div className="modal-backdrop" role="presentation">
+      <section className="modal-panel settlement-modal" role="dialog" aria-modal="true" aria-labelledby="settlement-modal-title">
+        <div className="modal-header">
+          <div><span dir="auto">{project.title}</span><h2 id="settlement-modal-title">{t("projects.settlementTitle")}</h2></div>
+          <button className="icon-button" type="button" onClick={onClose} aria-label={t("common.closeDialog")}><X size={20} aria-hidden="true" /></button>
+        </div>
+        <div className="settlement-modal-body">
+          <div className="settlement-intro"><Calculator size={22} aria-hidden="true" /><div><strong>{transfers.length} {t("projects.transferCount")}</strong><p>{t("projects.settlementHint")}</p></div></div>
+          {transfers.length ? (
+            <div className="settlement-transfer-list">
+              {transfers.map((transfer, index) => (
+                <article className="settlement-transfer" key={`${transfer.from}-${transfer.to}-${index}`}>
+                  <span className="settlement-transfer-index">{String(index + 1).padStart(2, "0")}</span>
+                  <div className="settlement-parties"><strong dir="auto">{transfer.from}</strong><span>{t("projects.paysTo")} <ArrowRight size={15} aria-hidden="true" /></span><strong dir="auto">{transfer.to}</strong></div>
+                  <b>{formatCurrency(transfer.amount)}</b>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="settlement-empty"><span>✓</span><strong>{t("projects.alreadySettled")}</strong><p>{t("projects.alreadySettledHint")}</p></div>
+          )}
+          {notice ? <p className="form-info" role="status">{notice}</p> : null}
+          <div className="settlement-actions"><button className="button secondary" type="button" onClick={onClose}>{t("common.cancel")}</button><button className="button primary" type="button" onClick={onShare}><Share2 size={18} aria-hidden="true" />{t("projects.shareSettlement")}</button></div>
+        </div>
+      </section>
+    </div>
   );
 }
 
@@ -438,8 +581,8 @@ export function ProjectDetailManager({ projectId }: { projectId: string }) {
           <div className="project-card-icon"><FolderKanban size={24} aria-hidden="true" /></div>
           <div>
             <span>{t("projects.projectDetails")}</span>
-            <h1>{project.title}</h1>
-            {project.description ? <p>{project.description}</p> : null}
+            <h1 dir="auto">{project.title}</h1>
+            {project.description ? <p dir="auto">{project.description}</p> : null}
           </div>
           <div className="project-start-date"><CalendarDays size={17} aria-hidden="true" /><span>{t("projects.startDate")}</span><strong>{formatDate(project.startDate)}</strong></div>
         </section>
@@ -459,7 +602,7 @@ export function ProjectDetailManager({ projectId }: { projectId: string }) {
             <tbody>
               {project.memberBalances.map((member) => (
                 <tr key={member.memberId}>
-                  <td><span className="table-title"><Users size={15} aria-hidden="true" />{member.memberName}</span></td>
+                  <td><span className="table-title"><Users size={15} aria-hidden="true" /><span dir="auto">{member.memberName}</span></span></td>
                   <td>{member.shareWeight}</td>
                   <td>{formatCurrency(member.paid)}</td>
                   <td>{formatCurrency(member.expected)}</td>
@@ -472,7 +615,7 @@ export function ProjectDetailManager({ projectId }: { projectId: string }) {
         <div className="project-mobile-member-list">
           {project.memberBalances.map((member) => (
             <article className="project-mobile-member-card" key={member.memberId}>
-              <div className="project-mobile-card-heading"><strong><Users size={16} aria-hidden="true" />{member.memberName}</strong><b className={member.balance >= 0 ? "positive" : "negative"}>{member.balance > 0 ? "+" : ""}{formatCurrency(member.balance)}</b></div>
+              <div className="project-mobile-card-heading"><strong><Users size={16} aria-hidden="true" /><span dir="auto">{member.memberName}</span></strong><b className={member.balance >= 0 ? "positive" : "negative"}>{member.balance > 0 ? "+" : ""}{formatCurrency(member.balance)}</b></div>
               <div className="project-mobile-member-metrics"><div><span>{t("projects.paid")}</span><strong>{formatCurrency(member.paid)}</strong></div><div><span>{t("projects.expected")}</span><strong>{formatCurrency(member.expected)}</strong></div></div>
             </article>
           ))}
@@ -485,7 +628,7 @@ export function ProjectDetailManager({ projectId }: { projectId: string }) {
           <div className="project-category-totals">
             {visibleCategoryTotals.map((category) => (
               <div className="project-category-total" key={category.categoryId}>
-                <div><strong>{category.categoryName}</strong><span>{formatCurrency(category.amount)}</span></div>
+                <div><strong dir="auto">{category.categoryName}</strong><span>{formatCurrency(category.amount)}</span></div>
                 <div className="project-category-track"><span style={{ width: `${(category.amount / maxCategoryAmount) * 100}%` }} /></div>
               </div>
             ))}
@@ -502,9 +645,9 @@ export function ProjectDetailManager({ projectId }: { projectId: string }) {
               {project.expenses.map((expense) => (
                 <tr key={expense.id}>
                   <td>{formatDate(expense.date)}</td>
-                  <td>{expense.description || t("projects.noDescription")}</td>
-                  <td><span className="project-category-chip">{expense.categoryName}</span></td>
-                  <td>{expense.paidByMemberName}</td>
+                  <td dir="auto">{expense.description ?? ""}</td>
+                  <td><span className="project-category-chip" dir="auto">{expense.categoryName}</span></td>
+                  <td dir="auto">{expense.paidByMemberName}</td>
                   <td><strong>{formatCurrency(expense.amount)}</strong></td>
                   {can("projects.expenses.edit") || can("projects.expenses.delete") ? <td><div className="table-actions">{can("projects.expenses.edit") ? <button className="icon-button" type="button" onClick={() => openEditExpense(expense)} aria-label={t("projects.editExpense")}><Pencil size={16} aria-hidden="true" /></button> : null}{can("projects.expenses.delete") ? <button className="icon-button danger" type="button" onClick={() => setDeletingExpense(expense)} aria-label={t("projects.deleteExpense")}><Trash2 size={16} aria-hidden="true" /></button> : null}</div></td> : null}
                 </tr>
@@ -515,10 +658,10 @@ export function ProjectDetailManager({ projectId }: { projectId: string }) {
         <div className="project-mobile-expense-list">
           {project.expenses.map((expense) => (
             <article className="project-mobile-expense-card" key={expense.id}>
-              <div className="project-mobile-card-heading"><span>{formatDate(expense.date)}</span><span className="project-category-chip">{expense.categoryName}</span></div>
-              <p>{expense.description || t("projects.noDescription")}</p>
+              <div className="project-mobile-card-heading"><span>{formatDate(expense.date)}</span><span className="project-category-chip" dir="auto">{expense.categoryName}</span></div>
+              {expense.description ? <p dir="auto">{expense.description}</p> : null}
               <div className="project-mobile-expense-footer">
-                <div><span>{t("projects.paidBy")}</span><strong>{expense.paidByMemberName}</strong></div>
+                <div><span>{t("projects.paidBy")}</span><strong dir="auto">{expense.paidByMemberName}</strong></div>
                 <strong className="project-mobile-expense-amount">{formatCurrency(expense.amount)}</strong>
                 {can("projects.expenses.edit") || can("projects.expenses.delete") ? <div className="table-actions">{can("projects.expenses.edit") ? <button className="icon-button" type="button" onClick={() => openEditExpense(expense)} aria-label={t("projects.editExpense")}><Pencil size={16} aria-hidden="true" /></button> : null}{can("projects.expenses.delete") ? <button className="icon-button danger" type="button" onClick={() => setDeletingExpense(expense)} aria-label={t("projects.deleteExpense")}><Trash2 size={16} aria-hidden="true" /></button> : null}</div> : null}
               </div>
