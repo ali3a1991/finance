@@ -15,7 +15,7 @@ type ShoppingForm = {
   deadline: string;
 };
 
-const emptyForm: ShoppingForm = { deadline: "", hasDeadline: false, name: "", quantity: "", unit: "piece" };
+const emptyForm: ShoppingForm = { deadline: "", hasDeadline: false, name: "", quantity: "1", unit: "piece" };
 
 function localDateKey(value: string) {
   const date = new Date(value);
@@ -26,7 +26,8 @@ export function ShoppingListManager() {
   const { can } = useAuth();
   const { language, t } = useLanguage();
   const [items, setItems] = useState<ShoppingItem[]>([]);
-  const [form, setForm] = useState<ShoppingForm>(emptyForm);
+  const [addForm, setAddForm] = useState<ShoppingForm>(emptyForm);
+  const [editForm, setEditForm] = useState<ShoppingForm>(emptyForm);
   const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null);
   const [suggestions, setSuggestions] = useState<ShoppingSuggestion[]>([]);
   const [areSuggestionsLoading, setAreSuggestionsLoading] = useState(false);
@@ -79,7 +80,7 @@ export function ShoppingListManager() {
   function closeModal() {
     setIsOpen(false);
     setEditingItem(null);
-    setForm(emptyForm);
+    setEditForm(emptyForm);
   }
 
   async function loadSuggestions() {
@@ -94,15 +95,9 @@ export function ShoppingListManager() {
     }
   }
 
-  function openAddModal() {
-    setEditingItem(null);
-    setForm(emptyForm);
-    setIsOpen(true);
-  }
-
   function openEditModal(item: ShoppingItem) {
     setEditingItem(item);
-    setForm({
+    setEditForm({
       deadline: item.deadline ?? "",
       hasDeadline: Boolean(item.deadline),
       name: item.name,
@@ -112,29 +107,50 @@ export function ShoppingListManager() {
     setIsOpen(true);
   }
 
-  function updateItemName(name: string) {
+  function updateItemName(form: ShoppingForm, setForm: (form: ShoppingForm) => void, name: string) {
     const selected = suggestions.find((suggestion) => suggestion.name.trim().toLocaleLowerCase() === name.trim().toLocaleLowerCase());
-    setForm((current) => ({ ...current, name, unit: selected?.unit ?? current.unit }));
+    setForm({ ...form, name, unit: selected?.unit ?? form.unit });
   }
 
-  async function saveItem(event: FormEvent<HTMLFormElement>) {
+  async function createItem(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSaving(true);
     setError("");
     try {
-      const body = await requestJson<{ item: ShoppingItem }>(editingItem ? `/api/shopping-list/${editingItem.id}` : "/api/shopping-list", {
+      const body = await requestJson<{ item: ShoppingItem }>("/api/shopping-list", {
         body: JSON.stringify({
-          deadline: form.hasDeadline ? form.deadline : null,
-          name: form.name.trim(),
-          quantity: Number(form.quantity),
-          unit: form.unit
+          deadline: addForm.hasDeadline ? addForm.deadline : null,
+          name: addForm.name.trim(),
+          quantity: Number(addForm.quantity),
+          unit: addForm.unit
         }),
-        method: editingItem ? "PATCH" : "POST"
+        method: "POST"
       });
-      setItems((current) => editingItem
-        ? current.map((item) => item.id === editingItem.id ? body.item : item)
-        : [body.item, ...current]
-      );
+      setItems((current) => [body.item, ...current]);
+      setAddForm(emptyForm);
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : t("shoppingList.error"));
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function saveEditedItem(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!editingItem) return;
+    setIsSaving(true);
+    setError("");
+    try {
+      const body = await requestJson<{ item: ShoppingItem }>(`/api/shopping-list/${editingItem.id}`, {
+        body: JSON.stringify({
+          deadline: editForm.hasDeadline ? editForm.deadline : null,
+          name: editForm.name.trim(),
+          quantity: Number(editForm.quantity),
+          unit: editForm.unit
+        }),
+        method: "PATCH"
+      });
+      setItems((current) => current.map((item) => item.id === editingItem.id ? body.item : item));
       closeModal();
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : t("shoppingList.error"));
@@ -204,7 +220,19 @@ export function ShoppingListManager() {
 
   return (
     <>
-      {can("shopping.create") ? <div className="action-row"><button className="button primary" type="button" onClick={openAddModal}><PlusCircle size={18} aria-hidden="true" />{t("shoppingList.add")}</button></div> : null}
+      {can("shopping.create") ? (
+        <section className="shopping-add-panel" aria-labelledby="shopping-add-title">
+          <div className="shopping-add-heading"><PlusCircle size={19} aria-hidden="true" /><strong id="shopping-add-title">{t("shoppingList.addTitle")}</strong></div>
+          <form className="shopping-inline-form" onSubmit={createItem}>
+            <label className="shopping-name-field"><span>{t("shoppingList.name")}</span><input required list="shopping-add-suggestions" autoComplete="off" value={addForm.name} onChange={(event) => updateItemName(addForm, setAddForm, event.target.value)} /><datalist id="shopping-add-suggestions">{suggestions.map((suggestion) => <option key={suggestion.name.toLocaleLowerCase()} value={suggestion.name} label={`${suggestion.name} · ${unitLabel(suggestion.unit)}`} />)}</datalist>{areSuggestionsLoading ? <small className="shopping-suggestions-status">{t("shoppingList.loadingSuggestions")}</small> : null}</label>
+            <label className="shopping-quantity-field"><span>{t("shoppingList.quantity")}</span><input required min="0.01" step="any" type="number" value={addForm.quantity} onChange={(event) => setAddForm((current) => ({ ...current, quantity: event.target.value }))} /></label>
+            <label className="shopping-unit-field"><span>{t("shoppingList.unit")}</span><select value={addForm.unit} onChange={(event) => setAddForm((current) => ({ ...current, unit: event.target.value as ShoppingUnit }))}><option value="kg">{unitLabel("kg")}</option><option value="package">{unitLabel("package")}</option><option value="piece">{unitLabel("piece")}</option></select></label>
+            <label className="checkbox-row shopping-deadline-toggle"><input type="checkbox" checked={addForm.hasDeadline} onChange={(event) => setAddForm((current) => ({ ...current, hasDeadline: event.target.checked, deadline: event.target.checked ? current.deadline : "" }))} /><span>{t("shoppingList.hasDeadline")}</span></label>
+            {addForm.hasDeadline ? <label className="shopping-date-field"><span>{t("shoppingList.deadline")}</span><input required type="date" value={addForm.deadline} onChange={(event) => setAddForm((current) => ({ ...current, deadline: event.target.value }))} /></label> : null}
+            <button className="button primary shopping-add-submit" type="submit" disabled={isSaving}><PlusCircle size={18} aria-hidden="true" />{isSaving ? t("common.saving") : t("shoppingList.add")}</button>
+          </form>
+        </section>
+      ) : null}
       {error ? <p className="form-error" role="alert">{error}</p> : null}
       {isLoading ? <p className="muted-text">{t("shoppingList.loading")}</p> : null}
 
@@ -228,13 +256,13 @@ export function ShoppingListManager() {
       {isOpen ? (
         <div className="modal-backdrop" role="presentation">
           <section className="modal-panel" role="dialog" aria-modal="true" aria-labelledby="shopping-modal-title">
-            <div className="modal-header"><div><span>{t("nav.shoppingList")}</span><h2 id="shopping-modal-title">{editingItem ? t("shoppingList.editTitle") : t("shoppingList.addTitle")}</h2></div><button className="icon-button" type="button" onClick={closeModal} aria-label={t("common.closeDialog")}><X size={20} aria-hidden="true" /></button></div>
-            <form className="modal-form" onSubmit={saveItem}>
-              <label className="form-field-full"><span>{t("shoppingList.name")}</span><input autoFocus required list="shopping-item-suggestions" autoComplete="off" value={form.name} onChange={(event) => updateItemName(event.target.value)} /><datalist id="shopping-item-suggestions">{suggestions.map((suggestion) => <option key={suggestion.name.toLocaleLowerCase()} value={suggestion.name} label={`${suggestion.name} · ${unitLabel(suggestion.unit)}`} />)}</datalist>{areSuggestionsLoading ? <small className="shopping-suggestions-status">{t("shoppingList.loadingSuggestions")}</small> : null}</label>
-              <label><span>{t("shoppingList.quantity")}</span><input required min="0.01" step="any" type="number" value={form.quantity} onChange={(event) => setForm((current) => ({ ...current, quantity: event.target.value }))} /></label>
-              <label><span>{t("shoppingList.unit")}</span><select value={form.unit} onChange={(event) => setForm((current) => ({ ...current, unit: event.target.value as ShoppingUnit }))}><option value="kg">{unitLabel("kg")}</option><option value="package">{unitLabel("package")}</option><option value="piece">{unitLabel("piece")}</option></select></label>
-              <label className="checkbox-row form-field-full"><input type="checkbox" checked={form.hasDeadline} onChange={(event) => setForm((current) => ({ ...current, hasDeadline: event.target.checked, deadline: event.target.checked ? current.deadline : "" }))} /><span>{t("shoppingList.hasDeadline")}</span></label>
-              {form.hasDeadline ? <label className="form-field-full"><span>{t("shoppingList.deadline")}</span><input required type="date" value={form.deadline} onChange={(event) => setForm((current) => ({ ...current, deadline: event.target.value }))} /></label> : null}
+            <div className="modal-header"><div><span>{t("nav.shoppingList")}</span><h2 id="shopping-modal-title">{t("shoppingList.editTitle")}</h2></div><button className="icon-button" type="button" onClick={closeModal} aria-label={t("common.closeDialog")}><X size={20} aria-hidden="true" /></button></div>
+            <form className="modal-form" onSubmit={saveEditedItem}>
+              <label className="form-field-full"><span>{t("shoppingList.name")}</span><input autoFocus required list="shopping-edit-suggestions" autoComplete="off" value={editForm.name} onChange={(event) => updateItemName(editForm, setEditForm, event.target.value)} /><datalist id="shopping-edit-suggestions">{suggestions.map((suggestion) => <option key={suggestion.name.toLocaleLowerCase()} value={suggestion.name} label={`${suggestion.name} · ${unitLabel(suggestion.unit)}`} />)}</datalist>{areSuggestionsLoading ? <small className="shopping-suggestions-status">{t("shoppingList.loadingSuggestions")}</small> : null}</label>
+              <label><span>{t("shoppingList.quantity")}</span><input required min="0.01" step="any" type="number" value={editForm.quantity} onChange={(event) => setEditForm((current) => ({ ...current, quantity: event.target.value }))} /></label>
+              <label><span>{t("shoppingList.unit")}</span><select value={editForm.unit} onChange={(event) => setEditForm((current) => ({ ...current, unit: event.target.value as ShoppingUnit }))}><option value="kg">{unitLabel("kg")}</option><option value="package">{unitLabel("package")}</option><option value="piece">{unitLabel("piece")}</option></select></label>
+              <label className="checkbox-row form-field-full"><input type="checkbox" checked={editForm.hasDeadline} onChange={(event) => setEditForm((current) => ({ ...current, hasDeadline: event.target.checked, deadline: event.target.checked ? current.deadline : "" }))} /><span>{t("shoppingList.hasDeadline")}</span></label>
+              {editForm.hasDeadline ? <label className="form-field-full"><span>{t("shoppingList.deadline")}</span><input required type="date" value={editForm.deadline} onChange={(event) => setEditForm((current) => ({ ...current, deadline: event.target.value }))} /></label> : null}
               <div className="modal-actions"><button className="button secondary" type="button" onClick={closeModal}>{t("common.cancel")}</button><button className="button primary" type="submit" disabled={isSaving}><Save size={18} aria-hidden="true" />{isSaving ? t("common.saving") : t("common.save")}</button></div>
             </form>
           </section>
