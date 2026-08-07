@@ -22,6 +22,10 @@ function localDateKey(value: string) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
+function isolateText(value: string | number) {
+  return `\u2068${value}\u2069`;
+}
+
 export function ShoppingListManager() {
   const { can } = useAuth();
   const { language, t } = useLanguage();
@@ -224,10 +228,15 @@ export function ShoppingListManager() {
 
     const text = [
       `🛒 ${t("shoppingList.shareTitle")}`,
+      `${t("shoppingList.totalItems")} · ${isolateText(selectedItems.length.toLocaleString(locale))}`,
+      "──────────────",
       "",
-      ...selectedItems.map((item) => `☐ ${item.name} — ${item.quantity.toLocaleString(locale)} ${unitLabel(item.unit)}${item.deadline ? ` · 📅 ${formatDay(item.deadline)}` : ""}`),
-      "",
-      `${t("shoppingList.totalItems")}: ${selectedItems.length.toLocaleString(locale)}`
+      ...selectedItems.flatMap((item, index) => [
+        `☐ ${isolateText(item.name)}`,
+        `   ${isolateText(`${item.quantity.toLocaleString(locale)} ${unitLabel(item.unit)}`)}`,
+        ...(item.deadline ? [`   📅 ${isolateText(formatDay(item.deadline))}`] : []),
+        ...(index < selectedItems.length - 1 ? [""] : [])
+      ])
     ].join("\n");
 
     try {
