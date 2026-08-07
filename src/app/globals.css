@@ -2974,7 +2974,6 @@ th {
 }
 
 .project-card-heading,
-.project-detail-nav,
 .project-card-actions {
   display: flex;
   align-items: center;
@@ -3139,14 +3138,6 @@ th {
   align-items: center;
   gap: 14px;
   padding: 18px;
-}
-
-.project-detail-nav {
-  justify-content: flex-end;
-}
-
-.project-detail-nav .button {
-  min-height: 40px;
 }
 
 .project-detail-hero span {
@@ -3825,15 +3816,6 @@ th {
   .modal-backdrop {
     align-items: end;
     padding: 10px;
-  }
-
-  .project-detail-nav {
-    align-items: center;
-    flex-direction: row;
-  }
-
-  .project-detail-nav .button {
-    width: auto;
   }
 
   .project-card-actions {

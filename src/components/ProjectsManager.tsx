@@ -424,7 +424,7 @@ export function ProjectDetailManager({ projectId }: { projectId: string }) {
   return (
     <>
       {can("projects.expenses.create") ? (
-        <div className="project-detail-nav">
+        <div className="action-row">
           <button className="button primary" type="button" onClick={openAddExpense} disabled={!activeCategories.length || !activeMembers.length}>
             <PlusCircle size={18} aria-hidden="true" /> {t("projects.addExpense")}
           </button>
