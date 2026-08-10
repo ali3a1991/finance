@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { CalendarDays, Check, Pencil, PlusCircle, Save, Send, Share2, ShoppingBasket, Trash2, X } from "lucide-react";
+import { CalendarDays, Check, ChevronDown, Pencil, PlusCircle, Save, Send, Share2, ShoppingBasket, Trash2, X } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
 import { requestJson } from "@/lib/requestJson";
@@ -326,10 +326,17 @@ export function ShoppingListManager() {
       ) : null}
 
       {completedGroups.map((group) => (
-        <section className="shopping-panel completed-panel" key={group.date}>
-          <div className="shopping-section-heading"><Check size={20} aria-hidden="true" /><span>{t("shoppingList.completedOn")} {formatDay(group.date)}</span><strong>{group.items.length}</strong></div>
+        <details className="shopping-panel completed-panel" key={group.date}>
+          <summary className="shopping-section-heading completed-accordion-heading">
+            <Check size={20} aria-hidden="true" />
+            <span>{t("shoppingList.completedOn")} {formatDay(group.date)}</span>
+            <span className="completed-accordion-meta">
+              <strong>{group.items.length}</strong>
+              <ChevronDown className="completed-accordion-chevron" size={18} aria-hidden="true" />
+            </span>
+          </summary>
           <div className="shopping-list">{group.items.map(renderItem)}</div>
-        </section>
+        </details>
       ))}
 
       {isOpen ? (
