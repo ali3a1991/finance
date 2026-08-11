@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { Bitcoin, ChartNoAxesCombined, LineChart, Pencil, PlusCircle, Save, Trash2, X } from "lucide-react";
+import { Bitcoin, LineChart, Pencil, PlusCircle, Save, Trash2, X } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
 import { formatCurrency, formatDate } from "@/lib/formatting";
@@ -162,16 +162,6 @@ export function InvestmentsManager() {
     (sum, investment) => sum + investment.quantity * (investment.currentPrice ?? investment.purchasePrice),
     0
   );
-  const marketResults = investments
-    .filter((investment) => investment.currentPrice !== null)
-    .map((investment) => ({
-      id: investment.id,
-      label: investment.assetName,
-      result: investment.quantity * ((investment.currentPrice as number) - investment.purchasePrice),
-      symbol: investment.symbol
-    }));
-  const totalMarketResult = marketResults.reduce((sum, investment) => sum + investment.result, 0);
-  const largestAbsoluteResult = Math.max(...marketResults.map((investment) => Math.abs(investment.result)), 1);
 
   return (
     <>
@@ -185,60 +175,6 @@ export function InvestmentsManager() {
       ) : null}
 
       {isLoading ? <p className="muted-text">{t("investments.loading")}</p> : null}
-
-      {!isLoading && marketResults.length > 0 ? (
-        <section className="investment-chart-panel" aria-labelledby="investment-result-chart-title">
-          <div className="investment-chart-heading">
-            <div>
-              <span className="investment-chart-eyebrow">
-                <ChartNoAxesCombined size={17} aria-hidden="true" />
-                {t("investments.marketStatus")}
-              </span>
-              <h2 id="investment-result-chart-title">{t("investments.chartTitle")}</h2>
-              <p>{t("investments.chartDescription")}</p>
-            </div>
-            <div className={`investment-chart-total ${totalMarketResult >= 0 ? "positive" : "negative"}`}>
-              <span>{t("investments.totalResult")}</span>
-              <strong>
-                {totalMarketResult > 0 ? "+" : ""}
-                {formatCurrency(totalMarketResult, "EUR")}
-              </strong>
-            </div>
-          </div>
-
-          <div className="investment-result-chart" role="list" aria-label={t("investments.chartTitle")}>
-            {marketResults.map((investment) => {
-              const isPositive = investment.result >= 0;
-              const width = `${Math.max((Math.abs(investment.result) / largestAbsoluteResult) * 50, 1.5)}%`;
-
-              return (
-                <div className="investment-chart-row" role="listitem" key={investment.id}>
-                  <div className="investment-chart-label">
-                    <strong>{investment.label}</strong>
-                    <span>{investment.symbol}</span>
-                  </div>
-                  <div className="investment-chart-track" aria-hidden="true">
-                    <span className="investment-chart-zero" />
-                    <span
-                      className={`investment-chart-bar ${isPositive ? "positive" : "negative"}`}
-                      style={isPositive ? { left: "50%", width } : { right: "50%", width }}
-                    />
-                  </div>
-                  <strong className={`investment-chart-value ${isPositive ? "positive" : "negative"}`}>
-                    {investment.result > 0 ? "+" : ""}
-                    {formatCurrency(investment.result, "EUR")}
-                  </strong>
-                </div>
-              );
-            })}
-          </div>
-          <div className="investment-chart-axis" aria-hidden="true">
-            <span>{t("investments.loss")}</span>
-            <span>{t("investments.zero")}</span>
-            <span>{t("investments.profit")}</span>
-          </div>
-        </section>
-      ) : null}
 
       <section className="table-panel">
         <div className="responsive-table desktop-data-table">
