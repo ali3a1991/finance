@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { ChangeEvent, useEffect, useState } from "react";
 import {
   CalendarDays,
@@ -163,9 +164,14 @@ export function HomeDashboard() {
       {showInvestmentTotal ? (
         <section className="investment-summary-panel" aria-label={t("dashboard.investmentOverview")}>
           <div className="investment-summary-heading">
-            <div className="summary-icon">
+            <Link
+              className="summary-icon"
+              href="/investments"
+              aria-label={t("nav.investments")}
+              title={t("nav.investments")}
+            >
               <LineChart size={20} aria-hidden="true" />
-            </div>
+            </Link>
             <div>
               <span>{t("dashboard.investmentOverview")}</span>
               <strong>

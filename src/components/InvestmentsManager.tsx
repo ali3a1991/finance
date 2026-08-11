@@ -59,7 +59,7 @@ function formFromInvestment(investment: InvestmentWithQuote): InvestmentForm {
 
 export function InvestmentsManager() {
   const { can } = useAuth();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const [editingInvestment, setEditingInvestment] = useState<InvestmentWithQuote | null>(null);
   const [form, setForm] = useState<InvestmentForm>(emptyForm);
   const [investmentToDelete, setInvestmentToDelete] = useState<InvestmentWithQuote | null>(null);
@@ -162,9 +162,48 @@ export function InvestmentsManager() {
     (sum, investment) => sum + investment.quantity * (investment.currentPrice ?? investment.purchasePrice),
     0
   );
+  const investmentResult = currentTotal - investedTotal;
+  const investmentReturnRate = investedTotal > 0 ? (investmentResult / investedTotal) * 100 : 0;
+  const investmentResultClass = investmentResult >= 0 ? "positive" : "negative";
 
   return (
     <>
+      {!isLoading && investments.length > 0 ? (
+        <section className="investment-summary-panel" aria-label={t("dashboard.investmentOverview")}>
+          <div className="investment-summary-heading">
+            <div className="summary-icon">
+              <LineChart size={20} aria-hidden="true" />
+            </div>
+            <div>
+              <span>{t("dashboard.investmentOverview")}</span>
+              <strong>
+                {investments.length} {t("dashboard.investmentItems")}
+              </strong>
+            </div>
+          </div>
+          <div className="investment-summary-grid">
+            <div>
+              <span>{t("dashboard.currentInvestmentValue")}</span>
+              <strong>{formatCurrency(currentTotal, "EUR")}</strong>
+            </div>
+            <div>
+              <span>{t("dashboard.returnRate")}</span>
+              <strong className={investmentResultClass}>
+                {investmentReturnRate.toLocaleString(language === "de" ? "de-DE" : "en-US", {
+                  maximumFractionDigits: 2,
+                  minimumFractionDigits: 2
+                })}
+                %
+              </strong>
+            </div>
+            <div>
+              <span>{t("dashboard.investmentResult")}</span>
+              <strong className={investmentResultClass}>{formatCurrency(investmentResult, "EUR")}</strong>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       {can("investments.create") ? (
         <div className="action-row">
           <button className="button primary" type="button" onClick={openAddModal}>
