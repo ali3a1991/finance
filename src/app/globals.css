@@ -2662,7 +2662,7 @@ th {
 
 .settings-stack {
   display: grid;
-  gap: 16px;
+  gap: 8px;
 }
 
 .settings-panel {
