@@ -1017,7 +1017,7 @@ th {
 
 .gauge-value {
   display: grid;
-  gap: 5px;
+  gap: 6px;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 12px;
