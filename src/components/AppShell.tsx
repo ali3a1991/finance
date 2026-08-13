@@ -16,7 +16,8 @@ import {
   ShieldCheck,
   TrendingUp,
   WalletCards,
-  X
+  X,
+  LineChart
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useApiLoading } from "@/components/ApiLoadingProvider";
@@ -30,7 +31,7 @@ const navItems = [
   { href: "/incomes", labelKey: "incomes", icon: TrendingUp },
   { href: "/expenses", labelKey: "expenses", icon: WalletCards },
   { href: "/savings", labelKey: "savings", icon: PiggyBank },
-  { href: "/investments", labelKey: "investments", icon: TrendingUp }
+  { href: "/investments", labelKey: "investments", icon: LineChart }
 ];
 
 const toolItems = [
