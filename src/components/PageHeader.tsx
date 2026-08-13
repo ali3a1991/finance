@@ -5,6 +5,7 @@ import { useLanguage } from "@/components/LanguageProvider";
 type PageHeaderProps = {
   page:
     | "home"
+    | "monthlyPayments"
     | "loans"
     | "insurances"
     | "incomes"

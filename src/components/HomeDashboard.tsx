@@ -7,6 +7,7 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  Gauge,
   LineChart,
   PiggyBank,
   Save,
@@ -92,7 +93,7 @@ const paymentTypeTranslationKeys: Record<MonthlyPayment["sourceType"], string> =
   contract: "dashboard.paymentTypeContract"
 };
 
-export function HomeDashboard() {
+export function HomeDashboard({ view = "home" }: { view?: "home" | "monthlyPayments" }) {
   const { can } = useAuth();
   const { language, t } = useLanguage();
   const [selectedMonth, setSelectedMonth] = useState(getMonthKey());
@@ -161,10 +162,11 @@ export function HomeDashboard() {
   const investmentResultClass = summary.investmentResult >= 0 ? "positive" : "negative";
   const showSavingsTotal = summary.savingsTotal !== 0;
   const showInvestmentTotal = summary.investmentCurrentTotal !== 0;
+  const isHomeView = view === "home";
 
   return (
     <>
-      {summary.shoppingOpenItemCount > 0 ? (
+      {isHomeView && summary.shoppingOpenItemCount > 0 ? (
         <Link
           className="shopping-summary-panel"
           href="/shopping-list"
@@ -189,7 +191,7 @@ export function HomeDashboard() {
         </Link>
       ) : null}
 
-      {showInvestmentTotal ? (
+      {isHomeView && showInvestmentTotal ? (
         <section className="investment-summary-panel" aria-label={t("dashboard.investmentOverview")}>
           <div className="investment-summary-heading">
             <Link
@@ -230,7 +232,7 @@ export function HomeDashboard() {
         </section>
       ) : null}
 
-      {showSavingsTotal ? (
+      {isHomeView && showSavingsTotal ? (
         <section className="investment-summary-panel savings-summary-panel" aria-label={t("dashboard.savings")}>
           <div className="investment-summary-heading">
             <div className="summary-icon">
@@ -250,39 +252,57 @@ export function HomeDashboard() {
         </section>
       ) : null}
 
-      <section className="month-switcher" aria-label={t("dashboard.monthPicker")}>
-        <button
-          className="icon-button"
-          type="button"
-          onClick={() => setSelectedMonth((current) => addMonths(current, -1))}
-          aria-label={t("dashboard.previousMonth")}
-        >
-          <ChevronLeft size={20} aria-hidden="true" />
-        </button>
-        <div className="month-switcher-current">
-          <CalendarDays size={18} aria-hidden="true" />
-          <div>
-            <span>{isCurrentMonth ? t("dashboard.currentMonth") : t("dashboard.selectedMonth")}</span>
-            <strong>{formatMonthLabel(selectedMonth, language)}</strong>
-          </div>
-        </div>
-        <button
-          className="icon-button"
-          type="button"
-          onClick={() => setSelectedMonth((current) => addMonths(current, 1))}
-          aria-label={t("dashboard.nextMonth")}
-        >
-          <ChevronRight size={20} aria-hidden="true" />
-        </button>
-        {!isCurrentMonth ? (
-          <button className="button secondary month-today-button" type="button" onClick={() => setSelectedMonth(getMonthKey())}>
-            {t("dashboard.today")}
+      {!isHomeView ? (
+        <section className="month-switcher" aria-label={t("dashboard.monthPicker")}>
+          <button
+            className="icon-button"
+            type="button"
+            onClick={() => setSelectedMonth((current) => addMonths(current, -1))}
+            aria-label={t("dashboard.previousMonth")}
+          >
+            <ChevronLeft size={20} aria-hidden="true" />
           </button>
-        ) : null}
-      </section>
+          <div className="month-switcher-current">
+            <CalendarDays size={18} aria-hidden="true" />
+            <div>
+              <span>{isCurrentMonth ? t("dashboard.currentMonth") : t("dashboard.selectedMonth")}</span>
+              <strong>{formatMonthLabel(selectedMonth, language)}</strong>
+            </div>
+          </div>
+          <button
+            className="icon-button"
+            type="button"
+            onClick={() => setSelectedMonth((current) => addMonths(current, 1))}
+            aria-label={t("dashboard.nextMonth")}
+          >
+            <ChevronRight size={20} aria-hidden="true" />
+          </button>
+          {!isCurrentMonth ? (
+            <button className="button secondary month-today-button" type="button" onClick={() => setSelectedMonth(getMonthKey())}>
+              {t("dashboard.today")}
+            </button>
+          ) : null}
+        </section>
+      ) : null}
 
       <section className="cash-gauge-panel" aria-label={t("dashboard.compass")}>
         <div className="gauge-copy">
+          {isHomeView ? (
+            <div className="cash-gauge-summary-heading">
+              <Link
+                className="summary-icon"
+                href="/monthly-payments"
+                aria-label={t("dashboard.viewMonthlyPayments")}
+                title={t("dashboard.viewMonthlyPayments")}
+              >
+                <Gauge size={20} aria-hidden="true" />
+              </Link>
+              <div>
+                <span>{t("dashboard.monthlyOverview")}</span>
+                <strong>{formatMonthLabel(selectedMonth, language)}</strong>
+              </div>
+            </div>
+          ) : null}
           <div className="gauge-values">
             <div className="gauge-value income">
               <span>{t("dashboard.income")}</span>
@@ -328,7 +348,7 @@ export function HomeDashboard() {
         </div>
       </section>
 
-      <section className="payment-panel">
+      {!isHomeView ? <section className="payment-panel">
         <div className="section-title">
           <span>{formatMonthLabel(selectedMonth, language)}</span>
           <strong>
@@ -427,7 +447,7 @@ export function HomeDashboard() {
             );
           })}
         </div>
-      </section>
+      </section> : null}
     </>
   );
 }

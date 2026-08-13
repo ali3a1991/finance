@@ -887,6 +887,26 @@ th {
   text-align: left;
 }
 
+.cash-gauge-summary-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.cash-gauge-summary-heading > div {
+  min-width: 0;
+}
+
+.cash-gauge-summary-heading .summary-icon {
+  color: var(--on-primary);
+}
+
+.cash-gauge-summary-heading strong {
+  display: block;
+  margin-top: 4px;
+}
+
 .gauge-copy span {
   color: var(--primary);
   font-size: 0.82rem;

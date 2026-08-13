@@ -44,6 +44,11 @@ const translations = {
         title: "Finanzen klar im Blick.",
         description: "Ein ruhiges Dashboard fur Kredite, Versicherungen, Ausgaben und monatliche Planung."
       },
+      monthlyPayments: {
+        eyebrow: "Monatsübersicht",
+        title: "Monatliche Zahlungen verwalten.",
+        description: "Behalte Einnahmen, Verpflichtungen und bezahlte Beträge für jeden Monat im Blick."
+      },
       loans: {
         eyebrow: "Kredite",
         title: "Kreditverpflichtungen verwalten.",
@@ -130,6 +135,8 @@ const translations = {
       investmentResult: "Ergebnis",
       savings: "Sparen",
       savingsTotal: "Gesamtes Sparguthaben",
+      monthlyOverview: "Monatsübersicht",
+      viewMonthlyPayments: "Monatsübersicht öffnen",
       shoppingList: "Einkaufsliste",
       openShoppingItems: "Offene Einkäufe",
       viewShoppingList: "Einkaufsliste öffnen",
@@ -593,6 +600,11 @@ const translations = {
         title: "Your finances at a glance.",
         description: "A calm dashboard for loans, insurance, expenses and monthly planning."
       },
+      monthlyPayments: {
+        eyebrow: "Monthly overview",
+        title: "Manage monthly payments.",
+        description: "Track income, commitments and paid amounts for every month."
+      },
       loans: {
         eyebrow: "Loans",
         title: "Manage loan obligations.",
@@ -679,6 +691,8 @@ const translations = {
       investmentResult: "Result",
       savings: "Savings",
       savingsTotal: "Total saved",
+      monthlyOverview: "Monthly overview",
+      viewMonthlyPayments: "Open monthly overview",
       shoppingList: "Shopping list",
       openShoppingItems: "Open shopping items",
       viewShoppingList: "Open shopping list",
