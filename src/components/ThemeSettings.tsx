@@ -39,7 +39,6 @@ export function ThemeSettings() {
             aria-pressed={theme === "light"}
           >
             <Sun size={20} aria-hidden="true" />
-            <span>Light</span>
           </button>
           <button
             className={`theme-choice ${theme === "dark" ? "active" : ""}`}
@@ -48,7 +47,6 @@ export function ThemeSettings() {
             aria-pressed={theme === "dark"}
           >
             <Moon size={20} aria-hidden="true" />
-            <span>Dark</span>
           </button>
         </div>
       </section>
@@ -66,7 +64,6 @@ export function ThemeSettings() {
             aria-pressed={language === "de"}
           >
             <span>DE</span>
-            <span>{t("settings.german")}</span>
           </button>
           <button
             className={`theme-choice ${language === "en" ? "active" : ""}`}
@@ -75,7 +72,6 @@ export function ThemeSettings() {
             aria-pressed={language === "en"}
           >
             <span>EN</span>
-            <span>{t("settings.english")}</span>
           </button>
         </div>
       </section>
