@@ -23,7 +23,7 @@ export function LogoutSettings() {
   }
 
   return (
-    <section className="settings-panel" aria-labelledby="logout-title">
+    <section className="settings-panel logout-settings-panel" aria-label={t("settings.logout")}>
       <button className="button danger" type="button" onClick={handleLogout} disabled={isLoggingOut}>
         <LogOut size={18} aria-hidden="true" />
         {isLoggingOut ? t("settings.loggingOut") : t("settings.logout")}

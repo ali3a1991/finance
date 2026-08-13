@@ -2677,6 +2677,10 @@ th {
   box-shadow: var(--shadow);
 }
 
+.logout-settings-panel {
+  grid-template-columns: 1fr;
+}
+
 .settings-copy {
   display: grid;
   gap: 8px;
