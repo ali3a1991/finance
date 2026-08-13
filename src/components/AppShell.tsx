@@ -2,49 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Banknote,
-  CircleDollarSign,
-  FileText,
-  FolderKanban,
-  Gauge,
-  Home,
-  Menu,
-  PiggyBank,
-  ShoppingBasket,
-  Settings,
-  ShieldCheck,
-  TrendingUp,
-  WalletCards,
-  X,
-  LineChart
-} from "lucide-react";
+import { Menu, Settings, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useApiLoading } from "@/components/ApiLoadingProvider";
 import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
+import { contractItems, navItems, toolItems } from "@/lib/navigation";
 import Image from "next/image";
-
-const navItems = [
-  { href: "/", labelKey: "home", icon: Home },
-  { href: "/monthly-payments", labelKey: "monthlyPayments", icon: Gauge },
-  { href: "/incomes", labelKey: "incomes", icon: TrendingUp },
-  { href: "/expenses", labelKey: "expenses", icon: WalletCards },
-  { href: "/savings", labelKey: "savings", icon: PiggyBank },
-  { href: "/investments", labelKey: "investments", icon: LineChart }
-];
-
-const toolItems = [
-  { href: "/shopping-list", labelKey: "shoppingList", icon: ShoppingBasket },
-  { href: "/exchange", labelKey: "exchange", icon: CircleDollarSign },
-  { href: "/projects", labelKey: "projects", icon: FolderKanban }
-];
-
-const contractItems = [
-  { href: "/contracts/insurances", labelKey: "insurances", icon: ShieldCheck },
-  { href: "/contracts/credits", labelKey: "loans", icon: Banknote },
-  { href: "/contracts/general", labelKey: "general", icon: FileText }
-];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const isApiLoading = useApiLoading();
