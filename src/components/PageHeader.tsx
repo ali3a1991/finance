@@ -25,8 +25,6 @@ export function PageHeader({ page }: PageHeaderProps) {
   return (
     <header className="page-header">
       <span>{t(`pages.${page}.eyebrow`)}</span>
-      {/* <h1>{t(`pages.${page}.title`)}</h1> */}
-      {/* <p>{t(`pages.${page}.description`)}</p> */}
     </header>
   );
 }

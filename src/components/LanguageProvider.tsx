@@ -40,68 +40,42 @@ const translations = {
     pages: {
       home: {
         eyebrow: "Startseite",
-        title: "Finanzen klar im Blick.",
-        description: "Ein ruhiges Dashboard fur Kredite, Versicherungen, Ausgaben und monatliche Planung."
       },
       monthlyPayments: {
         eyebrow: "Monatsübersicht",
-        title: "Monatliche Zahlungen verwalten.",
-        description: "Behalte Einnahmen, Verpflichtungen und bezahlte Beträge für jeden Monat im Blick."
       },
       loans: {
         eyebrow: "Kredite",
-        title: "Kreditverpflichtungen verwalten.",
-        description: "Alle laufenden Kredite mit Betrag, Gesamtzinsen, Rate und erster Zahlung."
       },
       insurances: {
         eyebrow: "Versicherungen",
-        title: "Policen, Kosten und Laufzeiten.",
-        description: "Eine kompakte Ubersicht uber Pramien, Anbieter und Verlangerungen."
       },
       incomes: {
         eyebrow: "Einnahmen",
-        title: "Geldzuflusse verwalten.",
-        description: "Feste Einkommen und einmalige Eingange werden getrennt erfasst."
       },
       expenses: {
         eyebrow: "Ausgaben",
-        title: "Ausgaben erfassen und auswerten.",
-        description: "Alle einzelnen Ausgaben werden klar erfasst und in einer Tabelle gepflegt."
       },
       projects: {
         eyebrow: "Gemeinsame Ausgaben",
-        title: "Projekte und Kosten gemeinsam verwalten.",
-        description: "Plane Reisen und gemeinsame Vorhaben mit eigenen Kategorien, Mitgliedern und fairen Anteilen."
       },
       investments: {
         eyebrow: "Investitionen",
-        title: "Depot und Krypto verwalten.",
-        description: "Erfasse deine Käufe und vergleiche Kaufpreis, Menge und aktuellen Marktpreis."
       },
       exchange: {
         eyebrow: "Wechsel",
-        title: "Euro, Tether und Toman umrechnen.",
-        description: "Live-Kurse fur deine Umrechnung zwischen Euro, USDT und Toman."
       },
       shoppingList: {
         eyebrow: "Einkaufsliste",
-        title: "Einkäufe einfach planen.",
-        description: "Produkte, Mengen und Fristen in einer übersichtlichen Checkliste."
       },
       savings: {
         eyebrow: "Sparen",
-        title: "Spartöpfe verwalten.",
-        description: "Behalte Guthaben, automatische Meilensteine und Sparbuchungen im Blick."
       },
       contractsGeneral: {
         eyebrow: "Verträge",
-        title: "Allgemeine Verträge.",
-        description: "Ein zentraler Ort für weitere laufende Verträge außerhalb von Krediten und Versicherungen."
       },
       settings: {
         eyebrow: "Einstellungen",
-        title: "Darstellung anpassen.",
-        description: "Wechsle Theme und Sprache fur eine angenehme, gut lesbare Ansicht."
       }
     },
     dashboard: {
@@ -593,68 +567,42 @@ const translations = {
     pages: {
       home: {
         eyebrow: "Home",
-        title: "Your finances at a glance.",
-        description: "A calm dashboard for loans, insurance, expenses and monthly planning."
       },
       monthlyPayments: {
         eyebrow: "Monthly overview",
-        title: "Manage monthly payments.",
-        description: "Track income, commitments and paid amounts for every month."
       },
       loans: {
         eyebrow: "Loans",
-        title: "Manage loan obligations.",
-        description: "All active loans with principal, total interest, installment and first payment."
       },
       insurances: {
         eyebrow: "Insurance",
-        title: "Policies, costs and terms.",
-        description: "A compact overview of premiums, providers and renewals."
       },
       incomes: {
         eyebrow: "Income",
-        title: "Manage incoming money.",
-        description: "Fixed income and one-time inflows are tracked separately."
       },
       expenses: {
         eyebrow: "Expenses",
-        title: "Track and review expenses.",
-        description: "All individual expenses are tracked clearly and managed in one table."
       },
       projects: {
         eyebrow: "Shared expenses",
-        title: "Manage projects and costs together.",
-        description: "Plan trips and shared activities with custom categories, members and fair weighted shares."
       },
       investments: {
         eyebrow: "Investments",
-        title: "Manage portfolio and crypto.",
-        description: "Track purchases and compare purchase price, quantity and current market price."
       },
       exchange: {
         eyebrow: "Exchange",
-        title: "Convert Euro, Tether and Toman.",
-        description: "Live rates for converting between Euro, USDT and Toman."
       },
       shoppingList: {
         eyebrow: "Shopping list",
-        title: "Plan shopping with ease.",
-        description: "Keep products, quantities and deadlines in a clear checklist."
       },
       savings: {
         eyebrow: "Savings",
-        title: "Manage savings funds.",
-        description: "Track balances, automatic milestones and savings transactions."
       },
       contractsGeneral: {
         eyebrow: "Contracts",
-        title: "General contracts.",
-        description: "A central place for other recurring contracts outside loans and insurance."
       },
       settings: {
         eyebrow: "Settings",
-        title: "Adjust appearance.",
-        description: "Switch theme and language for a comfortable, readable experience."
       }
     },
     dashboard: {
