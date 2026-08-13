@@ -22,7 +22,6 @@ import { useEffect, useRef, useState } from "react";
 import { useApiLoading } from "@/components/ApiLoadingProvider";
 import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
-import { APP_VERSION } from "@/lib/appVersion";
 import Image from "next/image";
 
 const navItems = [
@@ -237,11 +236,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <strong>{user.username}</strong>
               <small>{accessLabel}</small>
             </div>
-            {/*<div className="sidebar-version" aria-label={t("nav.version")}>
-              <span>{t("nav.version")}</span>
-              <strong>v{APP_VERSION}</strong>
-              <small>{t("nav.initialVersion")}</small>
-            </div>*/}
           </div>
         ) : null}
       </aside>

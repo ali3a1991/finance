@@ -33,8 +33,6 @@ const translations = {
       closeMenu: "Menu schliessen",
       main: "Hauptnavigation",
       signedInAs: "Angemeldet als",
-      version: "Version",
-      initialVersion: "Erste stabile Version",
       owner: "Inhaber",
       readonly: "Nebenbenutzer",
       readwrite: "Nebenbenutzer"
@@ -588,8 +586,6 @@ const translations = {
       closeMenu: "Close menu",
       main: "Main navigation",
       signedInAs: "Signed in as",
-      version: "Version",
-      initialVersion: "First stable version",
       owner: "Owner",
       readonly: "Shared user",
       readwrite: "Shared user"

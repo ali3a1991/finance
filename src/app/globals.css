@@ -267,8 +267,7 @@ button:disabled {
   gap: 8px;
 }
 
-.sidebar-user,
-.sidebar-version {
+.sidebar-user {
   display: grid;
   gap: 4px;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -278,32 +277,20 @@ button:disabled {
 }
 
 .sidebar-user span,
-.sidebar-user small,
-.sidebar-version span,
-.sidebar-version small {
+.sidebar-user small {
   color: var(--sidebar-muted);
   font-size: 0.7rem;
 }
 
-.sidebar-user span,
-.sidebar-version span {
+.sidebar-user span {
   font-weight: 800;
   text-transform: uppercase;
 }
 
-.sidebar-user strong,
-.sidebar-version strong {
+.sidebar-user strong {
   overflow-wrap: anywhere;
   color: var(--sidebar-text);
   font-size: 0.8rem;
-}
-
-.sidebar-version {
-  background: transparent;
-}
-
-.empty-contract-panel {
-  max-width: 760px;
 }
 
 .main-content {
@@ -375,23 +362,8 @@ button:disabled {
   line-height: 1.6;
 }
 
-.stats-grid,
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.card-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
 .stat-card,
-.data-card,
-.panel,
-.table-panel,
-.form-panel,
-.monthly-row {
+.table-panel {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
@@ -415,10 +387,7 @@ button:disabled {
   color: var(--primary);
 }
 
-.stat-card span,
-.data-card p,
-.monthly-row small,
-.data-list dt {
+.stat-card span {
   color: var(--muted);
 }
 
@@ -426,102 +395,20 @@ button:disabled {
   font-size: 1.65rem;
 }
 
-.stat-card small,
-.data-card p,
-.monthly-row small {
+.stat-card small {
   line-height: 1.45;
 }
 
-.two-column {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
-  gap: 16px;
-}
-
-.panel {
-  padding: 22px;
-}
-
-.accent-panel {
-  background: var(--accent-soft);
-  border-color: color-mix(in srgb, var(--accent) 32%, var(--line));
-}
-
-.section-title,
-.budget-row,
-.timeline-item,
-.monthly-row > div:first-child,
-.card-heading {
+.section-title {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
 
-.section-title span,
-.card-heading span {
+.section-title span {
   color: var(--muted);
   font-size: 0.9rem;
-}
-
-.progress-track {
-  overflow: hidden;
-  width: 100%;
-  height: 10px;
-  margin: 18px 0;
-  border-radius: 999px;
-  background: var(--soft-track);
-}
-
-.progress-fill {
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--primary), var(--accent));
-}
-
-.budget-list,
-.timeline,
-.monthly-list {
-  display: grid;
-  gap: 12px;
-}
-
-.budget-row,
-.timeline-item {
-  padding: 12px 0;
-  border-top: 1px solid var(--line);
-}
-
-.data-card {
-  display: grid;
-  gap: 14px;
-  padding: 22px;
-}
-
-.data-card h2 {
-  margin: 0;
-  font-size: 1.35rem;
-}
-
-.data-card p {
-  margin: 0;
-}
-
-.data-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  margin: 0;
-}
-
-.data-list dt,
-.data-list dd {
-  margin: 0;
-}
-
-.data-list dd {
-  margin-top: 4px;
-  font-weight: 800;
 }
 
 .table-panel {
@@ -1290,11 +1177,6 @@ th {
   color: var(--on-primary);
 }
 
-.main-icon {
-  background: var(--primary);
-  color: var(--on-primary);
-}
-
 .investment-summary-heading span,
 .investment-summary-grid span {
   color: var(--muted);
@@ -1332,162 +1214,8 @@ th {
   color: var(--rose);
 }
 
-.tether-panel {
-  display: grid;
-  gap: 16px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 18px;
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--primary) 10%, transparent), transparent 52%),
-    var(--surface);
-  box-shadow: var(--shadow);
-}
-
-.tether-panel-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-}
-
-.tether-refresh-button {
-  flex: 0 0 auto;
-}
-
 .spin-icon {
   animation: api-loading-spin 780ms linear infinite;
-}
-
-.tether-price-card {
-  display: grid;
-  gap: 8px;
-  border: 1px solid color-mix(in srgb, var(--primary) 34%, var(--line));
-  border-radius: 8px;
-  padding: 18px;
-  background: color-mix(in srgb, var(--primary) 10%, var(--surface-soft));
-}
-
-.tether-price-card span,
-.tether-grid span {
-  color: var(--muted);
-  font-size: 0.82rem;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.tether-price-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.tether-price-card-header small {
-  color: var(--muted);
-  font-size: 0.86rem;
-  font-weight: 800;
-}
-
-.tether-price-card strong {
-  color: var(--text);
-  font-size: clamp(2rem, 6vw, 4.2rem);
-  line-height: 1;
-}
-
-.tether-price-card small {
-  color: var(--muted);
-  font-weight: 800;
-}
-
-.tether-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.tether-grid > div {
-  display: grid;
-  gap: 6px;
-  min-height: 96px;
-  align-content: center;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 12px;
-  background: var(--surface-soft);
-}
-
-.tether-grid strong {
-  color: var(--text);
-  font-size: 1.05rem;
-}
-
-.tether-source {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 0.92rem;
-  font-weight: 700;
-}
-
-.tether-calculator {
-  display: grid;
-  gap: 14px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 16px;
-  background: var(--surface-soft);
-}
-
-.tether-calculator-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-}
-
-.tether-mode-switch {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
-  padding: 4px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
-}
-
-.tether-mode-switch button {
-  border: 0;
-  border-radius: 6px;
-  padding: 10px 12px;
-  background: transparent;
-  color: var(--muted);
-  font: inherit;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-.tether-mode-switch button.active {
-  background: var(--primary);
-  color: var(--on-primary);
-}
-
-.tether-calculator-input {
-  max-width: 520px;
-}
-
-.tether-calculator-input {
-  display: grid;
-  gap: 8px;
-}
-
-.tether-calculator-input input {
-  min-height: 52px;
-  border-radius: 8px;
-  padding: 0 14px;
-  font-size: 1.05rem;
-  font-weight: 800;
 }
 
 .exchange-converter-panel {
@@ -1499,19 +1227,6 @@ th {
   padding: 0;
   margin: 0 auto;
   text-align: left;
-}
-
-.exchange-title {
-  margin: 0;
-  color: var(--text);
-  font-size: clamp(2rem, 7vw, 3rem);
-  font-weight: 500;
-  line-height: 1.1;
-}
-
-.exchange-title span {
-  color: var(--muted);
-  font-weight: 400;
 }
 
 .exchange-rate-card {
@@ -2186,31 +1901,6 @@ th {
   padding-top: 6px;
 }
 
-.form-panel {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  padding: 22px;
-}
-
-.form-panel label {
-  display: grid;
-  gap: 8px;
-  color: var(--muted);
-  font-weight: 700;
-}
-
-.form-panel input,
-.form-panel select {
-  width: 100%;
-  min-height: 46px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 0 12px;
-  background: var(--input-bg);
-  color: var(--text);
-}
-
 .checkbox-row {
   display: flex !important;
   align-items: center;
@@ -2610,14 +2300,6 @@ th {
     grid-column: 3;
     grid-row: 1;
   }
-}
-
-.monthly-list {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.monthly-row {
-  padding: 18px;
 }
 
 .settings-stack {
@@ -3785,11 +3467,7 @@ th {
     margin-inline: auto;
   }
 
-  .stats-grid,
-  .card-grid,
-  .investment-summary-panel,
-  .two-column,
-  .monthly-list {
+  .investment-summary-panel {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -3919,10 +3597,6 @@ th {
     align-content: start;
   }
 
-  .exchange-title {
-    font-size: 2.05rem;
-  }
-
   .exchange-rate-card {
     gap: 7px;
     padding: 22px 16px 24px;
@@ -3992,14 +3666,9 @@ th {
     font-size: 2.25rem;
   }
 
-  .stats-grid,
-  .card-grid,
-  .two-column,
-  .form-panel,
   .modal-form,
   .detail-summary,
-  .investment-summary-panel,
-  .monthly-list {
+  .investment-summary-panel {
     grid-template-columns: 1fr;
   }
 
@@ -4081,40 +3750,7 @@ th {
     text-align: center;
   }
 
-  .tether-panel {
-    gap: 14px;
-    padding: 14px;
-  }
-
-  .tether-panel-heading {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .tether-price-card-header {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .tether-calculator {
-    padding: 14px;
-  }
-
-  .tether-calculator-heading {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .tether-calculator-input {
-    max-width: none;
-  }
-
-  .data-list {
-    grid-template-columns: 1fr;
-  }
-
-  .button {
+.button {
     width: 100%;
   }
 
