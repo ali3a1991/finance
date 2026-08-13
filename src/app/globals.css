@@ -3687,7 +3687,9 @@ th {
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: auto minmax(0, 1fr);
-    min-height: 100dvh;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
   }
 
   .page-header {
@@ -3947,6 +3949,8 @@ th {
 
   .main-content {
     min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
     padding-inline: 14px;
   }
 
