@@ -2669,7 +2669,7 @@ th {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 22px;
+  gap: 16px;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 22px;
