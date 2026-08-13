@@ -1235,8 +1235,8 @@ th {
   display: grid;
   place-items: center;
   justify-self: end;
-  width: 46px;
-  height: 46px;
+  width: 30px;
+  height: 30px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
