@@ -980,7 +980,7 @@ th {
 .gauge-free-amount {
   display: grid;
   justify-items: center;
-  gap: 5px;
+  gap: 6px;
   min-width: min(220px, 100%);
   margin-top: 12px;
   border: 1px solid color-mix(in srgb, var(--primary) 28%, var(--line));
