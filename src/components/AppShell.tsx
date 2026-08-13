@@ -18,7 +18,7 @@ import {
   WalletCards,
   X
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useApiLoading } from "@/components/ApiLoadingProvider";
 import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -52,7 +52,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const { t } = useLanguage();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const mainContentRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (!isMobileMenuOpen) {
@@ -82,7 +81,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [isMobileMenuOpen]);
 
   useEffect(() => {
-    mainContentRef.current?.scrollTo({ top: 0, left: 0, behavior: "instant" });
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [pathname]);
 
@@ -245,7 +243,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         ) : null}
       </aside>
-      <main ref={mainContentRef} className="main-content">{children}</main>
+      <main className="main-content">{children}</main>
     </div>
   );
 }
