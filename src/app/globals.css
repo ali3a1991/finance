@@ -1225,7 +1225,7 @@ th {
   align-items: stretch;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 18px;
+  padding: 24px;
   background:
     linear-gradient(135deg, color-mix(in srgb, var(--primary) 9%, transparent), transparent 48%),
     var(--surface);
@@ -4105,8 +4105,7 @@ th {
   }
 
   .investment-summary-panel {
-    gap: 14px;
-    padding: 14px;
+    padding: 18px;
   }
 
   .investment-summary-grid {
