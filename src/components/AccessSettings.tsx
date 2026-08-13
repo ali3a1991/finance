@@ -2,16 +2,11 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { KeyRound, Pencil, PlusCircle, Save, Trash2, UserRound, X } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
 import { requestJson } from "@/lib/requestJson";
 import type { SharedUser } from "@/lib/types";
 import { ACTION_PERMISSION_GROUPS, ALL_ACTION_PERMISSIONS, permissionActionName, type ActionPermission } from "@/lib/actionPermissions";
-
-type MeResponse = {
-  accessLevel: "owner" | "readonly" | "readwrite";
-  ownerId: string;
-  username: string;
-};
 
 type UserForm = {
   username: string;
@@ -24,8 +19,8 @@ const emptyForm: UserForm = {
 };
 
 export function AccessSettings() {
+  const { user: currentUser } = useAuth();
   const { t } = useLanguage();
-  const [currentUser, setCurrentUser] = useState<MeResponse | null>(null);
   const [editForm, setEditForm] = useState<UserForm>(emptyForm);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [form, setForm] = useState<UserForm>(emptyForm);
@@ -37,18 +32,14 @@ export function AccessSettings() {
   const [users, setUsers] = useState<SharedUser[]>([]);
 
   useEffect(() => {
-    async function loadAccess() {
-      const me = await requestJson<MeResponse>("/api/me");
-      setCurrentUser(me);
-
-      if (me.accessLevel === "owner") {
-        const body = await requestJson<{ users: SharedUser[] }>("/api/users");
-        setUsers(body.users);
-      }
+    if (currentUser?.accessLevel !== "owner") {
+      return;
     }
 
-    loadAccess().catch(() => undefined);
-  }, []);
+    requestJson<{ users: SharedUser[] }>("/api/users")
+      .then((body) => setUsers(body.users))
+      .catch(() => undefined);
+  }, [currentUser?.accessLevel]);
 
   if (currentUser?.accessLevel !== "owner") {
     return null;

@@ -30,10 +30,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    if (user) {
+      return;
+    }
+
     requestJson<CurrentUser>("/api/me")
       .then(setUser)
       .catch(() => setUser(null));
-  }, [pathname]);
+  }, [pathname, user]);
 
   const value = useMemo(
     () => ({

@@ -368,12 +368,6 @@ async function ensureExpenseProjectTables() {
 }
 
 export async function readFinanceDb(ownerId: string): Promise<FinanceDb> {
-  await ensureLoanNoteColumn();
-  await ensurePaymentIntervalColumns();
-  await ensureFinanceNoteColumns();
-  await ensureSavingsGoalTable();
-  await ensureMonthlyCarryOverTable();
-
   const [loans, insurances, generalContracts, incomes, expenses, investments, savingsGoals, monthlyBudgets, paymentConfirmations] =
     await Promise.all([
     prisma.loan.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } }),
@@ -414,7 +408,6 @@ export async function writeFinanceDb() {
 }
 
 export async function listLoans(ownerId: string): Promise<Loan[]> {
-  await ensureLoanNoteColumn();
   const loans = await prisma.loan.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } });
   return loans.map(mapLoan);
 }
@@ -473,8 +466,6 @@ export async function deleteLoan(ownerId: string, id: string): Promise<boolean> 
 }
 
 export async function listInsurances(ownerId: string): Promise<Insurance[]> {
-  await ensurePaymentIntervalColumns();
-  await ensureFinanceNoteColumns();
   const insurances = await prisma.insurance.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } });
   return insurances.map(mapInsurance);
 }
@@ -539,7 +530,6 @@ export async function deleteInsurance(ownerId: string, id: string): Promise<bool
 }
 
 export async function listGeneralContracts(ownerId: string): Promise<GeneralContract[]> {
-  await ensurePaymentIntervalColumns();
   const contracts = await prisma.generalContract.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } });
   return contracts.map(mapGeneralContract);
 }
@@ -602,7 +592,6 @@ export async function deleteGeneralContract(ownerId: string, id: string): Promis
 }
 
 export async function listIncomes(ownerId: string): Promise<Income[]> {
-  await ensureFinanceNoteColumns();
   const incomes = await prisma.income.findMany({ orderBy: { createdAt: "desc" }, where: { ownerId } });
   return incomes.map(mapIncome);
 }
@@ -667,7 +656,6 @@ export async function deleteIncome(ownerId: string, id: string): Promise<boolean
 }
 
 export async function listExpenses(ownerId: string): Promise<Expense[]> {
-  await ensureFinanceNoteColumns();
   const expenses = await prisma.expense.findMany({ orderBy: { date: "desc" }, where: { ownerId } });
   return expenses.map(mapExpense);
 }
@@ -730,7 +718,6 @@ export async function deleteExpense(ownerId: string, id: string): Promise<boolea
 }
 
 export async function listInvestments(ownerId: string): Promise<Investment[]> {
-  await ensureFinanceNoteColumns();
   const investments = await prisma.investment.findMany({
     orderBy: { createdAt: "desc" },
     where: { ownerId }
@@ -783,7 +770,6 @@ export async function deleteInvestment(ownerId: string, id: string): Promise<boo
 }
 
 export async function listShoppingItems(ownerId: string): Promise<ShoppingItem[]> {
-  await ensureShoppingItemTable();
   const items = await prisma.shoppingItem.findMany({
     orderBy: [{ completedAt: "asc" }, { createdAt: "desc" }],
     where: { ownerId }
@@ -791,8 +777,28 @@ export async function listShoppingItems(ownerId: string): Promise<ShoppingItem[]
   return items.map(mapShoppingItem);
 }
 
+export async function getShoppingListData(ownerId: string) {
+  const [shoppingItems, catalogItems] = await Promise.all([
+    prisma.shoppingItem.findMany({
+      orderBy: [{ completedAt: "asc" }, { createdAt: "desc" }],
+      where: { ownerId }
+    }),
+    prisma.shoppingCatalogItem.findMany({ orderBy: { lastUsedAt: "desc" }, where: { ownerId } })
+  ]);
+  const items = shoppingItems.map(mapShoppingItem);
+  const suggestionMap = new Map<string, ShoppingSuggestion>();
+
+  for (const item of [...catalogItems, ...items]) {
+    const key = normalizeShoppingName(item.name);
+    if (!suggestionMap.has(key)) {
+      suggestionMap.set(key, { name: item.name, unit: item.unit as ShoppingItem["unit"] });
+    }
+  }
+
+  return { items, suggestions: [...suggestionMap.values()] };
+}
+
 export async function listShoppingSuggestions(ownerId: string): Promise<ShoppingSuggestion[]> {
-  await Promise.all([ensureShoppingItemTable(), ensureShoppingCatalogTable()]);
   const [catalogItems, shoppingItems] = await Promise.all([
     prisma.shoppingCatalogItem.findMany({ orderBy: { lastUsedAt: "desc" }, where: { ownerId } }),
     prisma.shoppingItem.findMany({ orderBy: { createdAt: "desc" }, select: { name: true, unit: true }, where: { ownerId } })
@@ -867,7 +873,6 @@ export async function deleteShoppingItem(ownerId: string, id: string): Promise<b
 }
 
 export async function listSavingsGoals(ownerId: string): Promise<SavingsGoal[]> {
-  await ensureSavingsGoalTable();
   const goals = await prisma.savingsGoal.findMany({
     orderBy: { createdAt: "desc" },
     where: { ownerId }
@@ -936,7 +941,6 @@ export async function deleteSavingsGoal(ownerId: string, id: string): Promise<bo
 }
 
 export async function listSavingsTransactions(ownerId: string, savingsGoalId: string): Promise<SavingsTransaction[]> {
-  await ensureSavingsTransactionTable();
   const transactions = await prisma.savingsTransaction.findMany({
     orderBy: { date: "desc" },
     where: { ownerId, savingsGoalId }
@@ -1295,7 +1299,6 @@ const projectInclude = {
 };
 
 export async function listExpenseProjects(ownerId: string): Promise<ExpenseProject[]> {
-  await ensureExpenseProjectTables();
   const projects = await prisma.expenseProject.findMany({
     include: projectInclude,
     orderBy: { startDate: "desc" },
@@ -1306,7 +1309,6 @@ export async function listExpenseProjects(ownerId: string): Promise<ExpenseProje
 }
 
 export async function getExpenseProject(ownerId: string, id: string): Promise<ExpenseProjectDetail | null> {
-  await ensureExpenseProjectTables();
   const project = await prisma.expenseProject.findFirst({
     include: {
       categories: { orderBy: { createdAt: "asc" } },
@@ -1672,36 +1674,33 @@ export async function fetchInvestmentQuotes(symbols: string[]): Promise<Record<s
     return {};
   }
 
-  const usdToEurRate = await fetchUsdToEurRate();
-  const quoteEntries = await Promise.all(
-    uniqueSymbols.map(async (symbol) => {
+  const [usdToEurRate, quoteMetas] = await Promise.all([
+    fetchUsdToEurRate(),
+    Promise.all(uniqueSymbols.map(async (symbol) => {
       try {
-        const meta = await fetchYahooChartMeta(symbol);
-        const quoteSymbol = meta?.symbol?.toUpperCase() ?? symbol;
-        const quoteCurrency = meta?.currency?.toUpperCase() ?? "USD";
-        const rawPrice = typeof meta?.regularMarketPrice === "number" ? meta.regularMarketPrice : null;
-        const currentPrice =
-          rawPrice === null
-            ? null
-            : quoteCurrency === "EUR"
-              ? rawPrice
-              : quoteCurrency === "USD" && usdToEurRate
-                ? rawPrice * usdToEurRate
-                : null;
-
-        return [
-          quoteSymbol,
-          {
-            currency: "EUR",
-            currentPrice,
-            symbol: quoteSymbol
-          }
-        ] as const;
+        return { meta: await fetchYahooChartMeta(symbol), symbol };
       } catch {
         return null;
       }
-    })
-  );
+    }))
+  ]);
+
+  const quoteEntries = quoteMetas.map((entry) => {
+    if (!entry) return null;
+    const quoteSymbol = entry.meta?.symbol?.toUpperCase() ?? entry.symbol;
+    const quoteCurrency = entry.meta?.currency?.toUpperCase() ?? "USD";
+    const rawPrice = typeof entry.meta?.regularMarketPrice === "number" ? entry.meta.regularMarketPrice : null;
+    const currentPrice =
+      rawPrice === null
+        ? null
+        : quoteCurrency === "EUR"
+          ? rawPrice
+          : quoteCurrency === "USD" && usdToEurRate
+            ? rawPrice * usdToEurRate
+            : null;
+
+    return [quoteSymbol, { currency: "EUR", currentPrice, symbol: quoteSymbol }] as const;
+  });
 
   return Object.fromEntries(quoteEntries.filter((entry): entry is NonNullable<typeof entry> => Boolean(entry)));
 }
@@ -2068,17 +2067,37 @@ function getPreviousMonthBalanceAmount(
 }
 
 export async function getPreviousMonthBalance(ownerId: string, monthKey?: string | null) {
-  await ensureMonthlyCarryOverTable();
-  const db = await readFinanceDb(ownerId);
+  const [db, carryOvers] = await Promise.all([
+    readFinanceDb(ownerId),
+    prisma.monthlyCarryOver.findMany({ where: { ownerId } })
+  ]);
   const selectedDate = getDateFromMonthKey(monthKey);
   const selectedMonth = getMonthKey(selectedDate);
-  const carryOvers = await prisma.monthlyCarryOver.findMany({ where: { ownerId } });
   const carryOver = getManualCarryOver(carryOvers, selectedMonth);
 
   return {
     amount: getPreviousMonthBalanceAmount(db, carryOvers, selectedDate),
     isManual: Boolean(carryOver),
     month: selectedMonth
+  };
+}
+
+export async function getIncomesPageData(ownerId: string, monthKey?: string | null) {
+  const [db, carryOvers] = await Promise.all([
+    readFinanceDb(ownerId),
+    prisma.monthlyCarryOver.findMany({ where: { ownerId } })
+  ]);
+  const selectedDate = getDateFromMonthKey(monthKey);
+  const selectedMonth = getMonthKey(selectedDate);
+  const carryOver = getManualCarryOver(carryOvers, selectedMonth);
+
+  return {
+    incomes: db.incomes,
+    previousMonthBalance: {
+      amount: getPreviousMonthBalanceAmount(db, carryOvers, selectedDate),
+      isManual: Boolean(carryOver),
+      month: selectedMonth
+    }
   };
 }
 
@@ -2110,11 +2129,14 @@ export async function updatePreviousMonthBalance(ownerId: string, monthKey: stri
 }
 
 export async function getDashboardData(ownerId: string, monthKey?: string | null) {
-  await ensureShoppingItemTable();
   const db = await readFinanceDb(ownerId);
   const selectedDate = getDateFromMonthKey(monthKey);
   const monthlyPayments = buildMonthlyPayments(db, selectedDate);
-  const investmentQuotes = await fetchInvestmentQuotes((db.investments ?? []).map((investment) => investment.symbol));
+  const [investmentQuotes, carryOvers, shoppingOpenItemCount] = await Promise.all([
+    fetchInvestmentQuotes((db.investments ?? []).map((investment) => investment.symbol)),
+    prisma.monthlyCarryOver.findMany({ where: { ownerId } }),
+    prisma.shoppingItem.count({ where: { completedAt: null, ownerId } })
+  ]);
   const investmentSummary = (db.investments ?? []).reduce(
     (summary, investment) => {
       const investedValue = investment.quantity * investment.purchasePrice;
@@ -2134,7 +2156,7 @@ export async function getDashboardData(ownerId: string, monthKey?: string | null
   const investmentReturnRate =
     investmentSummary.investedTotal > 0 ? (investmentResult / investmentSummary.investedTotal) * 100 : 0;
   const incomeTotal = getMonthlyIncomeTotal(db, selectedDate);
-  const previousMonthBalance = (await getPreviousMonthBalance(ownerId, getMonthKey(selectedDate))).amount;
+  const previousMonthBalance = getPreviousMonthBalanceAmount(db, carryOvers, selectedDate);
   const monthlyExpenseTotal = getMonthlyExpenseTotal(db, selectedDate);
   const loanTotal = db.loans.reduce((sum, loan) => sum + loan.balance, 0);
   const savingsTotal = (db.savingsGoals ?? []).reduce((sum, goal) => sum + goal.currentAmount, 0);
@@ -2142,10 +2164,6 @@ export async function getDashboardData(ownerId: string, monthKey?: string | null
     .filter((payment) => payment.sourceType === "insurance")
     .reduce((sum, payment) => sum + payment.amount, 0);
   const committed = monthlyPayments.reduce((sum, payment) => sum + payment.amount, 0);
-  const shoppingOpenItemCount = await prisma.shoppingItem.count({
-    where: { completedAt: null, ownerId }
-  });
-
   return {
     month: getMonthKey(selectedDate),
     monthlyPayments,
@@ -2217,7 +2235,6 @@ async function ensureSharedUserPermissionsColumn() {
 }
 
 export async function listSharedUsers(ownerId: string): Promise<SharedUser[]> {
-  await ensureSharedUserPermissionsColumn();
   const users = await prisma.appUser.findMany({
     orderBy: { createdAt: "desc" },
     where: {

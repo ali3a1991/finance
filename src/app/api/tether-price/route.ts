@@ -39,19 +39,21 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const [depthResponse, tradesResponse] = await Promise.all([
-      fetch(`${TABDEAL_BASE_URL}/depth?symbol=${TABDEAL_SYMBOL}&limit=1`, { cache: "no-store" }),
-      fetch(`${TABDEAL_BASE_URL}/trades?symbol=${TABDEAL_SYMBOL}&limit=1`, { cache: "no-store" })
+    const [depthResponse, tradesResponse, kucoinResponse] = await Promise.all([
+      fetch(`${TABDEAL_BASE_URL}/depth?symbol=${TABDEAL_SYMBOL}&limit=1`, { next: { revalidate: 10 } }),
+      fetch(`${TABDEAL_BASE_URL}/trades?symbol=${TABDEAL_SYMBOL}&limit=1`, { next: { revalidate: 10 } }),
+      fetch(`${KUCOIN_TICKER_URL}?symbol=${KUCOIN_SYMBOL}`, { next: { revalidate: 10 } })
     ]);
-    const kucoinResponse = await fetch(`${KUCOIN_TICKER_URL}?symbol=${KUCOIN_SYMBOL}`, { cache: "no-store" });
 
     if (!depthResponse.ok || !tradesResponse.ok || !kucoinResponse.ok) {
       return NextResponse.json({ message: "Die Preisdaten konnten nicht geladen werden." }, { status: 502 });
     }
 
-    const depth = (await depthResponse.json()) as DepthResponse;
-    const trades = (await tradesResponse.json()) as TradeResponse[];
-    const kucoinTicker = (await kucoinResponse.json()) as KuCoinTickerResponse;
+    const [depth, trades, kucoinTicker] = await Promise.all([
+      depthResponse.json() as Promise<DepthResponse>,
+      tradesResponse.json() as Promise<TradeResponse[]>,
+      kucoinResponse.json() as Promise<KuCoinTickerResponse>
+    ]);
     const lastTrade = trades[0];
     const bestAsk = parseMarketPrice(depth.asks?.[0]?.[0]);
     const bestBid = parseMarketPrice(depth.bids?.[0]?.[0]);

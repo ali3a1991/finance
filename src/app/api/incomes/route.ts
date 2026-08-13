@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireApiAuth, requireWriteAccess } from "@/lib/auth";
-import { createIncome, getPreviousMonthBalance, listIncomes, updatePreviousMonthBalance } from "@/lib/serverDb";
+import { createIncome, getIncomesPageData, updatePreviousMonthBalance } from "@/lib/serverDb";
 import type { Income } from "@/lib/types";
 
 export async function GET(request: NextRequest) {
@@ -11,11 +11,7 @@ export async function GET(request: NextRequest) {
   }
 
   const month = request.nextUrl.searchParams.get("month");
-
-  return NextResponse.json({
-    incomes: await listIncomes(auth.payload.ownerId),
-    previousMonthBalance: await getPreviousMonthBalance(auth.payload.ownerId, month)
-  });
+  return NextResponse.json(await getIncomesPageData(auth.payload.ownerId, month));
 }
 
 export async function POST(request: NextRequest) {

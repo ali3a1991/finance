@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireApiAuth, requireWriteAccess } from "@/lib/auth";
-import { createShoppingItem, listShoppingItems } from "@/lib/serverDb";
+import { createShoppingItem, getShoppingListData } from "@/lib/serverDb";
 import type { ShoppingItem, ShoppingUnit } from "@/lib/types";
 
 const units: ShoppingUnit[] = ["kg", "package", "piece", "bottle"];
@@ -8,7 +8,7 @@ const units: ShoppingUnit[] = ["kg", "package", "piece", "bottle"];
 export async function GET(request: NextRequest) {
   const auth = requireApiAuth(request);
   if (auth.error) return auth.error;
-  return NextResponse.json({ items: await listShoppingItems(auth.payload.ownerId) });
+  return NextResponse.json(await getShoppingListData(auth.payload.ownerId));
 }
 
 export async function POST(request: NextRequest) {

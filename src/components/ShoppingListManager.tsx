@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { CalendarDays, Check, ChevronDown, Pencil, PlusCircle, Save, Send, Share2, ShoppingBasket, Trash2, X } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -34,7 +34,7 @@ export function ShoppingListManager() {
   const [editForm, setEditForm] = useState<ShoppingForm>(emptyForm);
   const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null);
   const [suggestions, setSuggestions] = useState<ShoppingSuggestion[]>([]);
-  const [areSuggestionsLoading, setAreSuggestionsLoading] = useState(false);
+  const [areSuggestionsLoading, setAreSuggestionsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -43,19 +43,18 @@ export function ShoppingListManager() {
   const [selectedShareIds, setSelectedShareIds] = useState<Set<string>>(new Set());
   const [shareNotice, setShareNotice] = useState("");
   const [error, setError] = useState("");
-  const suggestionsLoaded = useRef(false);
 
   useEffect(() => {
-    requestJson<{ items: ShoppingItem[] }>("/api/shopping-list")
-      .then((body) => setItems(body.items))
+    requestJson<{ items: ShoppingItem[]; suggestions: ShoppingSuggestion[] }>("/api/shopping-list")
+      .then((body) => {
+        setItems(body.items);
+        setSuggestions(body.suggestions);
+      })
       .catch((loadError: unknown) => setError(loadError instanceof Error ? loadError.message : t("shoppingList.error")))
-      .finally(() => setIsLoading(false));
-  }, [t]);
-
-  useEffect(() => {
-    if (suggestionsLoaded.current) return;
-    suggestionsLoaded.current = true;
-    void loadSuggestions();
+      .finally(() => {
+        setAreSuggestionsLoading(false);
+        setIsLoading(false);
+      });
   }, [t]);
 
   const openItems = useMemo(
@@ -88,18 +87,6 @@ export function ShoppingListManager() {
     setIsOpen(false);
     setEditingItem(null);
     setEditForm(emptyForm);
-  }
-
-  async function loadSuggestions() {
-    setAreSuggestionsLoading(true);
-    try {
-      const body = await requestJson<{ suggestions: ShoppingSuggestion[] }>("/api/shopping-list/suggestions");
-      setSuggestions(body.suggestions);
-    } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : t("shoppingList.error"));
-    } finally {
-      setAreSuggestionsLoading(false);
-    }
   }
 
   function openEditModal(item: ShoppingItem) {

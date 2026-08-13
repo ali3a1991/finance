@@ -181,7 +181,6 @@ export async function ensureUserPermissionsColumn() {
 
 export async function getUserActionPermissions(payload: { accessLevel: AccessLevel; sub: string }) {
   if (payload.accessLevel === "owner") return ALL_ACTION_PERMISSIONS;
-  await ensureUserPermissionsColumn();
   const user = await prisma.appUser.findUnique({ select: { accessLevel: true, permissions: true }, where: { username: payload.sub } });
   if (!user) return [];
   const permissions = user.permissions.filter(isActionPermission);
