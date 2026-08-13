@@ -15,6 +15,7 @@ const translations = {
     },
     nav: {
       home: "Startseite",
+      monthlyPayments: "Monatsübersicht",
       loans: "Kredit",
       insurances: "Versicherungen",
       incomes: "Einnahmen",
@@ -571,6 +572,7 @@ const translations = {
     },
     nav: {
       home: "Home",
+      monthlyPayments: "Monthly overview",
       loans: "Credit",
       insurances: "Insurance",
       incomes: "Income",

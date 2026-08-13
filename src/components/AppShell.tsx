@@ -7,6 +7,7 @@ import {
   CircleDollarSign,
   FileText,
   FolderKanban,
+  Gauge,
   Home,
   Menu,
   PiggyBank,
@@ -26,6 +27,7 @@ import Image from "next/image";
 
 const navItems = [
   { href: "/", labelKey: "home", icon: Home },
+  { href: "/monthly-payments", labelKey: "monthlyPayments", icon: Gauge },
   { href: "/incomes", labelKey: "incomes", icon: TrendingUp },
   { href: "/expenses", labelKey: "expenses", icon: WalletCards },
   { href: "/savings", labelKey: "savings", icon: PiggyBank },
