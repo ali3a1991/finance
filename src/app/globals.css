@@ -128,6 +128,24 @@ a {
   text-decoration: none;
 }
 
+a,
+button,
+summary,
+label,
+input,
+select,
+textarea,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a,
+button,
+summary,
+[role="button"] {
+  touch-action: manipulation;
+}
+
 button,
 input,
 select {
@@ -136,8 +154,6 @@ select {
 
 button {
   color: inherit;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
 }
 
 button:disabled {
@@ -309,6 +325,25 @@ button:disabled {
   gap: 8px;
   width: min(1120px, 100%);
   margin: 0 auto;
+}
+
+.home-page-stack {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.home-page-stack > .page-header {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.home-page-stack > .shopping-notification {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: start;
+}
+
+.home-page-stack > :not(.page-header, .shopping-notification) {
+  grid-column: 1 / -1;
 }
 
 .page-header {

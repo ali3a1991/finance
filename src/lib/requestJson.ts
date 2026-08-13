@@ -2,6 +2,18 @@ type RequestJsonOptions = RequestInit & {
   authenticated?: boolean;
 };
 
+let pendingRequests = 0;
+const apiLoadingListeners = new Set<() => void>();
+
+export function subscribeApiLoading(listener: () => void) {
+  apiLoadingListeners.add(listener);
+  return () => apiLoadingListeners.delete(listener);
+}
+
+export function getApiLoadingSnapshot() {
+  return pendingRequests > 0;
+}
+
 function getAuthHeaders() {
   const token = localStorage.getItem("finance_token");
 
@@ -13,11 +25,8 @@ function getAuthHeaders() {
 }
 
 function setApiLoading(isLoading: boolean) {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  window.dispatchEvent(new Event(isLoading ? "finance-api-loading-start" : "finance-api-loading-end"));
+  pendingRequests = isLoading ? pendingRequests + 1 : Math.max(0, pendingRequests - 1);
+  apiLoadingListeners.forEach((listener) => listener());
 }
 
 export async function requestJson<T>(url: string, options: RequestJsonOptions = {}) {
