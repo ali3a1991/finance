@@ -2110,6 +2110,7 @@ export async function updatePreviousMonthBalance(ownerId: string, monthKey: stri
 }
 
 export async function getDashboardData(ownerId: string, monthKey?: string | null) {
+  await ensureShoppingItemTable();
   const db = await readFinanceDb(ownerId);
   const selectedDate = getDateFromMonthKey(monthKey);
   const monthlyPayments = buildMonthlyPayments(db, selectedDate);
@@ -2141,6 +2142,9 @@ export async function getDashboardData(ownerId: string, monthKey?: string | null
     .filter((payment) => payment.sourceType === "insurance")
     .reduce((sum, payment) => sum + payment.amount, 0);
   const committed = monthlyPayments.reduce((sum, payment) => sum + payment.amount, 0);
+  const shoppingOpenItemCount = await prisma.shoppingItem.count({
+    where: { completedAt: null, ownerId }
+  });
 
   return {
     month: getMonthKey(selectedDate),
@@ -2158,7 +2162,8 @@ export async function getDashboardData(ownerId: string, monthKey?: string | null
       loanTotal,
       monthlyExpenseTotal,
       previousMonthBalance,
-      savingsTotal
+      savingsTotal,
+      shoppingOpenItemCount
     }
   };
 }

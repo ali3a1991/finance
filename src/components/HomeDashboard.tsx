@@ -10,6 +10,7 @@ import {
   LineChart,
   PiggyBank,
   Save,
+  ShoppingBasket,
 } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -31,6 +32,7 @@ type DashboardSummary = {
   monthlyExpenseTotal: number;
   previousMonthBalance: number;
   savingsTotal: number;
+  shoppingOpenItemCount: number;
 };
 
 type DashboardPayload = {
@@ -52,7 +54,8 @@ const emptySummary: DashboardSummary = {
   loanTotal: 0,
   monthlyExpenseTotal: 0,
   previousMonthBalance: 0,
-  savingsTotal: 0
+  savingsTotal: 0,
+  shoppingOpenItemCount: 0
 };
 
 function getMonthKey(date = new Date()) {
@@ -161,6 +164,31 @@ export function HomeDashboard() {
 
   return (
     <>
+      {summary.shoppingOpenItemCount > 0 ? (
+        <Link
+          className="shopping-summary-panel"
+          href="/shopping-list"
+          aria-label={`${t("dashboard.viewShoppingList")}: ${summary.shoppingOpenItemCount} ${t("dashboard.openShoppingItems")}`}
+        >
+          <div className="shopping-summary-heading">
+            <span className="summary-icon" aria-hidden="true">
+              <ShoppingBasket size={20} />
+            </span>
+            <div>
+              <span>{t("dashboard.shoppingList")}</span>
+              <strong>{t("dashboard.openShoppingItems")}</strong>
+            </div>
+          </div>
+          <span className="shopping-summary-count" aria-hidden="true">
+            {summary.shoppingOpenItemCount}
+          </span>
+          <span className="shopping-summary-action" aria-hidden="true">
+            {t("dashboard.viewShoppingList")}
+            <ChevronRight size={18} />
+          </span>
+        </Link>
+      ) : null}
+
       {showInvestmentTotal ? (
         <section className="investment-summary-panel" aria-label={t("dashboard.investmentOverview")}>
           <div className="investment-summary-heading">
