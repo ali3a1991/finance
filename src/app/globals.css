@@ -1321,7 +1321,6 @@ th {
 .investment-summary-grid > div {
   display: grid;
   gap: 6px;
-  min-height: 71px;
   align-content: center;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -3973,14 +3972,6 @@ th {
     right: 12px;
   }
 
-  .gauge-free-amount {
-    padding: 10px 8px;
-  }
-
-  .gauge-free-amount span {
-    font-size: 0.72rem;
-  }
-
   .exchange-pair {
     font-size: 1.1rem;
   }
@@ -4101,7 +4092,7 @@ th {
   }
 
   .gauge-value span {
-    font-size: 0.72rem;
+    font-size: 0.82rem;
   }
 
   .gauge-value strong {
@@ -4128,6 +4119,7 @@ th {
 
   .investment-summary-grid > div {
     padding: 10px 8px;
+    text-align: center;
   }
 
   .tether-panel {
