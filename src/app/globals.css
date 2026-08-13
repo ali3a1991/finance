@@ -1224,9 +1224,7 @@ th {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 24px;
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--primary) 9%, transparent), transparent 48%),
-    var(--surface);
+  background: var(--surface);
   box-shadow: var(--shadow);
 }
 
@@ -1479,38 +1477,6 @@ th {
   max-width: 520px;
 }
 
-.tether-result-card {
-  display: grid;
-  gap: 8px;
-  border: 1px solid color-mix(in srgb, var(--primary) 34%, var(--line));
-  border-radius: 8px;
-  padding: 16px;
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--primary) 12%, transparent), transparent 58%),
-    var(--surface);
-}
-
-.tether-result-card span {
-  color: var(--muted);
-  font-size: 0.82rem;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.tether-result-card strong {
-  color: var(--text);
-  font-size: clamp(1.7rem, 4vw, 3rem);
-  line-height: 1;
-}
-
-.tether-result-card small,
-.tether-calculator-note {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.92rem;
-  font-weight: 700;
-}
-
 .tether-calculator-input {
   display: grid;
   gap: 8px;
@@ -1563,9 +1529,6 @@ th {
     linear-gradient(145deg, color-mix(in srgb, var(--surface-soft) 82%, var(--primary)), transparent 120%),
     linear-gradient(25deg, color-mix(in srgb, var(--primary) 18%, transparent), transparent 52%),
     var(--surface);
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, #ffffff 20%, transparent),
-    0 22px 60px color-mix(in srgb, var(--primary) 16%, transparent);
 }
 
 .exchange-refresh-button {
