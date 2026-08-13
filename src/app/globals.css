@@ -828,6 +828,7 @@ th {
   margin-top: 4px;
 }
 
+.investment-summary-heading span,
 .gauge-copy span {
   color: var(--primary);
   font-size: 0.82rem;
@@ -1177,7 +1178,6 @@ th {
   color: var(--on-primary);
 }
 
-.investment-summary-heading span,
 .investment-summary-grid span {
   color: var(--muted);
   font-size: 0.82rem;
