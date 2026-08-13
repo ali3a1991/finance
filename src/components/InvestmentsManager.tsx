@@ -170,17 +170,6 @@ export function InvestmentsManager() {
     <>
       {!isLoading && investments.length > 0 ? (
         <section className="investment-summary-panel" aria-label={t("dashboard.investmentOverview")}>
-          <div className="investment-summary-heading">
-            <div className="summary-icon">
-              <LineChart size={20} aria-hidden="true" />
-            </div>
-            <div>
-              <span>{t("dashboard.investmentOverview")}</span>
-              <strong>
-                {investments.length} {t("dashboard.investmentItems")}
-              </strong>
-            </div>
-          </div>
           <div className="investment-summary-grid">
             <div>
               <span>{t("dashboard.currentInvestmentValue")}</span>
