@@ -168,25 +168,14 @@ export function HomeDashboard({ view = "home" }: { view?: "home" | "monthlyPayme
     <>
       {isHomeView && summary.shoppingOpenItemCount > 0 ? (
         <Link
-          className="shopping-summary-panel"
+          className="shopping-notification"
           href="/shopping-list"
           aria-label={`${t("dashboard.viewShoppingList")}: ${summary.shoppingOpenItemCount} ${t("dashboard.openShoppingItems")}`}
+          title={t("dashboard.viewShoppingList")}
         >
-          <div className="shopping-summary-heading">
-            <span className="summary-icon" aria-hidden="true">
-              <ShoppingBasket size={20} />
-            </span>
-            <div>
-              <span>{t("dashboard.shoppingList")}</span>
-              <strong>{t("dashboard.openShoppingItems")}</strong>
-            </div>
-          </div>
-          <span className="shopping-summary-count" aria-hidden="true">
-            {summary.shoppingOpenItemCount}
-          </span>
-          <span className="shopping-summary-action" aria-hidden="true">
-            {t("dashboard.viewShoppingList")}
-            <ChevronRight size={18} />
+          <ShoppingBasket size={22} aria-hidden="true" />
+          <span className="shopping-notification-badge" aria-hidden="true">
+            {summary.shoppingOpenItemCount > 99 ? "99+" : summary.shoppingOpenItemCount}
           </span>
         </Link>
       ) : null}

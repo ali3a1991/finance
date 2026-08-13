@@ -1197,75 +1197,50 @@ th {
   box-shadow: var(--shadow);
 }
 
-.shopping-summary-panel {
+.shopping-notification {
+  position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  gap: 14px;
-  align-items: center;
-  border: 1px solid color-mix(in srgb, var(--primary) 32%, var(--line));
+  place-items: center;
+  justify-self: end;
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 14px 18px;
-  background:
-    linear-gradient(110deg, color-mix(in srgb, var(--primary) 12%, transparent), transparent 62%),
-    var(--surface);
-  color: inherit;
+  background: var(--surface);
+  color: var(--primary);
   text-decoration: none;
   box-shadow: var(--shadow);
-  transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
 }
 
-.shopping-summary-panel:hover {
+.shopping-notification:hover {
   border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
   transform: translateY(-1px);
 }
 
-.shopping-summary-panel:focus-visible {
+.shopping-notification:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--primary) 40%, transparent);
   outline-offset: 3px;
 }
 
-.shopping-summary-heading {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-
-.shopping-summary-heading > div {
-  min-width: 0;
-}
-
-.shopping-summary-heading span:not(.summary-icon) {
-  color: var(--muted);
-  font-size: 0.82rem;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.shopping-summary-heading strong {
-  display: block;
-  margin-top: 4px;
-}
-
-.shopping-summary-count {
+.shopping-notification-badge {
+  position: absolute;
+  top: -7px;
+  right: -7px;
   display: grid;
   place-items: center;
-  min-width: 38px;
-  height: 38px;
+  min-width: 22px;
+  height: 22px;
+  border: 2px solid var(--surface);
   border-radius: 999px;
-  padding-inline: 10px;
-  background: var(--primary);
-  color: var(--on-primary);
-  font-size: 1rem;
+  padding-inline: 5px;
+  background: var(--rose);
+  color: white;
+  font-size: 0.7rem;
   font-weight: 900;
-}
-
-.shopping-summary-action {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--primary);
-  font-weight: 850;
+  line-height: 1;
+  box-shadow: 0 3px 8px rgba(16, 24, 39, 0.22);
 }
 
 .investment-summary-heading {
@@ -4099,15 +4074,6 @@ th {
   .investment-summary-panel {
     gap: 14px;
     padding: 14px;
-  }
-
-  .shopping-summary-panel {
-    grid-template-columns: minmax(0, 1fr) auto;
-    padding: 14px;
-  }
-
-  .shopping-summary-action {
-    display: none;
   }
 
   .investment-summary-grid {
