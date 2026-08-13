@@ -80,6 +80,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     };
   }, [isMobileMenuOpen]);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [pathname]);
+
   function isActivePath(href: string) {
     if (href === "/") {
       return pathname === "/";
