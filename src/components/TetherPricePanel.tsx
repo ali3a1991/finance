@@ -1,13 +1,14 @@
 "use client";
 
 import { ChevronDown, RefreshCw, ShieldCheck, WalletCards } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/components/LanguageProvider";
 import { requestJson } from "@/lib/requestJson";
 
 const KUCOIN_EURO_FEE = 1;
 const TETHER_TRANSFER_FEE = 1.5;
 const TOMAN_WITHDRAWAL_FEE = 15000;
+const PRICE_REFRESH_INTERVAL_MS = 60_000;
 
 type TetherPricePayload = {
   source: string;
@@ -125,24 +126,30 @@ export function TetherPricePanel() {
   const [error, setError] = useState("");
   const [calculatorMode, setCalculatorMode] = useState<CalculatorMode>("eur-to-toman");
   const [calculatorAmount, setCalculatorAmount] = useState("100");
+  const isLoadingPriceRef = useRef(false);
 
-  async function loadPrice() {
+  const loadPrice = useCallback(async () => {
+    if (isLoadingPriceRef.current) return;
+    isLoadingPriceRef.current = true;
     setIsLoading(true);
     setError("");
 
     try {
-      const body = await requestJson<TetherPricePayload>("/api/tether-price");
+      const body = await requestJson<TetherPricePayload>("/api/tether-price", { cache: "no-store" });
       setPriceData(body);
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : t("exchange.error"));
     } finally {
+      isLoadingPriceRef.current = false;
       setIsLoading(false);
     }
-  }
+  }, [t]);
 
   useEffect(() => {
     void loadPrice();
-  }, []);
+    const intervalId = window.setInterval(() => void loadPrice(), PRICE_REFRESH_INTERVAL_MS);
+    return () => window.clearInterval(intervalId);
+  }, [loadPrice]);
 
   useEffect(() => {
     setCalculatorAmount((currentAmount) => formatCalculatorInput(currentAmount, calculatorMode, language));
