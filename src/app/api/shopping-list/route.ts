@@ -34,7 +34,6 @@ export async function POST(request: NextRequest) {
     unit: body.unit
   });
   await notifyShoppingItemCreated({
-    itemName: item.name,
     ownerId: auth.payload.ownerId,
     username: auth.payload.sub
   }).catch((error) => console.error("Shopping notification failed", error));

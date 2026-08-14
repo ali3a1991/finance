@@ -109,11 +109,9 @@ async function deleteExpiredSubscription(id: string) {
 }
 
 export async function notifyShoppingItemCreated({
-  itemName,
   ownerId,
   username
 }: {
-  itemName: string;
   ownerId: string;
   username: string;
 }) {
@@ -126,7 +124,7 @@ export async function notifyShoppingItemCreated({
     WHERE "ownerId" = ${ownerId} AND "username" <> ${username}
   `;
   const payload = JSON.stringify({
-    body: `${username} hat „${itemName}“ zur Einkaufsliste hinzugefügt.`,
+    body: "Ein Artikel wurde zur Einkaufsliste hinzugefügt.",
     tag: "shopping-list-update",
     title: "FyNest · Einkaufsliste",
     url: "/shopping-list"
