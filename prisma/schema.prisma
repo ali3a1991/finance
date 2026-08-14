@@ -291,3 +291,16 @@ model ShoppingCatalogItem {
   @@unique([ownerId, normalizedName])
   @@index([ownerId, lastUsedAt])
 }
+
+model PushSubscription {
+  id        String   @id
+  ownerId   String
+  username  String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
+}

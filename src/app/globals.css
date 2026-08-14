@@ -2341,6 +2341,25 @@ th {
   line-height: 1.55;
 }
 
+.notification-settings-panel .settings-copy {
+  max-width: 680px;
+}
+
+.notification-status {
+  color: var(--muted);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.notification-status.error {
+  color: #dc2626;
+}
+
+.theme-choice:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .access-settings-panel {
   grid-template-columns: 1fr;
   align-items: stretch;

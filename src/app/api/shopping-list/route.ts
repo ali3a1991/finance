@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireApiAuth, requireWriteAccess } from "@/lib/auth";
 import { createShoppingItem, getShoppingListData } from "@/lib/serverDb";
+import { notifyShoppingItemCreated } from "@/lib/pushNotifications";
 import type { ShoppingItem, ShoppingUnit } from "@/lib/types";
 
 const units: ShoppingUnit[] = ["kg", "package", "piece", "bottle"];
@@ -32,5 +33,10 @@ export async function POST(request: NextRequest) {
     quantity: body.quantity,
     unit: body.unit
   });
+  await notifyShoppingItemCreated({
+    itemName: item.name,
+    ownerId: auth.payload.ownerId,
+    username: auth.payload.sub
+  }).catch((error) => console.error("Shopping notification failed", error));
   return NextResponse.json({ item }, { status: 201 });
 }

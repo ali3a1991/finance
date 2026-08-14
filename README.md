@@ -82,9 +82,17 @@ TELEGRAM_BOT_TOKEN=
 TELEGRAM_BOT_USERNAME=
 APP_URL=
 UPDATE_BROADCAST_SECRET=
+VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
+VAPID_SUBJECT=mailto:admin@example.com
 ```
 
 `APP_URL` and `UPDATE_BROADCAST_SECRET` are only required for manual Telegram release broadcasts.
+
+Shopping-list push notifications derive a stable, separate key pair from the required `AUTH_SECRET`, so no extra
+setup is needed. `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` can optionally override that pair; generate them once
+with `npx web-push generate-vapid-keys` and use the same values in every deployment. `VAPID_SUBJECT` must be a
+`mailto:` address or an HTTPS URL. The push-subscription table is created automatically on first use.
 
 ## Development
 
