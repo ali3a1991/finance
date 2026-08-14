@@ -1188,6 +1188,10 @@ th {
   gap: 10px;
 }
 
+.investment-summary-panel > .investment-summary-grid:only-child {
+  grid-column: 1 / -1;
+}
+
 .investment-summary-grid > div {
   display: grid;
   gap: 6px;
