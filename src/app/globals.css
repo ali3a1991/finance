@@ -953,7 +953,7 @@ th {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: white;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
