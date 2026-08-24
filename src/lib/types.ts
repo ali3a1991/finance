@@ -128,6 +128,23 @@ export type MonthlyPayment = {
   lockedBySavings?: boolean;
 };
 
+export type DashboardSummary = {
+  freeAmount: number;
+  incomeTotal: number;
+  insuranceTotal: number;
+  investmentCurrentTotal: number;
+  investmentInvestedTotal: number;
+  investmentItemCount: number;
+  investmentResult: number;
+  investmentReturnRate: number;
+  loanCount: number;
+  loanTotal: number;
+  monthlyExpenseTotal: number;
+  previousMonthBalance: number;
+  savingsTotal: number;
+  shoppingOpenItemCount: number;
+};
+
 export type ShoppingUnit = "kg" | "package" | "piece" | "bottle";
 
 export type ShoppingItem = {
