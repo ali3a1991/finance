@@ -224,9 +224,14 @@ export function HomeDashboard({ view = "home" }: { view?: "home" | "monthlyPayme
       {isHomeView && showSavingsTotal ? (
         <section className="investment-summary-panel savings-summary-panel" aria-label={t("dashboard.savings")}>
           <div className="investment-summary-heading">
-            <div className="summary-icon">
+            <Link
+              className="summary-icon"
+              href="/savings"
+              aria-label={t("nav.savings")}
+              title={t("nav.savings")}
+            >
               <PiggyBank size={20} aria-hidden="true" />
-            </div>
+            </Link>
             <div>
               <span>{t("dashboard.savings")}</span>
               <strong>{t("dashboard.savingsTotal")}</strong>
