@@ -1571,6 +1571,9 @@ th {
   font-size: 0.82rem;
   font-weight: 700;
   line-height: 1.35;
+  min-height: 54px;
+  display: flex;
+  align-items: center;
 }
 
 .payment-row.locked .payment-amount {
@@ -3889,9 +3892,6 @@ th {
     grid-column: 2 / -1;
     justify-self: stretch;
     max-width: none;
-    min-height: 54px;
-    display: flex;
-    align-items: center;
   }
 
   .partial-input input {
