@@ -1,3 +1,5 @@
+const APP_ICON_URL = "/icon-192.png?v=2";
+
 self.addEventListener("install", () => {
   self.skipWaiting();
 });
@@ -18,8 +20,8 @@ self.addEventListener("push", (event) => {
 
   event.waitUntil(self.registration.showNotification(payload.title || "FyNest", {
     body: payload.body || "Die Einkaufsliste wurde aktualisiert.",
-    icon: "/icon-192.png",
-    badge: "/icon-192.png",
+    icon: APP_ICON_URL,
+    badge: APP_ICON_URL,
     data: { url: payload.url || "/shopping-list" },
     tag: payload.tag || "fynest-update"
   }));
