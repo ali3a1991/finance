@@ -40,42 +40,68 @@ const translations = {
     pages: {
       home: {
         eyebrow: "Startseite",
+        title: "Deine Finanzen auf einen Blick",
+        description: "Verfolge Zahlungen, verfügbares Budget und deine langfristigen Ziele.",
       },
       monthlyPayments: {
         eyebrow: "Monatsübersicht",
+        title: "Monat sicher planen",
+        description: "Behalte fällige Zahlungen, Fortschritt und freien Betrag im Blick.",
       },
       loans: {
         eyebrow: "Kredite",
+        title: "Kredite verwalten",
+        description: "Sieh Restbeträge, Raten und Laufzeiten übersichtlich an einem Ort.",
       },
       insurances: {
         eyebrow: "Versicherungen",
+        title: "Versicherungsschutz im Blick",
+        description: "Verwalte Verträge, Beiträge und wichtige Laufzeiten zuverlässig.",
       },
       incomes: {
         eyebrow: "Einnahmen",
+        title: "Einnahmen organisieren",
+        description: "Erfasse regelmäßige und einmalige Einnahmen für eine klare Planung.",
       },
       expenses: {
         eyebrow: "Ausgaben",
+        title: "Ausgaben verstehen",
+        description: "Ordne Buchungen nach Monat und erkenne deine wichtigsten Kosten.",
       },
       projects: {
         eyebrow: "Gemeinsame Ausgaben",
+        title: "Gemeinsam fair abrechnen",
+        description: "Plane Gruppenausgaben und gleiche offene Beträge transparent aus.",
       },
       investments: {
         eyebrow: "Investitionen",
+        title: "Portfolio verfolgen",
+        description: "Vergleiche Einstand, aktuellen Wert und Entwicklung deiner Anlagen.",
       },
       exchange: {
         eyebrow: "Wechsel",
+        title: "Euro und Toman umrechnen",
+        description: "Berechne den erwarteten Betrag mit aktuellen USDT-Marktdaten und Gebühren.",
       },
       shoppingList: {
         eyebrow: "Einkaufsliste",
+        title: "Einkäufe gemeinsam planen",
+        description: "Sammle offene Artikel, Fristen und erledigte Einkäufe an einem Ort.",
       },
       savings: {
         eyebrow: "Sparen",
+        title: "Sparziele erreichen",
+        description: "Verfolge Fortschritt, Einzahlungen und geplante monatliche Beiträge.",
       },
       contractsGeneral: {
         eyebrow: "Verträge",
+        title: "Verträge zentral verwalten",
+        description: "Behalte Kosten, Laufzeiten und Kündigungsfristen zuverlässig im Blick.",
       },
       settings: {
         eyebrow: "Einstellungen",
+        title: "FyNest personalisieren",
+        description: "Passe Darstellung, Sprache, Benachrichtigungen und Zugriffe an.",
       }
     },
     dashboard: {
@@ -574,42 +600,68 @@ const translations = {
     pages: {
       home: {
         eyebrow: "Home",
+        title: "Your finances at a glance",
+        description: "Track payments, available budget, and long-term goals with confidence.",
       },
       monthlyPayments: {
         eyebrow: "Monthly overview",
+        title: "Plan the month with confidence",
+        description: "Keep due payments, progress, and your available balance in view.",
       },
       loans: {
         eyebrow: "Loans",
+        title: "Manage your loans",
+        description: "See remaining balances, installments, and terms in one clear place.",
       },
       insurances: {
         eyebrow: "Insurance",
+        title: "Keep coverage in view",
+        description: "Manage policies, premiums, and important renewal dates reliably.",
       },
       incomes: {
         eyebrow: "Income",
+        title: "Organize your income",
+        description: "Record recurring and one-time income for clearer financial planning.",
       },
       expenses: {
         eyebrow: "Expenses",
+        title: "Understand your spending",
+        description: "Review transactions by month and identify your most important costs.",
       },
       projects: {
         eyebrow: "Shared expenses",
+        title: "Settle shared costs fairly",
+        description: "Plan group expenses and resolve open balances transparently.",
       },
       investments: {
         eyebrow: "Investments",
+        title: "Track your portfolio",
+        description: "Compare purchase cost, current value, and portfolio performance.",
       },
       exchange: {
         eyebrow: "Exchange",
+        title: "Convert Euro and Toman",
+        description: "Estimate the result using current USDT market data and included fees.",
       },
       shoppingList: {
         eyebrow: "Shopping list",
+        title: "Plan purchases together",
+        description: "Keep open items, deadlines, and completed purchases in one place.",
       },
       savings: {
         eyebrow: "Savings",
+        title: "Reach your savings goals",
+        description: "Follow progress, deposits, and planned monthly contributions.",
       },
       contractsGeneral: {
         eyebrow: "Contracts",
+        title: "Manage contracts centrally",
+        description: "Keep costs, terms, and cancellation dates reliably in view.",
       },
       settings: {
         eyebrow: "Settings",
+        title: "Personalize FyNest",
+        description: "Adjust appearance, language, notifications, and account access.",
       }
     },
     dashboard: {

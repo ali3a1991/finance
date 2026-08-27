@@ -13,9 +13,13 @@ export function PageHeader({ page }: PageHeaderProps) {
 
   return (
     <header className="page-header">
-      <div className="page-header-label">
+      <div className="page-header-icon" aria-hidden="true">
         <Icon size={20} strokeWidth={2.2} aria-hidden="true" />
+      </div>
+      <div className="page-header-copy">
         <span>{t(`pages.${page}.eyebrow`)}</span>
+        <h1>{t(`pages.${page}.title`)}</h1>
+        <p>{t(`pages.${page}.description`)}</p>
       </div>
     </header>
   );
