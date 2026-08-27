@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Finance Manager App",
     start_url: "/",
     display: "standalone",
-    background_color: "#020617",
-    theme_color: "#020617",
+    background_color: "#0b1412",
+    theme_color: "#0d7568",
     icons: [
       {
         src: "/icon-192.png",

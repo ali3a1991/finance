@@ -77,7 +77,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className={`app-shell ${isMobileMenuOpen ? "menu-open" : ""} ${isApiLoading ? "api-loading-active" : ""}`}>
       <header className="mobile-header">
         <Link className="mobile-brand" href="/" onClick={closeMobileMenu}>
-          <Image src="/logo.png" width={36} height={36}  alt="FyNest Logo" className="brand-logo" />
+          <Image src="/logo.svg" width={36} height={36} alt="FyNest Logo" className="brand-logo" />
           <span>{t("app.brand")}</span>
         </Link>
         <button
@@ -109,7 +109,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       >
         <div className="sidebar-top">
           <Link className="brand" href="/">
-            <Image src="/logo.png" alt="FyNest Logo" width={44} height={44} className="brand-logo" />
+            <Image src="/logo.svg" alt="FyNest Logo" width={44} height={44} className="brand-logo" />
             <span>
               <strong>FyNest</strong>
             </span>

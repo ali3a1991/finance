@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title description">
+  <title id="title">FyNest</title>
+  <desc id="description">An upward financial path resting inside a simple nest.</desc>
+  <rect width="128" height="128" rx="32" fill="#0d7568"/>
+  <path
+    d="M27 69 47 49l15 14 34-34"
+    fill="none"
+    stroke="#ffffff"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="9"
+  />
+  <path
+    d="M80 29h16v16"
+    fill="none"
+    stroke="#ffffff"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="9"
+  />
+  <path
+    d="M27 81c9 13 22 20 37 20s28-7 37-20"
+    fill="none"
+    stroke="#bfe4da"
+    stroke-linecap="round"
+    stroke-width="9"
+  />
+</svg>
