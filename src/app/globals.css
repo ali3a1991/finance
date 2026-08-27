@@ -4334,6 +4334,42 @@ body {
   padding: 42px clamp(24px, 4vw, 64px) 64px;
 }
 
+.public-exchange-shell {
+  min-height: 100dvh;
+}
+
+.public-exchange-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  min-height: 68px;
+  padding: 10px clamp(20px, 4vw, 64px);
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+  background: color-mix(in srgb, var(--header-bg) 94%, transparent);
+  backdrop-filter: blur(18px);
+}
+
+.public-exchange-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  color: var(--text);
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+}
+
+.public-exchange-main {
+  padding: 34px clamp(20px, 4vw, 64px) 64px;
+}
+
+.public-exchange-shell.api-loading-active .public-exchange-main {
+  filter: blur(2px);
+  pointer-events: none;
+  user-select: none;
+}
+
 .page-stack {
   gap: 24px;
   width: min(1180px, 100%);
@@ -4740,6 +4776,15 @@ tbody tr:hover {
 
 @media (max-width: 640px) {
   .main-content {
+    padding: 22px 14px 42px;
+  }
+
+  .public-exchange-header {
+    min-height: 62px;
+    padding-inline: 14px;
+  }
+
+  .public-exchange-main {
     padding: 22px 14px 42px;
   }
 

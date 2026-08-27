@@ -72,6 +72,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         : user?.accessLevel === "readwrite"
           ? t("nav.readwrite")
           : "";
+  const isAnonymousExchange = pathname === "/exchange" && !user;
+
+  if (isAnonymousExchange) {
+    return (
+      <div className={`public-exchange-shell ${isApiLoading ? "api-loading-active" : ""}`}>
+        <header className="public-exchange-header">
+          <Link className="public-exchange-brand" href="/exchange">
+            <Image src="/logo.svg" width={38} height={38} alt="FyNest Logo" className="brand-logo" />
+            <strong>FyNest</strong>
+          </Link>
+        </header>
+        <main ref={mainContentRef} className="public-exchange-main">{children}</main>
+      </div>
+    );
+  }
 
   return (
     <div className={`app-shell ${isMobileMenuOpen ? "menu-open" : ""} ${isApiLoading ? "api-loading-active" : ""}`}>

@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<CurrentUser | null>(null);
 
   useEffect(() => {
-    if (pathname === "/login" || pathname === "/register" || pathname === "/forgot-password" || pathname === "/exchange") {
+    if (pathname === "/login" || pathname === "/register" || pathname === "/forgot-password") {
       setUser(null);
       return;
     }
@@ -34,9 +34,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    requestJson<CurrentUser>("/api/me")
-      .then(setUser)
-      .catch(() => setUser(null));
+    if (pathname === "/exchange") {
+      fetch("/api/me", { cache: "no-store" })
+        .then(async (response) => {
+          if (!response.ok) {
+            throw new Error("No active session");
+          }
+
+          return response.json() as Promise<CurrentUser>;
+        })
+        .then(setUser)
+        .catch(() => setUser(null));
+      return;
+    }
+
+    requestJson<CurrentUser>("/api/me").then(setUser).catch(() => setUser(null));
   }, [pathname, user]);
 
   const value = useMemo(
