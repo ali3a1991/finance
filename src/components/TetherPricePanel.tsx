@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, RefreshCw, ShieldCheck, WalletCards } from "lucide-react";
+import { Check, ChevronDown, RefreshCw, Share2, ShieldCheck, WalletCards } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/components/LanguageProvider";
 import { requestJson } from "@/lib/requestJson";
@@ -124,6 +124,7 @@ export function TetherPricePanel() {
   const [priceData, setPriceData] = useState<TetherPricePayload | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "error">("idle");
   const [calculatorMode, setCalculatorMode] = useState<CalculatorMode>("eur-to-toman");
   const [calculatorAmount, setCalculatorAmount] = useState("100");
   const isLoadingPriceRef = useRef(false);
@@ -164,6 +165,28 @@ export function TetherPricePanel() {
     setCalculatorAmount(formatCalculatorInput(value, calculatorMode, language));
   }
 
+  async function sharePage() {
+    const url = window.location.href;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: t("exchange.shareTitle"), url });
+        return;
+      }
+
+      await navigator.clipboard.writeText(url);
+      setShareStatus("copied");
+      window.setTimeout(() => setShareStatus("idle"), 2500);
+    } catch (shareError) {
+      if (shareError instanceof DOMException && shareError.name === "AbortError") {
+        return;
+      }
+
+      setShareStatus("error");
+      window.setTimeout(() => setShareStatus("idle"), 2500);
+    }
+  }
+
   const amount = parseAmount(calculatorAmount, calculatorMode, language);
   const kucoinRate = priceData?.kucoin.bestAsk ?? priceData?.kucoin.eurPerUsdt ?? null;
   const tabdealSellRate = priceData?.bestBid ?? priceData?.lastPrice ?? null;
@@ -193,6 +216,16 @@ export function TetherPricePanel() {
 
   return (
     <section className="exchange-converter-panel">
+      <div className="exchange-share-row">
+        <button className="button secondary compact" type="button" onClick={sharePage}>
+          {shareStatus === "copied" ? <Check size={17} aria-hidden="true" /> : <Share2 size={17} aria-hidden="true" />}
+          {shareStatus === "copied" ? t("exchange.linkCopied") : t("exchange.share")}
+        </button>
+        <span className="sr-only" role="status" aria-live="polite">
+          {shareStatus === "copied" ? t("exchange.linkCopied") : shareStatus === "error" ? t("exchange.shareError") : ""}
+        </span>
+      </div>
+
       <div className="exchange-rate-card">
         <button className="exchange-refresh-button" type="button" onClick={loadPrice} disabled={isLoading} aria-label={t("exchange.refresh")}>
           <RefreshCw size={18} aria-hidden="true" className={isLoading ? "spin-icon" : ""} />

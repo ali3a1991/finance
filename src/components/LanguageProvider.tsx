@@ -321,6 +321,10 @@ const translations = {
       source: "Quelle",
       toman: "Toman",
       error: "Der Tetherpreis konnte nicht geladen werden.",
+      share: "Teilen",
+      shareTitle: "FyNest Wechselrechner",
+      linkCopied: "Link kopiert",
+      shareError: "Der Link konnte nicht geteilt werden.",
       calculator: {
         eyebrow: "Rechner",
         title: "Euro und Toman umrechnen",
@@ -851,6 +855,10 @@ const translations = {
       source: "Source",
       toman: "Toman",
       error: "The Tether price could not be loaded.",
+      share: "Share",
+      shareTitle: "FyNest exchange calculator",
+      linkCopied: "Link copied",
+      shareError: "The link could not be shared.",
       calculator: {
         eyebrow: "Calculator",
         title: "Convert Euro and Toman",

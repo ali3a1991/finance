@@ -1,5 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
-import { requireApiAuth } from "@/lib/auth";
+import { NextResponse } from "next/server";
 
 const TABDEAL_SYMBOL = "USDTIRT";
 const TABDEAL_BASE_URL = "https://api1.tabdeal.org/r/api/v1";
@@ -31,13 +30,7 @@ function parseMarketPrice(value: unknown) {
   return Number.isFinite(price) ? price : null;
 }
 
-export async function GET(request: NextRequest) {
-  const auth = requireApiAuth(request);
-
-  if (auth.error) {
-    return auth.error;
-  }
-
+export async function GET() {
   try {
     const [depthResponse, tradesResponse, kucoinResponse] = await Promise.all([
       fetch(`${TABDEAL_BASE_URL}/depth?symbol=${TABDEAL_SYMBOL}&limit=1`, { next: { revalidate: 10 } }),

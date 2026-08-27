@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<CurrentUser | null>(null);
 
   useEffect(() => {
-    if (pathname === "/login" || pathname === "/register" || pathname === "/forgot-password") {
+    if (pathname === "/login" || pathname === "/register" || pathname === "/forgot-password" || pathname === "/exchange") {
       setUser(null);
       return;
     }
