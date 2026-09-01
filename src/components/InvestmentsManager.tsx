@@ -310,7 +310,11 @@ export function InvestmentsManager() {
                 </div>
                 <div className="mobile-data-card-footer">
                   <span>{t("investments.result")}</span>
-                  <strong className={`investment-result ${result >= 0 ? "positive" : "negative"}`}>{result > 0 ? "+" : ""}{formatCurrency(result, "EUR")}</strong>{can("investments.edit") || can("investments.delete") ? 
+                  <div>
+                    <strong className={`investment-result ${result >= 0 ? "positive" : "negative"}`}>{result > 0 ? "+" : ""}{formatCurrency(result, "EUR")}</strong><br />
+                    <span className={`investment-result-percentage ${result >= 0 ? "positive" : "negative"}`}>{result > 0 ? "+" : ""}{((result / investedValue) * 100).toFixed(2) + " %"}</span>
+                  </div>
+                  {can("investments.edit") || can("investments.delete") ? 
                   <div className="table-actions">
                     {can("investments.edit") ? <button className="icon-button" type="button" onClick={() => openEditModal(investment)} aria-label={`${investment.assetName} ${t("common.edit")}`}><Pencil size={16} aria-hidden="true" /></button> : null}{can("investments.delete") ? <button className="icon-button danger" type="button" onClick={() => setInvestmentToDelete(investment)} aria-label={`${investment.assetName} ${t("common.delete")}`}><Trash2 size={16} aria-hidden="true" /></button> : null}
                   </div> : null}
