@@ -14,32 +14,12 @@ export function HomeOverview({ summary }: { summary: DashboardSummary }) {
 
   return (
     <>
-      {showSavingsTotal ? (
-        <section className="investment-summary-panel savings-summary-panel" aria-label={t("dashboard.savings")}>
-          <div className="investment-summary-heading">
-            <Link className="summary-icon" href="/savings" aria-label={t("nav.savings")} title={t("nav.savings")}>
-              <PiggyBank size={20} aria-hidden="true" />
-            </Link>
-            <div>
-              <span>{t("dashboard.savings")}</span>
-              <strong>{t("dashboard.savingsTotal")}</strong>
-            </div>
-          </div>
-          <div className="investment-summary-grid savings-summary-grid">
-            <div>
-              <span>{t("dashboard.savings")}</span>
-              <strong>{formatCurrency(summary.savingsTotal)}</strong>
-            </div>
-          </div>
-        </section>
-      ) : null}
-
       {summary.shoppingOpenItemCount > 0 ? (
         <Link
-          className="shopping-notification"
-          href="/shopping-list"
-          aria-label={`${t("dashboard.viewShoppingList")}: ${summary.shoppingOpenItemCount} ${t("dashboard.openShoppingItems")}`}
-          title={t("dashboard.viewShoppingList")}
+        className="shopping-notification"
+        href="/shopping-list"
+        aria-label={`${t("dashboard.viewShoppingList")}: ${summary.shoppingOpenItemCount} ${t("dashboard.openShoppingItems")}`}
+        title={t("dashboard.viewShoppingList")}
         >
           <ShoppingBasket size={22} aria-hidden="true" />
           <span className="shopping-notification-badge" aria-hidden="true">
@@ -76,6 +56,26 @@ export function HomeOverview({ summary }: { summary: DashboardSummary }) {
             <div>
               <span>{t("dashboard.investmentResult")}</span>
               <strong className={investmentResultClass}>{formatCurrency(summary.investmentResult)}</strong>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {showSavingsTotal ? (
+        <section className="investment-summary-panel savings-summary-panel" aria-label={t("dashboard.savings")}>
+          <div className="investment-summary-heading">
+            <Link className="summary-icon" href="/savings" aria-label={t("nav.savings")} title={t("nav.savings")}>
+              <PiggyBank size={20} aria-hidden="true" />
+            </Link>
+            <div>
+              <span>{t("dashboard.savings")}</span>
+              <strong>{t("dashboard.savingsTotal")}</strong>
+            </div>
+          </div>
+          <div className="investment-summary-grid savings-summary-grid">
+            <div>
+              <span>{t("dashboard.savings")}</span>
+              <strong>{formatCurrency(summary.savingsTotal)}</strong>
             </div>
           </div>
         </section>

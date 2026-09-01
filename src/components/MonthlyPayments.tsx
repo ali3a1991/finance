@@ -144,8 +144,6 @@ export function MonthlyPayments({ view = "full" }: { view?: "summary" | "full" }
 
   return (
     <>
-      {isSummaryView ? <HomeOverview summary={summary} /> : null}
-
       {!isSummaryView ? (
         <section className="month-switcher" aria-label={t("dashboard.monthPicker")}>
           <button
@@ -342,6 +340,8 @@ export function MonthlyPayments({ view = "full" }: { view?: "summary" | "full" }
           })}
         </div>
       </section> : null}
+
+      {isSummaryView ? <HomeOverview summary={summary} /> : null}
     </>
   );
 }
