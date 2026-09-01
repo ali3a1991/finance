@@ -1064,6 +1064,12 @@ th {
   font-weight: 900;
 }
 
+.investment-result-percentage {
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-left: 4px;
+}
+
 .investment-result.positive {
   color: var(--primary);
 }

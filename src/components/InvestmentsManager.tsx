@@ -247,7 +247,7 @@ export function InvestmentsManager() {
                     <td>{formatCurrency(currentValue, "EUR")}</td>
                     <td>
                       <span className={`investment-result ${resultClass}`}>
-                        {formatCurrency(result, "EUR")}
+                        {formatCurrency(result, "EUR")}<span className="investment-result-percentage">( {((result / investedValue) * 100).toFixed(2) + " %"} )</span>
                       </span>
                     </td>
                     {can("investments.edit") || can("investments.delete") ? (
