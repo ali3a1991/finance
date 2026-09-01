@@ -247,7 +247,10 @@ export function InvestmentsManager() {
                     <td>{formatCurrency(currentValue, "EUR")}</td>
                     <td>
                       <span className={`investment-result ${resultClass}`}>
-                        {formatCurrency(result, "EUR")}<span className="investment-result-percentage">( {((result / investedValue) * 100).toFixed(2) + " %"} )</span>
+                        {formatCurrency(result, "EUR")}
+                      </span><br />
+                      <span className={`investment-result-percentage ${resultClass}`}>
+                        {((result / investedValue) * 100).toFixed(2) + " %"}
                       </span>
                     </td>
                     {can("investments.edit") || can("investments.delete") ? (
@@ -285,9 +288,33 @@ export function InvestmentsManager() {
             const result = currentValue - investedValue;
             return (
               <article className="mobile-data-card" key={investment.id}>
-                <div className="mobile-data-card-heading"><span className="mobile-data-title">{investment.symbol === "BTC-USD" ? <Bitcoin size={17} aria-hidden="true" /> : <LineChart size={17} aria-hidden="true" />}<strong>{investment.assetName}</strong></span><strong>{formatCurrency(currentValue, "EUR")}</strong></div>
-                <div className="mobile-data-grid three-columns"><div><span>{t("investments.quantity")}</span><strong>{investment.quantity}</strong></div><div><span>{t("investments.purchasePrice")}</span><strong>{formatCurrency(investment.purchasePrice, "EUR")}</strong></div><div><span>{t("investments.currentPrice")}</span><strong>{investment.currentPrice === null ? t("investments.priceUnavailable") : formatCurrency(investment.currentPrice, "EUR")}</strong></div></div>
-                <div className="mobile-data-card-footer"><span>{t("investments.result")}</span><strong className={`investment-result ${result >= 0 ? "positive" : "negative"}`}>{result > 0 ? "+" : ""}{formatCurrency(result, "EUR")}</strong>{can("investments.edit") || can("investments.delete") ? <div className="table-actions">{can("investments.edit") ? <button className="icon-button" type="button" onClick={() => openEditModal(investment)} aria-label={`${investment.assetName} ${t("common.edit")}`}><Pencil size={16} aria-hidden="true" /></button> : null}{can("investments.delete") ? <button className="icon-button danger" type="button" onClick={() => setInvestmentToDelete(investment)} aria-label={`${investment.assetName} ${t("common.delete")}`}><Trash2 size={16} aria-hidden="true" /></button> : null}</div> : null}</div>
+                <div className="mobile-data-card-heading">
+                  <span className="mobile-data-title">
+                    {investment.symbol === "BTC-USD" ? <Bitcoin size={17} aria-hidden="true" /> : <LineChart size={17} aria-hidden="true" />}<strong>{investment.assetName}</strong>
+                  </span>
+                  <strong>{formatCurrency(currentValue, "EUR")}</strong>
+                </div>
+                <div className="mobile-data-grid three-columns">
+                  <div>
+                    <span>{t("investments.quantity")}</span>
+                    <strong>{investment.quantity}</strong>
+                  </div>
+                  <div>
+                    <span>{t("investments.purchasePrice")}</span>
+                    <strong>{formatCurrency(investment.purchasePrice, "EUR")}</strong>
+                  </div>
+                  <div>
+                    <span>{t("investments.currentPrice")}</span>
+                    <strong>{investment.currentPrice === null ? t("investments.priceUnavailable") : formatCurrency(investment.currentPrice, "EUR")}</strong>
+                  </div>
+                </div>
+                <div className="mobile-data-card-footer">
+                  <span>{t("investments.result")}</span>
+                  <strong className={`investment-result ${result >= 0 ? "positive" : "negative"}`}>{result > 0 ? "+" : ""}{formatCurrency(result, "EUR")}</strong>{can("investments.edit") || can("investments.delete") ? 
+                  <div className="table-actions">
+                    {can("investments.edit") ? <button className="icon-button" type="button" onClick={() => openEditModal(investment)} aria-label={`${investment.assetName} ${t("common.edit")}`}><Pencil size={16} aria-hidden="true" /></button> : null}{can("investments.delete") ? <button className="icon-button danger" type="button" onClick={() => setInvestmentToDelete(investment)} aria-label={`${investment.assetName} ${t("common.delete")}`}><Trash2 size={16} aria-hidden="true" /></button> : null}
+                  </div> : null}
+                </div>
               </article>
             );
           })}

@@ -1067,14 +1067,13 @@ th {
 .investment-result-percentage {
   font-size: 0.75rem;
   font-weight: 700;
-  margin-left: 4px;
 }
 
-.investment-result.positive {
+.investment-result.positive, .investment-result-percentage.positive {
   color: var(--primary);
 }
 
-.investment-result.negative {
+.investment-result.negative, .investment-result-percentage.negative {
   color: var(--rose);
 }
 
