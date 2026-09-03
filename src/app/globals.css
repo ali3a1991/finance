@@ -172,7 +172,7 @@ button:disabled {
   position: sticky;
   top: 0;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   gap: 12px;
   height: 100dvh;
   padding: 24px 18px;
@@ -215,6 +215,10 @@ button:disabled {
   display: grid;
   align-content: start;
   gap: 4px;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .nav-item {
