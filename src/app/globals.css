@@ -4293,7 +4293,6 @@ body {
 
 .nav-item,
 .nav-group-label {
-  min-height: 42px;
   border-radius: 11px;
   padding: 9px 11px;
 }
