@@ -10,8 +10,8 @@ import {
   Settings,
   ShieldCheck,
   ShoppingBasket,
-  TrendingUp,
-  WalletCards,
+  BanknoteArrowUp,
+  BanknoteArrowDown,
   type LucideIcon
 } from "lucide-react";
 
@@ -33,8 +33,8 @@ export type PageKey =
 export const navItems = [
   { href: "/", labelKey: "home", icon: Home },
   { href: "/monthly-payments", labelKey: "monthlyPayments", icon: Gauge },
-  { href: "/incomes", labelKey: "incomes", icon: TrendingUp },
-  { href: "/expenses", labelKey: "expenses", icon: WalletCards },
+  { href: "/incomes", labelKey: "incomes", icon: BanknoteArrowDown },
+  { href: "/expenses", labelKey: "expenses", icon: BanknoteArrowUp },
   { href: "/savings", labelKey: "savings", icon: PiggyBank },
   { href: "/investments", labelKey: "investments", icon: LineChart }
 ] as const;
@@ -56,8 +56,8 @@ export const pageIcons: Record<PageKey, LucideIcon> = {
   monthlyPayments: Gauge,
   loans: Banknote,
   insurances: ShieldCheck,
-  incomes: TrendingUp,
-  expenses: WalletCards,
+  incomes: BanknoteArrowDown,
+  expenses: BanknoteArrowUp,
   projects: FolderKanban,
   shoppingList: ShoppingBasket,
   savings: PiggyBank,

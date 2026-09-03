@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState, useTransition } from "react";
-import { CalendarDays, ChevronLeft, ChevronRight, Pencil, PlusCircle, Save, Trash2, TrendingUp, X } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Pencil, PlusCircle, Save, Trash2, X } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
 import { formatCurrency, formatDate } from "@/lib/formatting";
@@ -379,7 +379,6 @@ export function EinkommenManager() {
                 <tr key={income.id}>
                   <td>
                     <span className="table-title">
-                      <TrendingUp size={16} aria-hidden="true" />
                       {income.title}
                     </span>
                   </td>
@@ -421,7 +420,7 @@ export function EinkommenManager() {
         <div className="mobile-data-list">
           {visibleIncomes.map((income) => (
             <article className="mobile-data-card" key={income.id}>
-              <div className="mobile-data-card-heading"><span className="mobile-data-title"><TrendingUp size={17} aria-hidden="true" /><strong>{income.title}</strong></span><strong className="positive">{formatCurrency(income.amount)}</strong></div>
+              <div className="mobile-data-card-heading"><span className="mobile-data-title"><strong>{income.title}</strong></span><strong className="positive">{formatCurrency(income.amount)}</strong></div>
               <div className="mobile-data-grid"><div><span>{t("incomes.source")}</span><strong>{income.source}</strong></div><div><span>{t("incomes.date")}</span><strong>{income.recurring ? `${income.entryDay}. ${t("common.day")}` : formatDate(income.date)}</strong></div></div>
               <div className="mobile-data-card-footer"><span className="mobile-data-chip">{income.recurring ? t("incomes.fixed") : t("common.oneTime")}</span>{can("incomes.edit") || can("incomes.delete") ? (isSavingsGeneratedIncome(income) ? <small className="table-note">{t("savings.manageOnlyInSavings")}</small> : <div className="table-actions">{can("incomes.edit") ? <button className="icon-button" type="button" onClick={() => openEditModal(income)} aria-label={`${income.title} ${t("common.edit")}`}><Pencil size={16} aria-hidden="true" /></button> : null}{can("incomes.delete") ? <button className="icon-button danger" type="button" onClick={() => setIncomeToDelete(income)} aria-label={`${income.title} ${t("common.delete")}`}><Trash2 size={16} aria-hidden="true" /></button> : null}</div>) : null}</div>
             </article>
