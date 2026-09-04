@@ -3473,6 +3473,22 @@ th {
     backdrop-filter: blur(16px);
   }
 
+  .mobile-settings-button {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    background: var(--surface);
+    color: var(--text);
+  }
+
+  .sidebar,
+  .mobile-menu-overlay {
+    display: none;
+  }
+
   .mobile-bottom-nav {
     position: fixed;
     z-index: 11;
@@ -4864,7 +4880,7 @@ tbody tr:hover {
   }
 
   .main-content {
-    padding: 30px 22px 52px;
+    padding: 30px 22px calc(104px + env(safe-area-inset-bottom));
   }
 
   .page-header {
@@ -4881,7 +4897,7 @@ tbody tr:hover {
 
 @media (max-width: 640px) {
   .main-content {
-    padding: 22px 14px 42px;
+    padding: 22px 14px calc(100px + env(safe-area-inset-bottom));
   }
 
   .public-exchange-header {
