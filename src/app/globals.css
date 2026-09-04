@@ -234,6 +234,7 @@ button:disabled {
   padding: 8px 10px;
   border-radius: 8px;
   color: var(--sidebar-link);
+  max-width: calc(100% - 4px);
 }
 
 .nav-item:hover {
