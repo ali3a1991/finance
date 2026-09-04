@@ -3473,22 +3473,6 @@ th {
     backdrop-filter: blur(16px);
   }
 
-  .mobile-settings-button {
-    display: grid;
-    place-items: center;
-    width: 42px;
-    height: 42px;
-    border: 1px solid var(--line);
-    border-radius: 11px;
-    background: var(--surface);
-    color: var(--text);
-  }
-
-  .sidebar,
-  .mobile-menu-overlay {
-    display: none;
-  }
-
   .mobile-bottom-nav {
     position: fixed;
     z-index: 11;
@@ -3604,6 +3588,11 @@ th {
     box-shadow: 22px 0 48px rgba(16, 24, 39, 0.2);
     transform: translateX(-105%);
     transition: transform 220ms ease;
+  }
+
+  /* Avoid repeating destinations already present in the mobile bottom bar. */
+  .sidebar .mobile-bottom-nav-duplicate {
+    display: none;
   }
 
   .sidebar.open,

@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Settings } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { Menu, Settings, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useApiLoading } from "@/components/ApiLoadingProvider";
 import { useAuth } from "@/components/AuthProvider";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -15,7 +15,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user } = useAuth();
   const { t } = useLanguage();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const mainContentRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+
+    const scrollY = window.scrollY;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = "";
+      window.scrollTo(0, scrollY);
+    };
+  }, [isMobileMenuOpen]);
 
   useEffect(() => {
     mainContentRef.current?.scrollTo({ top: 0, left: 0, behavior: "instant" });
@@ -28,6 +41,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     }
 
     return pathname === href || pathname.startsWith(`${href}/`);
+  }
+
+  function closeMobileMenu() {
+    setIsMobileMenuOpen(false);
   }
 
   const hasActiveContract = contractItems.some((item) => isActivePath(item.href));
@@ -61,18 +78,31 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className={`app-shell ${isApiLoading ? "api-loading-active" : ""}`}>
+    <div className={`app-shell ${isMobileMenuOpen ? "menu-open" : ""} ${isApiLoading ? "api-loading-active" : ""}`}>
       <header className="mobile-header">
-        <Link className="mobile-brand" href="/">
+        <Link className="mobile-brand" href="/" onClick={closeMobileMenu}>
           <Image src="/logo.svg" width={36} height={36} alt="FyNest Logo" className="brand-logo" />
           <span>{t("app.brand")}</span>
         </Link>
-        <Link className="mobile-settings-button" href="/settings" aria-label={t("nav.settings")}>
-          <Settings size={21} aria-hidden="true" />
-        </Link>
+        <button
+          className="mobile-menu-button"
+          type="button"
+          onClick={() => setIsMobileMenuOpen(true)}
+          aria-label={t("nav.openMenu")}
+          aria-expanded={isMobileMenuOpen}
+        >
+          <Menu size={22} aria-hidden="true" />
+        </button>
       </header>
 
-      <aside className="sidebar" aria-label={t("nav.main")}>
+      <button
+        className={`mobile-menu-overlay ${isMobileMenuOpen ? "open" : ""}`}
+        type="button"
+        onClick={closeMobileMenu}
+        aria-label={t("nav.closeMenu")}
+      />
+
+      <aside className={`sidebar ${isMobileMenuOpen ? "open" : ""}`} aria-label={t("nav.main")}>
         <div className="sidebar-top">
           <Link className="brand" href="/">
             <Image src="/logo.svg" alt="FyNest Logo" width={44} height={44} className="brand-logo" />
@@ -80,6 +110,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <strong>FyNest</strong>
             </span>
           </Link>
+          <button className="sidebar-close" type="button" onClick={closeMobileMenu} aria-label={t("nav.closeMenu")}>
+            <X size={20} aria-hidden="true" />
+          </button>
         </div>
         <nav className="nav-list" aria-label={t("nav.main")}>
           {navItems.map((item) => {
@@ -89,8 +122,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             return (
               <Link
                 href={item.href}
-                className={`nav-item ${isActive ? "active" : ""}`}
+                className={`nav-item ${isActive ? "active" : ""} ${["home", "monthlyPayments", "incomes", "expenses"].includes(item.labelKey) ? "mobile-bottom-nav-duplicate" : ""}`}
                 key={item.href}
+                onClick={closeMobileMenu}
                 aria-current={isActive ? "page" : undefined}
               >
                 <Icon size={18} aria-hidden="true" />
@@ -112,6 +146,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     href={item.href}
                     className={`nav-item ${isActive ? "active" : ""}`}
                     key={item.href}
+                    onClick={closeMobileMenu}
                     aria-current={isActive ? "page" : undefined}
                   >
                     <Icon size={16} aria-hidden="true" />
@@ -135,6 +170,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     href={item.href}
                     className={`nav-item ${isActive ? "active" : ""}`}
                     key={item.href}
+                    onClick={closeMobileMenu}
                     aria-current={isActive ? "page" : undefined}
                   >
                     <Icon size={16} aria-hidden="true" />
@@ -150,6 +186,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Link
               href="/settings"
               className={`nav-item ${isActivePath("/settings") ? "active" : ""}`}
+              onClick={closeMobileMenu}
               aria-current={isActivePath("/settings") ? "page" : undefined}
             >
               <Settings size={18} aria-hidden="true" />
