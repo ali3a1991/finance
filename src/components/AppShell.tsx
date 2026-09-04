@@ -64,6 +64,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const hasActiveContract = contractItems.some((item) => isActivePath(item.href));
   const hasActiveTool = toolItems.some((item) => isActivePath(item.href));
+  const mobileNavItems = navItems.filter((item) =>
+    ["home", "monthlyPayments", "incomes", "expenses", "investments"].includes(item.labelKey)
+  );
   const accessLabel =
     user?.accessLevel === "owner"
       ? t("nav.owner")
@@ -220,6 +223,25 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         ) : null}
       </aside>
       <main ref={mainContentRef} className="main-content">{children}</main>
+      <nav className="mobile-bottom-nav" aria-label={t("nav.main")}>
+        {mobileNavItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = isActivePath(item.href);
+
+          return (
+            <Link
+              href={item.href}
+              className={`mobile-bottom-nav-item ${isActive ? "active" : ""}`}
+              key={item.href}
+              aria-label={t(`nav.${item.labelKey}`)}
+              aria-current={isActive ? "page" : undefined}
+            >
+              <Icon size={21} strokeWidth={2} aria-hidden="true" />
+              <span className="sr-only">{t(`nav.${item.labelKey}`)}</span>
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 }
