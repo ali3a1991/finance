@@ -4361,7 +4361,7 @@ body {
 }
 
 .app-shell {
-  grid-template-columns: 264px minmax(0, 1fr);
+  grid-template-columns: 280px minmax(0, 1fr);
 }
 
 .sidebar {
